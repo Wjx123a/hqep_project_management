@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.interface_serv.dao.DictDao">
+
+    <select id="getUserNameList" resultType="java.util.Map">
+        select id as "userCode", name as "userName" from pmsn_person
+        <where>
+            <if test="userName != null and userName != ''">
+                and name like '%'||#{userName}||'%'
+            </if>
+        </where>
+    </select>
+    <select id="getSystemNameList" resultType="java.util.Map">
+        select id as "systemCode", system_name as "systemName" from dict_system_dept
+        <where>
+            <if test="systemName != null and systemName != ''">
+                and system_name like '%'||#{systemName}||'%'
+            </if>
+             and system_name is not null
+        </where>
+    </select>
+
+    <select id="getDownOrderSystemNameList" resultType="java.util.Map">
+        select
+        t.system_code as "systemCode",
+        t.simple_name as "systemName"
+        from t_down_system_zs t
+        <where>
+            <if test="systemName != null and systemName != ''">
+                and simple_name like '%'||#{systemName}||'%'
+            </if>
+             and simple_name is not null
+        </where>
+    </select>
+
+    <select id="getDeptNameList" resultType="java.util.Map">
+        select distinct dept_name as "deptName" from dict_system_dept
+        <where>
+            <if test="deptName != null and deptName != ''">
+                and dept_name like '%'||#{deptName}||'%'
+            </if>
+            <if test="systemName != null and systemName != ''">
+                and system_name = #{systemName}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getDownOrderDeptNameList" resultType="java.util.Map">
+        select
+        distinct t.dept_name as "deptName"
+        from t_down_system_zs t
+        <where>
+            <if test="deptName != null and deptName != ''">
+                and dept_name like '%'||#{deptName}||'%'
+            </if>
+            <if test="systemName != null and systemName != ''">
+                and simple_name = #{systemName}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCountOfSjzt" resultType="integer">
+        select count(1) from (
+            select
+            t1.simple_name,t1.table_ename,t1.table_cname,
+            concat(t2.zt_qz,t1.db_user,'_',t1.table_ename) sjzt_bm
+            from t_up_table_zs t1
+            left join pmsn.zt_zjb t2 on t2.xt_zw_sx=t1.simple_name
+            where
+            t1.simple_name=#{simple_name}
+            and t1.table_ename=#{table_ename}
+        ) t
+        join dict_sjzt_tables sjzt on UPPER(sjzt.table_cn_name)=upper(t.sjzt_bm)
+    </select>
+    <select id="getSystemNameListForFmqd" resultType="java.util.Map" parameterType="java.util.Map">
+        select distinct t.simple_name as "systemCode",t.simple_name as "systemName"
+        from t_up_table_zs t
+        <where>
+            t.negative_type != '非负面清单'
+            <if test="systemName != null and systemName != ''">
+                and t.simple_name like '%'||#{systemName}||'%'
+            </if>
+        </where>
+        order by t.simple_name;
+    </select>
+    <select id="getUserNameListForFmqd" resultType="java.util.Map" parameterType="java.util.Map">
+        select distinct t.db_user as "userCode",t.db_user as "userName"
+        from t_up_table_zs t where t.negative_type != '非负面清单'
+        <if test="userName != null and userName != ''">
+            and t.db_user like '%'||#{userName}||'%'
+        </if>
+        order by t.db_user;
+    </select>
+</mapper>

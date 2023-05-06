@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.sgcc:isc_sm_agent_V2:2_20190919">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sgcc/isc_sm_agent_V2/2_20190919/isc_sm_agent_V2-2_20190919.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sgcc/isc_sm_agent_V2/2_20190919/isc_sm_agent_V2-2_20190919-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/sgcc/isc_sm_agent_V2/2_20190919/isc_sm_agent_V2-2_20190919-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

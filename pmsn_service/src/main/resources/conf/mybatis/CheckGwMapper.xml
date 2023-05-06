@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.CheckGwDao">
+    <insert id="insertCatalogTree" >
+        INSERT ALL
+        <foreach collection="list" item="item" index="index">
+             INTO T_DOWN_CATALOG_TABLE_REL_GW VALUES
+            (#{item.orgCode},#{item.systemCode},#{item.systemName},
+            #{item.oneCatalogName},#{item.twoCatalogName},
+            #{item.threeCatalogName},sys_guid()
+            ,SYSDATE)
+        </foreach>
+        select 1 from dual
+    </insert>
+    <insert id="insertCatalogTree1" >
+        INSERT INTO T_DOWN_CATALOG_TABLE_REL_GW VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.orgCode},#{item.systemCode},#{item.systemName},
+            #{item.oneCatalogName},#{item.twoCatalogName},
+            #{item.threeCatalogName},sys_guid()
+            ,SYSDATE)
+        </foreach>
+    </insert>
+
+    <insert id="insertTableList" >
+        INSERT ALL
+            <foreach collection="list" item="item" index="index" >
+                INTO T_DOWN_TABLE_GW VALUES
+                     (#{item.tableId},#{item.tableName},#{item.tableCname},
+                #{item.tableDesc},#{item.orgCode},#{item.systemCode},
+                #{item.systemName},  #{item.oneCatalogName},  #{item.twoCatalogName},
+                  #{item.threeCatalogName},  #{item.dbName},  #{item.dbType},
+                #{item.deptCode},  #{item.deptName},  #{item.recordNum},
+                #{item.columnNum},  #{item.tableTypeCode},  #{item.negativeTypeCode},
+                #{item.accessOdps},  #{item.uploaded},  #{item.dataLabel},
+                #{item.businessLabel},  #{item.createTime},  #{item.updateTime},
+                SYSDATE)
+            </foreach>
+        select 1 from dual
+    </insert>
+
+    <insert id="insertTableProList" >
+        INSERT ALL
+        <foreach collection="list" item="item" index="index" >
+            INTO T_DOWN_COLUMN_GW VALUES
+               (#{item.columnId},#{item.tableId},#{item.columnName},
+            #{item.columnCname},#{item.columnDesc},
+            #{item.columnType},#{item.primarykey},#{item.required},
+            #{item.sensitived},#{item.createTime},#{item.updateTime},
+            SYSDATE)
+        </foreach>
+        select 1 from dual
+    </insert>
+
+    <insert id="insertCatalogTreeByOne"  parameterType="java.util.Map">
+        INSERT
+             INTO T_DOWN_CATALOG_TABLE_REL_GW VALUES
+            (#{item.orgCode},#{item.systemCode},#{item.systemName},
+            #{item.oneCatalogName},#{item.twoCatalogName},
+            #{item.threeCatalogName},sys_guid()
+            ,SYSDATE)
+    </insert>
+    <insert id="insertTableListByOne"  parameterType="java.util.Map">
+        INSERT  INTO T_DOWN_TABLE_GW VALUES
+                     (#{item.tableId},#{item.tableName},#{item.tableCname},
+                #{item.tableDesc},#{item.orgCode},#{item.systemCode},
+                #{item.systemName},  #{item.oneCatalogName},  #{item.twoCatalogName},
+                  #{item.threeCatalogName},  #{item.dbName},  #{item.dbType},
+                #{item.deptCode},  #{item.deptName},  #{item.recordNum},
+                #{item.columnNum},  #{item.tableTypeCode},  #{item.negativeTypeCode},
+                #{item.accessOdps},  #{item.uploaded},  #{item.dataLabel},
+                #{item.businessLabel},  #{item.createTime},  #{item.updateTime},
+                SYSDATE)
+    </insert>
+    <insert id="insertTableProListByOne" parameterType="java.util.Map">
+            INSERT  INTO T_DOWN_COLUMN_GW VALUES
+               (#{item.columnId},#{item.tableId},#{item.columnName},
+            #{item.columnCname},#{item.columnDesc},
+            #{item.columnType},#{item.primarykey},#{item.required},
+            #{item.sensitived},#{item.createTime},#{item.updateTime},
+            SYSDATE)
+    </insert>
+
+
+
+<!--  获取国网的系统列表-->
+    <select id="queryGwSystemList"  resultType="pd">
+        select distinct t.*  from (
+        select
+        SIMPLE_NAME,
+        SYSTEM_NAME,
+        SYSTEM_CODE,
+        ORG_CODE
+        ORG_NAME
+        from T_DOWN_SYSTEM_ZS
+        union all
+        select
+        SIMPLE_NAME,
+        SYSTEM_NAME,
+        SYSTEM_CODE,
+        ORG_CODE
+        ORG_NAME
+        from T_DOWN_SYSTEM
+        ) t
+        where 1=1
+        <if test=" SYSTEM_CODE != null and SYSTEM_CODE != '' ">
+            and SYSTEM_CODE = #{SYSTEM_CODE}
+        </if>
+    </select>
+
+
+</mapper>

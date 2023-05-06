@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd"
+        xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans"
+        xmlns:task="http://www.springframework.org/schema/task">
+    <context:component-scan base-package="com.hqep.*.*.action"/>
+
+    <!-- 这两个类用来启动基于Spring MVC的注解功能，将控制器与方法映射加入到容器中 -->
+    <!--<bean
+        class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+    <bean
+        class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />-->
+    <mvc:annotation-driven/>
+
+    <!-- localtion = /WEB-INF/page/服务名称/static mapping = /服务名称/static/** -->
+    <!--<mvc:resources location="/WEB-INF/page/" mapping="/page/**" />-->
+    <!--<mvc:resources location="/WEB-INF/page/js/" mapping="/js/**" />-->
+    <!--<mvc:resources location="/WEB-INF/page/css/" mapping="/css/**" />-->
+    <!--<mvc:resources location="/WEB-INF/page/images/" mapping="/images/**" />-->
+    <!-- 这个类用于Spring MVC视图解析 -->
+    <bean id="defaultViewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass"
+                  value="org.springframework.web.servlet.view.JstlView"/>
+        <property value="text/html;charset=UTF-8" name="contentType"/>
+        <property name="prefix" value="/page/html/"/><!--设置JSP文件的目录位置 -->
+        <property name="suffix" value=".html"/>
+    </bean>
+    <!-- 配置MultipartResolver 用于文件上传 使用spring的CommosMultipartResolver -->
+    <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"
+          p:defaultEncoding="UTF-8"
+          p:uploadTempDir="/WEB-INF/page/upload">
+    </bean>-->
+
+    <!-- 处理请求返回json字符串的乱码问题 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!--将静态资源交由默认的servlet处理 Wang_XD-->
+    <mvc:default-servlet-handler/>
+    <!--向容器自动注入配置 Wang_XD-->
+    <context:annotation-config/>
+    <!--自动扫描 Wang_XD-->
+    <!--	<context:component-scan base-package="com.hqep.pmsn.action"/>-->
+    <context:component-scan base-package="springfox.documentation.swagger2.configuration"/>
+    <!--   扫描aspect -->
+    <context:component-scan base-package="com.hqep.dataSharingPlatform.*.aspect"/>
+    <!-- 只扫描控制器 Wang_XD-->
+    <!--将SwaggerConfig配置类注入 Wang_XD-->
+    <bean class="com.hqep.dataSharingPlatform.common.config.swaggerConfig"/>
+    <!--配置swagger资源不被拦截 Wang_XD-->
+    <!--    	<mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/" />-->
+    <!--    	<mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/>-->
+
+
+    <!-- 定义文件上传解析器 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 设定默认编码 -->
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <!-- 设定文件上传的最大值50MB，50*1024*1024 -->
+        <property name="maxUploadSize" value="52428800"></property>
+    </bean>
+    <!--配置springmvc 注解方法定时-->
+<!--    <task:annotation-driven />-->
+<!--    <context:component-scan base-package="com.hqep.dataSharingPlatform.*.job" />-->
+<!--    &lt;!&ndash;    <bean id="sysLogAspect" class="SysLogAspect"/>&ndash;&gt;-->
+
+</beans>

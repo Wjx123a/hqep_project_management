@@ -1,0 +1,10 @@
+# Project exclude paths
+/common/target/
+/interface_service/target/
+/pmsn_check_service/target/
+/pmsn_service/target/
+/pmsn_web_core/target/
+/sjfwgj_web/target/
+/sjkflc_redis_servce/target/
+/sjkflc_service/target/
+/sjwfgj_serve/target/

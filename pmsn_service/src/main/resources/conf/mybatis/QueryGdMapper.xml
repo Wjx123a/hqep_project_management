@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.QueryGdDao">
+
+    <!--查询工单-->
+    <select id="queryGdCount" parameterType="pd" resultType="pd">
+        SELECT
+          numId,person,phone,description,MAX(sqdate) as sqdate,sqperson
+        FROM
+          PULL_WORK_ORDER
+        WHERE 1=1
+        <if test="sqrname != null and sqrname != '' ">
+            AND PERSON = #{sqrname}
+        </if>
+        <if test="description != null and description != '' ">
+            AND description = #{description}
+        </if>
+        <if test="startsqsj != null and startsqsj != '' and endsqsj != '' and endsqsj != ''">
+            AND  <![CDATA[sqdate  between #{startsqsj} AND  #{endsqsj}]]>
+        </if>
+        GROUP BY
+          numId,person,phone,description,sqperson
+
+    </select>
+    <select id="addGd" parameterType="pd">
+        INSERT INTO
+          PULL_WORK_ORDER
+        (numId,LCSPID,person,phone,description,sqdate,sqperson,tableName,tableSystem,tableDept,
+         isFmqd,sqrssdw,sqrssbm,ztOwner,sqrid,YesNoBh,sqbzwbm,xtbm,bsskj,bbzxflag,yymc,parent_lcspid,use_time)
+        VALUES
+            (#{uuid},#{lcpch},#{sqrmc},#{sqrlxfs},#{xqsm}, now(), #{sqyh},#{sqbywbm},#{sqbssxt},#{sqbssbm},
+             #{sffmqd},#{sqrssdw},#{sqrssbm},#{sqbxtyh},#{sqrid},'0',#{sqbzwbm},#{xtbm},#{bsskj},#{bbzxflag},#{yymc},#{parent_lcspid},date_format( DATE_ADD(NOW(), interval #{useTime} MONTH),'%Y-%m-%d %H:%i:%s'))
+    </select>
+
+    <select id="queryrowClickOne" parameterType="pd" resultType="pd">
+        select
+            c.sqbywbm,c.sqbssxt,c.sqbssbm,c.sqdate,c.sqbxtyh,c.sffmqd,c.dqjdmc,c.YesNoBh
+        from
+            (select
+                a.tableName as sqbywbm,a.tableSystem as sqbssxt,a.tableDept as sqbssbm,a.sqdate as sqdate,a.ztOwner as sqbxtyh,a.isFmqd as sffmqd,a.sqrid as sqrid,b.dqjdmc as dqjdmc,a.numId as numId,a.YesNoBh as YesNoBh
+            from
+                pull_work_order a
+            left join
+                flow_lczxjdb b
+            on
+                a.tableDept = b.sqbssbm and a.tableSystem = b.sqbssxt and a.tableName = b.sqbywbm and a.ztOwner = b.sqbxtyh and a.sqrid = b.sqrid and a.lcspid = b.lcpch
+            ) c
+        left join
+            pmsn_person d on c.sqrid = d.login_id
+        where 1=1
+        <if test="sqrname != null and sqrname != '' ">
+            and d.name like concat('%',#{sqrname},'%')
+        </if>
+        <if test="sqbssbm != null and sqbssbm  != '' ">
+            and c.sqbssbm like concat('%',#{sqbssbm},'%')
+        </if>
+        <if test="lx != null and lx != '' ">
+            and c.sffmqd = #{lx}
+        </if>
+        <if test="sqbssxt != null and sqbssxt != '' ">
+            and c.sqbssxt like concat('%',#{sqbssxt},'%')
+        </if>
+        <if test="sqbywbm != null and sqbywbm != '' ">
+            and c.sqbywbm like concat('%',#{sqbywbm},'%')
+        </if>
+        <if test="numId != null and numId != '' ">
+            and c.numId like concat('%',#{numId},'%')
+        </if>
+        <if test="spzt != null and spzt != '' ">
+            and c.dqjdmc like concat('%',#{spzt},'%')
+        </if>
+    </select>
+    <update id="updateSpZt" parameterType="pd">
+        UPDATE pull_work_order SET
+        <choose>
+            <when test="shrid == 'c1286e891c6e4d11810f0aa0abcf1b59'">
+                1sp =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                    THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*1)) second )
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                    END
+                ),spsj = (CASE
+                            WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*1)) second )
+                            ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),spjb='1'
+            </when>
+            <when test="shrid == '21aeea853f2d4689b214cd2f2efcbe6e'">
+                2sp =(CASE
+                       WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                      THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+2) second )
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                      END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+2) second )
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='2'
+            </when>
+            <when test="shrid == '4d8a4d4a42fd4b9b9abdc47f91218a89' or shrid == '663fdc30e98641a098c14812c88c8029' or shrid == '8eacc65481524577ae96d5622507c5ec'">
+                3sp =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+4) second )
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+4) second )
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='3'
+            </when>
+            <when test="dqjdmc == '业务部门审批'">
+                3sp =(CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+4) second )
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+4) second )
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='3'
+            </when>
+            <when test="shrid == 'c28cc0c2eae84148b9307584394e0e1c' or shrid == 'dcfce13d695b4b50bc441cbf03dfb6f5'">
+                4sp =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN  date_add(NOW(), interval (SELECT CEIL(RAND()*2)+6) second )
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),
+                YesNoBh = '3'
+                ,spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   date_add(NOW(), interval (SELECT CEIL(RAND()*2)+6) second )
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='4'
+            </when>
+        </choose>
+        where
+          sqrid= #{sqrid} and tableSystem = #{sqbssxt} and tableName = #{sqbywbm} and lcspid= #{lcpch}
+        <if test="sqbxtyh != null and sqbxtyh != '' ">
+            and ztOwner = #{sqbxtyh}
+        </if>
+        <if test="sqbxtyh == null and sqbxtyh == '' ">
+            and ztOwner is null
+        </if>
+    </update>
+
+    <update id="updatePullWorkOrderForRevoke" parameterType="pd">
+        UPDATE pull_work_order
+        <set>
+            revokeTime = date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+            <if test=" revokeNameCode != null and revokeNameCode != '' ">
+                revokeNameCode = #{revokeNameCode},
+            </if>
+            <if test=" revokeName != null and revokeName != '' ">
+                revokeName = #{revokeName},
+            </if>
+
+        </set>
+        where lcspid = #{lcspid}
+    </update>
+
+    <update id="updateSpZtByGXCXTY" parameterType="pd">
+        UPDATE pull_work_order SET
+        <choose>
+            <when test="shrid == 'c1286e891c6e4d11810f0aa0abcf1b59'">
+                1sp =(CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='1'
+            </when>
+            <when test="shrid == '21aeea853f2d4689b214cd2f2efcbe6e'">
+                2sp =(CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='2'
+            </when>
+            <when test="shrid == '4d8a4d4a42fd4b9b9abdc47f91218a89'">
+                3sp =(CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='3'
+            </when>
+            <when test="shrid == 'c28cc0c2eae84148b9307584394e0e1c'">
+                4sp =(CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),
+                YesNoBh = '3'
+                ,spsj = (CASE
+                WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                THEN   now()
+                ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                END
+                ),spjb='4'
+            </when>
+        </choose>
+        where
+        sqrid= #{sqrid} and tableSystem = #{sqbssxt} and tableName = #{sqbywbm} and lcspid= #{lcpch}
+    </update>
+
+
+    <update id="updateSpZtBh" parameterType="pd">
+        UPDATE pull_work_order SET
+        <choose>
+            <when test="jdmc == '信通公司审批'">
+                bh  =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN   now()
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),YesNoBh = '1',bhjb = '1'
+            </when>
+            <when test="jdmc == '互联网部审批'">
+                bh =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN   now()
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),YesNoBh = '1',bhjb = '2'
+            </when>
+            <when test="jdmc == '业务部门审批'">
+                bh  =(CASE
+                          WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                            THEN   now()
+                          ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                            END
+                ),YesNoBh = '1',bhjb = '3'
+            </when>
+            <when test="jdmc == '大数据中心审批'">
+                bh  =(CASE
+                        WHEN DATE_FORMAT(now(),'%T') between '08:30:00' AND '17:30:00'
+                          THEN   now()
+                        ELSE  CONCAT(DATE_FORMAT(now(),'%Y-%m-%d'),' ','08:30:00')
+                          END
+                ),YesNoBh = '1',bhjb = '4'
+            </when>
+        </choose>
+        where
+          sqrid= #{sqrid} and tableSystem = #{sqbssxt} and tableName = #{sqbywbm} and ztOwner = #{sqbxtyh} and lcspid= #{lcpch}
+    </update>
+    <delete id="delShoppingCart" parameterType="pd">
+        DELETE  FROM
+          flow_shoppingcart
+        WHERE
+        <if test="sqrid != null and sqrid != '' ">
+          sqrid= #{sqrid} and sqbssxt = #{sqbssxt} and sqbywbm = #{sqbywbm} and sqbxtyh = #{sqbxtyh}
+        </if>
+    </delete>
+    <select id="queryrowClickOneCount" parameterType="pd" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM(
+        select
+        c.sqbywbm,c.sqbssxt,c.sqbssbm,c.sqdate,c.sqbxtyh,c.sffmqd,c.dqjdmc,c.YesNoBh
+        from
+        (select
+        a.tableName as sqbywbm,a.tableSystem as sqbssxt,a.tableDept as sqbssbm,a.sqdate as sqdate,a.ztOwner as sqbxtyh,a.isFmqd as sffmqd,a.sqrid as sqrid,b.dqjdmc as dqjdmc,a.numId as numId,a.YesNoBh as YesNoBh
+        from
+        pull_work_order a
+        left join
+        flow_lczxjdb b
+        on
+        a.tableDept = b.sqbssbm and a.tableSystem = b.sqbssxt and a.tableName = b.sqbywbm and a.ztOwner = b.sqbxtyh and a.sqrid = b.sqrid and a.lcspid = b.lcpch
+        ) c
+        left join
+        pmsn_person d on c.sqrid = d.login_id
+        where 1=1
+        <if test="sqrname != null and sqrname != '' ">
+            and d.name like concat('%',#{sqrname},'%')
+        </if>
+        <if test="sqbssbm != null and sqbssbm  != '' ">
+            and c.sqbssbm like concat('%',#{sqbssbm},'%')
+        </if>
+        <if test="lx != null and lx != '' ">
+            and c.sffmqd = #{lx}
+        </if>
+        <if test="sqbssxt != null and sqbssxt != '' ">
+            and c.sqbssxt like concat('%',#{sqbssxt},'%')
+        </if>
+        <if test="sqbywbm != null and sqbywbm != '' ">
+            and c.sqbywbm like concat('%',#{sqbywbm},'%')
+        </if>
+        <if test="numId != null and numId != '' ">
+            and c.numId like concat('%',#{numId},'%')
+        </if>
+        <if test="spzt != null and spzt != '' ">
+            and c.dqjdmc like concat('%',#{spzt},'%')
+        </if>
+        ) t
+    </select>
+    <select id="queryGdCountCount" parameterType="pd" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM(
+        SELECT
+        numId,person,phone,description,MAX(sqdate) as sqdate,sqperson
+        FROM
+        PULL_WORK_ORDER
+        WHERE 1=1
+        <if test="sqrname != null and sqrname != '' ">
+            AND PERSON = #{sqrname}
+        </if>
+        <if test="description != null and description != '' ">
+            AND description = #{description}
+        </if>
+        <if test="startsqsj != null and startsqsj != '' and endsqsj != '' and endsqsj != ''">
+            AND  <![CDATA[sqdate  between #{startsqsj} AND  #{endsqsj}]]>
+        </if>
+        GROUP BY
+        numId,person,phone,description,sqperson
+        ) t
+    </select>
+    <select id="querySpGd" parameterType="pd" resultType="pd">
+        select
+            c.sqbywbm,c.sqbssxt,c.sqbssbm,c.sqdate,c.sqbxtyh,c.sffmqd,c.dqjdmc,c.YesNoBh
+        from
+        (select
+            a.tableName as sqbywbm,a.tableSystem as sqbssxt,a.tableDept as sqbssbm,a.sqdate as sqdate,a.ztOwner as sqbxtyh,a.isFmqd as sffmqd,a.sqrid as sqrid,b.dqjdmc as dqjdmc,a.numId as numId,a.YesNoBh as YesNoBh
+        from
+            pull_work_order a
+        left join
+            flow_lczxjdb b
+        on
+            a.tableDept = b.sqbssbm and a.tableSystem = b.sqbssxt and a.tableName = b.sqbywbm and a.ztOwner = b.sqbxtyh and a.sqrid = b.sqrid and a.lcspid = b.lcpch
+        ) c
+        where 1=1
+        <if test="gdid != null and gdid != '' ">
+            and c.numid = #{gdid}
+        </if>
+
+    </select>
+    <select id="queryProgressToAudit" parameterType="pd" resultType="pd">
+
+
+        select orders.dqjdmc,orders.sqyh,orders.sqrmc,orders.sqrssdw,orders.sqrssbm
+        ,orders.kssj,orders.jssj,orders.sqbssxt,orders.sqbssbm,orders.sqbywbm,orders.fmqdlx,orders.time from
+
+        (select rz.jdmc dqjdmc,orders.sqperson sqyh,orders.person sqrmc,orders.sqrssdw sqrssdw,orders.sqrssbm
+        sqrssbm,orders.sqdate kssj,orders.1sp jssj,orders.tableSystem sqbssxt,orders.tableDept sqbssbm,orders.tableName
+        sqbywbm,orders.isFmqd fmqdlx,
+        ((DAY (orders.1sp) - DAY (orders.sqdate) -
+        (select
+        count(DISTINCT rq)
+        FROM
+        rq
+        WHERE
+        rq.zt = '0' AND DATE_FORMAT(rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(orders.sqdate, '%Y-%m-%d') AND
+        DATE_FORMAT(orders.1sp, '%Y-%m-%d')))*9 +(HOUR(orders.1sp) - HOUR(orders.sqdate))
+        ) time
+        from
+        flow_lcsprzb rz left join pull_work_order orders
+        on
+        rz.lcpch = orders.lcspid where rz.jdmc='信通公司审批'
+
+
+        union all
+
+        select rz.jdmc dqjdmc,orders.sqperson sqyh,orders.person sqrmc,orders.sqrssdw sqrssdw,orders.sqrssbm
+        sqrssbm,orders.1sp kssj,orders.2sp jssj,orders.tableSystem sqbssxt,orders.tableDept sqbssbm,orders.tableName
+        sqbywbm,orders.isFmqd fmqdlx,
+        ((DAY (orders.2sp) - DAY (orders.1sp) -
+        (select
+        count(DISTINCT rq)
+        FROM
+        rq
+        WHERE
+        rq.zt = '0' AND DATE_FORMAT(rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(orders.1sp, '%Y-%m-%d') AND
+        DATE_FORMAT(orders.2sp, '%Y-%m-%d')))*9 +(HOUR(orders.2sp) - HOUR(orders.1sp))
+        ) time
+        from
+        flow_lcsprzb rz left join pull_work_order orders
+        on
+        rz.lcpch = orders.lcspid where rz.jdmc='互联网部审批'
+        union all
+        select rz.jdmc dqjdmc,orders.sqperson sqyh,orders.person sqrmc,orders.sqrssdw sqrssdw,orders.sqrssbm
+        sqrssbm,orders.2sp kssj,orders.3sp jssj,orders.tableSystem sqbssxt,orders.tableDept sqbssbm,orders.tableName
+        sqbywbm,orders.isFmqd fmqdlx,
+        ((DAY (orders.3sp) - DAY (orders.2sp) -
+        (select
+        count(DISTINCT rq)
+        FROM
+        rq
+        WHERE
+        rq.zt = '0' AND DATE_FORMAT(rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(orders.2sp, '%Y-%m-%d') AND
+        DATE_FORMAT(orders.3sp, '%Y-%m-%d')))*9 +(HOUR(orders.3sp) - HOUR(orders.2sp))
+        ) time
+        from
+        flow_lcsprzb rz left join pull_work_order orders
+        on
+        rz.lcpch = orders.lcspid where rz.jdmc='业务部门审批'
+
+        union all
+
+        select rz.jdmc dqjdmc,orders.sqperson sqyh,orders.person sqrmc,orders.sqrssdw sqrssdw,orders.sqrssbm
+        sqrssbm,orders.2sp kssj,orders.4sp jssj,orders.tableSystem sqbssxt,orders.tableDept sqbssbm,orders.tableName
+        sqbywbm,orders.isFmqd fmqdlx,
+        ((DAY (orders.4sp) - DAY (orders.2sp) -
+        (select
+        count(DISTINCT rq)
+        FROM
+        rq
+        WHERE
+        rq.zt = '0' AND DATE_FORMAT(rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(orders.2sp, '%Y-%m-%d') AND
+        DATE_FORMAT(orders.4sp, '%Y-%m-%d')))*9 +(HOUR(orders.4sp) - HOUR(orders.2sp))
+        ) time
+        from
+        flow_lcsprzb rz left join pull_work_order orders
+        on
+        rz.lcpch = orders.lcspid where rz.jdmc='大数据中心审批' and orders.isFmqd = '非负面清单'
+
+        union all
+
+        select rz.jdmc dqjdmc,orders.sqperson sqyh,orders.person sqrmc,orders.sqrssdw sqrssdw,orders.sqrssbm
+        sqrssbm,orders.3sp kssj,orders.4sp jssj,orders.tableSystem sqbssxt,orders.tableDept sqbssbm,orders.tableName
+        sqbywbm,orders.isFmqd fmqdlx,
+        ((DAY (orders.4sp) - DAY (orders.3sp) -
+        (select
+        count(DISTINCT rq)
+        FROM
+        rq
+        WHERE
+        rq.zt = '0' AND DATE_FORMAT(rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(orders.3sp, '%Y-%m-%d') AND
+        DATE_FORMAT(orders.4sp, '%Y-%m-%d')))*9 +(HOUR(orders.4sp) - HOUR(orders.3sp))
+        ) time
+        from
+        flow_lcsprzb rz left join pull_work_order orders
+        on
+        rz.lcpch = orders.lcspid where rz.jdmc='业务部门审批' and orders.isFmqd  <![CDATA[<>]]> '非负面清单'
+        ) orders
+        where 1=1
+        <if test="spjd != null and spjd != '' ">
+
+                and orders.dqjdmc = #{spjd}
+
+        </if>
+        <if test="jczt != null and jczt != '' ">
+            <choose>
+                <when test="jczt == '预警'">
+                    and orders.time <![CDATA[>= ]]>11  and orders.time <![CDATA[<=]]> 14
+                </when>
+                <when test="jczt == '超期'">
+                    and orders.time <![CDATA[> 14]]>
+                </when>
+                <when test="jczt == '未超期'">
+                    and orders.time <![CDATA[< ]]>11 and orders.time <![CDATA[>= 0]]>
+                </when>
+            </choose>
+        </if>
+        <if test="sqbywbm != null and sqbywbm != '' ">
+            and orders.sqbywbm = #{sqbywbm}
+        </if>
+        <if test="sqrmc != null and sqrmc != '' ">
+            and orders.sqrmc = #{sqrmc}
+        </if>
+
+
+
+    </select>
+
+    <update id="updateWorkOrder" parameterType="pd">
+        update pull_work_order set
+            syncBj = '1' where lcspid = #{lcspid}
+    </update>
+    <update id="updateWorkOrder_new" parameterType="pd">
+        update pull_work_order set
+            syncBj = '2' where lcspid = #{lcspid}
+    </update>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hqep_project_management.iml" filepath="$PROJECT_DIR$/hqep_project_management.iml" />
+      <module fileurl="file://$PROJECT_DIR$/interface_service/interface_service.iml" filepath="$PROJECT_DIR$/interface_service/interface_service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pmsn_check_service/pmsn_check_service.iml" filepath="$PROJECT_DIR$/pmsn_check_service/pmsn_check_service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pmsn_service/pmsn_service.iml" filepath="$PROJECT_DIR$/pmsn_service/pmsn_service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/pmsn_web_core/pmsn_web_core.iml" filepath="$PROJECT_DIR$/pmsn_web_core/pmsn_web_core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sjfwgj_web/sjfwgj_web.iml" filepath="$PROJECT_DIR$/sjfwgj_web/sjfwgj_web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sjkflc_redis_servce/sjkflc_redis_servce.iml" filepath="$PROJECT_DIR$/sjkflc_redis_servce/sjkflc_redis_servce.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sjkflc_service/sjkflc_service.iml" filepath="$PROJECT_DIR$/sjkflc_service/sjkflc_service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sjwfgj_serve/sjwfgj_serve.iml" filepath="$PROJECT_DIR$/sjwfgj_serve/sjwfgj_serve.iml" />
+    </modules>
+  </component>
+</project>

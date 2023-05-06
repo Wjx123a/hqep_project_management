@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.SysMenuButtonDao">
+    <sql id="tableName">
+        sys_menu_button
+    </sql>
+    <sql id="baseColumnList">
+        id, button_code, button_name, button_desc, shortnum        
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.pmsn.model.SysMenuButton" id="baseResultMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="buttonCode" column="button_code" jdbcType="VARCHAR"/>
+        <result property="buttonName" column="button_name" jdbcType="VARCHAR"/>
+        <result property="buttonDesc" column="button_desc" jdbcType="VARCHAR"/>
+        <result property="shortnum" column="shortnum" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultType="integer">
+        select
+        count(1) from sys_menu_button b
+        inner join sys_auth s
+        on b.id = s.menu_id
+        where
+        s.user_id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询==>通过用户ID查询按钮权限-->
+    <select id="queryListAuth" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        b.* from sys_menu_button b
+        inner join sys_auth s
+        on b.id = s.menu_id
+        where
+        s.user_id = #{id,jdbcType=VARCHAR}
+        and b.button_code = #{buttonCode,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.pmsn.model.SysMenuButton"
+            resultMap="baseResultMap">
+        select
+        <include refid="baseColumnList"/>
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="buttonCode != null and buttonCode != ''">
+                and button_code = #{buttonCode,jdbcType=VARCHAR}
+            </if>
+            <if test="buttonName != null and buttonName != ''">
+                and button_name = #{buttonName,jdbcType=VARCHAR}
+            </if>
+            <if test="buttonDesc != null and buttonDesc != ''">
+                and button_desc = #{buttonDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="shortnum != null and shortnum != ''">
+                and shortnum = #{shortnum,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.pmsn.model.SysMenuButton">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{buttonCode,jdbcType=VARCHAR}, #{buttonName,jdbcType=VARCHAR},
+        #{buttonDesc,jdbcType=VARCHAR}, #{shortnum,jdbcType=VARCHAR} )
+    </insert>
+
+
+    <!--新增所有列-->
+    <insert id="insertForModel" parameterType="com.hqep.dataSharingPlatform.pmsn.model.SysMenuButton">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{buttonCode,jdbcType=VARCHAR}, #{buttonName,jdbcType=VARCHAR},
+        #{buttonDesc,jdbcType=VARCHAR}, #{shortnum,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{id,jdbcType=VARCHAR}, #{buttonCode,jdbcType=VARCHAR}, #{buttonName,jdbcType=VARCHAR},
+            #{buttonDesc,jdbcType=VARCHAR}, #{shortnum,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.pmsn.model.SysMenuButton">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="buttonCode != null and buttonCode != ''">
+                button_code = #{buttonCode,jdbcType=VARCHAR},
+            </if>
+            <if test="buttonName != null and buttonName != ''">
+                button_name = #{buttonName,jdbcType=VARCHAR},
+            </if>
+            <if test="buttonDesc != null and buttonDesc != ''">
+                button_desc = #{buttonDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="shortnum != null and shortnum != ''">
+                shortnum = #{shortnum,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>
+

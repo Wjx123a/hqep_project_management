@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.DataManageForTwoDao">
+
+    <!-- 查询系统表   -->
+    <select id="query_t_up_system" parameterType="pd" resultType="integer">
+        select count(1) as querytotal
+		from t_up_system t
+		where t.SIMPLE_NAME = #{SIMPLE_NAME} and t.SYSTEM_NAME = #{SYSTEM_NAME}
+		and t.SYSTEM_CODE = #{SYSTEM_CODE}
+    </select>
+
+    <!-- 查询表信息表   -->
+    <select id="query_t_up_table" parameterType="pd" resultType="int">
+        select count(1) as querytotal
+		from t_up_table t
+        where t.SIMPLE_NAME = #{SIMPLE_NAME} and t.SYSTEM_CODE = #{SYSTEM_CODE}
+         and t.DB_USER = #{DB_USER} and t.TABLE_ENAME = #{TABLE_ENAME}
+    </select>
+
+    <!-- 查询列信息表   -->
+    <select id="query_t_up_column" parameterType="pd" resultType="int">
+        select count(1) as querytotal
+		from t_up_column t
+        where t.SIMPLE_NAME = #{SIMPLE_NAME} and t.SYSTEM_CODE = #{SYSTEM_CODE} and  t.DB_USER = #{DB_USER}
+         and t.TABLE_ENAME = #{TABLE_ENAME} and t.COLUMN_ENAME = #{COLUMN_ENAME}
+    </select>
+
+    <!-- 查询关系表   -->
+    <select id="query_t_up_catalog_table_rel" parameterType="pd"  resultType="int">
+        select count(1) as querytotal
+        from t_up_catalog_table_rel t
+        where t.SIMPLE_NAME = #{SIMPLE_NAME} and t.SYSTEM_CODE = #{SYSTEM_CODE} and t.TABLE_ENAME = #{TABLE_ENAME}
+    </select>
+
+
+    <!-- 插入系统表   -->
+    <insert id="insert_t_up_system" parameterType="pd">
+        insert into t_up_system (
+            SIMPLE_NAME, SYSTEM_NAME, SYSTEM_CODE,SYSTEM_TYPE, ORG_CODE,
+            ORG_NAME, DEPT_CODE, DEPT_NAME, DEPT_NO, DATA_SCALE,
+            MODIFY_TYPE,BATCH_TIME
+        ) values (
+            #{SIMPLE_NAME}, #{SYSTEM_NAME} , #{SYSTEM_CODE}, #{SYSTEM_TYPE}, #{ORG_CODE},
+            #{ORG_NAME}, #{DEPT_CODE}, #{DEPT_NAME}, #{DEPT_NO}, #{DATA_SCALE},
+            #{MODIFY_TYPE},SYSDATE
+        )
+    </insert>
+
+    <!-- 插入表信息表   -->
+    <insert id="insert_t_up_table" parameterType="pd">
+         insert into t_up_table (
+            ORG_NAME, ORG_CODE, SIMPLE_NAME, SYSTEM_CODE, DB_USER,
+            TABLE_ENAME, TABLE_CNAME, TABLE_DESC, DATA_NUM, COLUMN_NUM,
+            TABLE_TYPE, TABLE_TYPE_CODE, NEGATIVE_TYPE, NEGATIVE_TYPE_CODE, IS_ZT,
+            IS_UPLOAD,  CREATE_TIME, UPDATE_TIME, DB_TYPE, DATA_LABEL,
+            BUSINESS_LABEL,MODIFY_TYPE,RELEASE_TIME, BATCH_TIME
+        ) values (
+            #{ORG_NAME}, #{ORG_CODE}, #{SIMPLE_NAME}, #{SYSTEM_CODE}, #{DB_USER},
+            #{TABLE_ENAME}, #{TABLE_CNAME}, #{TABLE_DESC}, #{DATA_NUM}, #{COLUMN_NUM},
+            #{TABLE_TYPE}, #{TABLE_TYPE_CODE}, #{NEGATIVE_TYPE}, #{NEGATIVE_TYPE_CODE}, #{IS_ZT},
+            #{IS_UPLOAD},  #{CREATE_TIME}, #{UPDATE_TIME}, #{DB_TYPE}, #{DATA_LABEL},
+            #{BUSINESS_LABEL}, #{MODIFY_TYPE},#{RELEASE_TIME},SYSDATE
+        )
+    </insert>
+<!--    TO_DATE(,'yyyy-mm-dd hh24:mi:ss')-->
+    <!-- 插入列信息表   -->
+    <insert id="insert_t_up_column" parameterType="pd">
+        insert into t_up_column (
+            ORG_NAME, ORG_CODE, SIMPLE_NAME, SYSTEM_CODE, DB_USER,
+            TABLE_ENAME, COLUMN_ENAME, COLUMN_CNAME, COLUMN_DESC,
+            COLUMN_TYPE, IS_PK, IS_REQUIRED, IS_SENSITIVE,MODIFY_TYPE,
+            RELEASE_TIME,BATCH_TIME
+        ) values (
+            #{ORG_NAME}, #{ORG_CODE}, #{SIMPLE_NAME}, #{SYSTEM_CODE}, #{DB_USER},
+            #{TABLE_ENAME}, #{COLUMN_ENAME}, #{COLUMN_CNAME}, #{COLUMN_DESC},
+            #{COLUMN_TYPE}, #{IS_PK}, #{IS_REQUIRED}, #{IS_SENSITIVE}, #{MODIFY_TYPE},
+            SYSDATE,SYSDATE
+        )
+    </insert>
+
+    <!-- 插入关系表   -->
+    <insert id="insert_t_up_catalog_table_rel" parameterType="pd">
+         insert into t_up_catalog_table_rel (
+          ORG_CODE, ORG_NAME, SIMPLE_NAME, SYSTEM_CODE, ONE_CATALOG_NAME,
+          TWO_CATALOG_NAME, THREE_CATALOG_NAME, DB_USER, TABLE_ENAME,MODIFY_TYPE,
+          RELEASE_TIME,BATCH_TIME
+        ) values (
+            #{ORG_CODE},#{ORG_NAME},  #{SIMPLE_NAME}, #{SYSTEM_CODE}, #{ONE_CATALOG_NAME},
+            #{TWO_CATALOG_NAME}, #{THREE_CATALOG_NAME}, #{DB_USER}, #{TABLE_ENAME}, #{MODIFY_TYPE},
+            SYSDATE, SYSDATE
+        )
+    </insert>
+
+</mapper>

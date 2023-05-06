@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.interface_serv.dao.SysLogsDao">
+
+    <resultMap type="com.hqep.dataSharingPlatform.common.model.SysLogs" id="SysLogsMap">
+        <result property="id" column="id" jdbcType="NUMERIC"/>
+        <result property="managerName" column="manager_name" jdbcType="VARCHAR"/>
+        <result property="operation" column="operation" jdbcType="VARCHAR"/>
+        <result property="method" column="method" jdbcType="VARCHAR"/>
+        <result property="params" column="params" jdbcType="VARCHAR"/>
+        <result property="time" column="time" jdbcType="NUMERIC"/>
+        <result property="ip" column="ip" jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" jdbcType="TIMESTAMP"/>
+        <result property="managerid" column="managerid" jdbcType="VARCHAR"/>
+        <result property="operationcode" column="operationcode" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" resultType="com.hqep.dataSharingPlatform.common.model.SysLogs">
+        select
+          id, manager_name, operation, method, params, time, ip, created_time
+        from sys_logs
+        where id = #{id}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultMap="SysLogsMap">
+        select
+          id, manager_name, operation, method, params, time, ip, created_time
+        from sys_logs
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryAll" resultMap="SysLogsMap">
+        select
+        id, manager_name, operation, method, params, time, ip, created_time
+        from sys_logs
+        <where>
+            <if test="id != null and id !=''">
+                and id = #{id}
+            </if>
+            <if test="managerName != null and managerName != ''">
+                and manager_name like concat("%",#{managerName},"%")
+            </if>
+            <if test="operation != null and operation != ''">
+                and operation like concat("%",#{operation},"%")
+            </if>
+            <if test="method != null and method != ''">
+                and method like concat("%",#{method},"%")
+            </if>
+            <if test="params != null and params != ''">
+                and params = #{params}
+            </if>
+            <if test="time != null">
+                and time = #{time}
+            </if>
+            <if test="ip != null and ip != ''">
+                and ip  like concat("%",#{ip},"%")
+            </if>
+            <if test="dateStrStart != null and dateStrStart != ''">
+                and created_time like concat("%",#{dateStrStart},"%")
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 根据登录用户查询最新的登录记录-->
+    <select id="queryAllForLogin" resultMap="SysLogsMap">
+        select
+        id, manager_name, operation, method, params, time, ip, created_time,managerid,operationcode
+        from sys_logs
+        where operation = '登陆系统'
+        and operationcode is not null
+        and operationcode != ''
+        <if test="id != null and id !=''">
+            and id = #{id}
+        </if>
+        <if test="managerName != null and managerName != ''">
+            and manager_name like concat("%",#{managerName},"%")
+        </if>
+        <if test="operation != null and operation != ''">
+            and operation like concat("%",#{operation},"%")
+        </if>
+        <if test="method != null and method != ''">
+            and method like concat("%",#{method},"%")
+        </if>
+        <if test="params != null and params != ''">
+            and params = #{params}
+        </if>
+        <if test="time != null">
+            and time = #{time}
+        </if>
+        <if test="ip != null and ip != ''">
+            and ip  like concat("%",#{ip},"%")
+        </if>
+        <if test="dateStrStart != null and dateStrStart != ''">
+            and created_time like concat("%",#{dateStrStart},"%")
+        </if>
+        order by created_time desc
+    </select>
+
+    <!-- 根据登录用户查询最新的登录记录的详情-->
+    <select id="queryAllForLoginToDetail" resultMap="SysLogsMap">
+        select
+        t.id, t.manager_name, t.operation, t.method, t.params, t.time, t.ip, t.created_time,t.managerid,t.operationcode
+        from sys_logs t
+        where t.managerid = #{managerid}
+        and  t.operationcode = #{operationcode}
+        order by t.created_time desc
+    </select>
+
+
+
+    <!-- 根据登录用户查询最新的登录记录-->
+    <select id="queryNewLastForPerson" resultMap="SysLogsMap">
+        select zz.rownum,zz.id, zz.manager_name, zz.operation, zz.method, zz.params, zz.time,
+        zz.ip, zz.created_time,zz.managerid,zz.operationcode from (
+        select @rownum :=@rownum + 1 as rownum,
+        t.id, t.manager_name, t.operation, t.method, t.params, t.time, t.ip, t.created_time,t.managerid,t.operationcode
+        from sys_logs t,( SELECT @rownum := 0  ) b
+        where t.managerid = #{managerid}
+        ORDER BY t.created_time desc
+        ) zz
+        where zz.rownum = 1
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into sys_logs(manager_name, operation, method, params, time, ip, created_time,managerid,operationcode)
+        values (#{managerName}, #{operation}, #{method}, #{params}, #{time}, #{ip}, #{createdTime}, #{managerid}, #{operationcode})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update sys_logs
+        <set>
+            <if test="managerName != null and managerName != ''">
+                manager_name = #{managerName},
+            </if>
+            <if test="operation != null and operation != ''">
+                operation = #{operation},
+            </if>
+            <if test="method != null and method != ''">
+                method = #{method},
+            </if>
+            <if test="params != null and params != ''">
+                params = #{params},
+            </if>
+            <if test="time != null">
+                time = #{time},
+            </if>
+            <if test="ip != null and ip != ''">
+                ip = #{ip},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from sys_logs where id = #{id}
+    </delete>
+
+    <select id="getIPWhiteList" resultType="string">
+        select distinct ip from dic_ip_white_list
+    </select>
+
+    <select id="getPowerRoleNameList" resultType="string">
+        select distinct ip from dic_ip_white_list where power='Y'
+    </select>
+
+    <select id="getPowerRoleNameListForLoginNum" resultType="string">
+        select distinct ip from dic_ip_white_list where power='Y'
+        <if test=" username != null and username != '' ">
+            and username = #{username}
+        </if>
+    </select>
+
+    <!-- 根据id查询传入参数json -->
+    <select id="queryParamsById" resultType="java.lang.String" parameterType="java.lang.String">
+        select params from sys_logs where id = #{id}
+    </select>
+
+    <select id="querySysLogsSelectList" resultMap="SysLogsMap">
+        select
+         DISTINCT operation
+        from sys_logs
+        where 1=1 and operation not  like "%:%"
+    </select>
+
+</mapper>

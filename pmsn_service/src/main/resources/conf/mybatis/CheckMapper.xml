@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.CheckDao">
+    <select id="queryCatalogTree" parameterType="pd" resultType="pd">
+        select '01020' as "orgCode",
+         rel.system_code as "systemCode",
+        rel.simple_name as "systemName"
+        ,rel.one_catalog_name as "oneCatalogName"
+        ,rel.two_catalog_name as "twoCatalogName"
+        ,rel.three_catalog_name as "threeCatalogName"
+        from t_up_catalog_table_rel_zs rel
+        where 1=1
+        <if test=" systemCode != null and systemCode != '' ">
+            and rel.system_code = #{systemCode}
+        </if>
+        <if test=" orgCode != null and orgCode != '' ">
+            and '01020' = #{orgCode}
+        </if>
+        group by rel.system_code,rel.simple_name,rel.one_catalog_name,rel.two_catalog_name,rel.three_catalog_name
+    </select>
+
+    <select id="queryTableList" parameterType="pd" resultType="pd">
+        select * from (
+        select
+        ROWNUM rowno
+        ,dt.table_Id as "tableId"
+        ,dt.table_ename as "tableName"
+        ,dt.table_cname as "tableCname"
+        ,dt.table_desc as "tableDesc"
+        ,'01020' as "orgCode"
+        ,dt.system_code as "systemCode"
+        ,dt.simple_name as "systemName"
+        ,dr.three_catalog_name as "threeCatalogName"
+        ,dr.two_catalog_name as "twoCatalogName"
+        ,dr.one_catalog_name as "oneCatalogName"
+        ,dt.db_user as "dbName"
+        ,dt.db_type as "dbType"
+        ,ds.dept_code as "deptCode"
+        ,ds.dept_name as "deptName"
+        ,dt.data_num as "recordNum"
+        ,dt.column_num as "columnNum"
+        ,dt.table_type_code as "tableTypeCode"
+        ,dt.negative_type_code as "negativeTypeCode"
+        ,case when dt.is_zt = '是' then 'true' else 'false' end as "accessOdps"
+        ,case when dt.is_upload = '是' then 'true' else 'false' end as "uploaded"
+        ,dt.data_label as "dataLabel"
+        ,dt.business_label as "businessLabel"
+        ,sysdate as "createTime"
+        ,dt.update_time as "updateTime"
+        from t_up_table_zs dt
+        left join t_up_system_zs ds on ds.system_code = dt.system_code
+        left join t_up_catalog_table_rel_zs dr
+        on dr.system_code = dt.system_code and dr.db_user = dt.db_user and dr.table_ename = dt.table_ename
+        where 1=1
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        <if test=" orgCode != null and orgCode != '' ">
+            and '01020' = #{orgCode}
+        </if>
+        <if test=" systemCode != null and systemCode != '' ">
+            and dt.system_code = #{systemCode}
+        </if>
+        <if test=" dbName != null and dbName != '' ">
+            and dt.db_user = #{dbName}
+        </if>
+        <if test=" tableName != null and tableName != '' ">
+            and dt.table_ename = #{tableName}
+        </if>
+        <if test=" oneCatalog != null and oneCatalog != '' ">
+            and dr.one_catalog_name = #{oneCatalog}
+        </if>
+        <if test=" twoCatalog != null and twoCatalog != '' ">
+            and dr.two_catalog_name = #{twoCatalog}
+        </if>
+        <if test=" threeCatalog != null and threeCatalog != '' ">
+            and dr.three_catalog_name = #{threeCatalog}
+        </if>
+        ) zb
+        WHERE rowno <![CDATA[>=]]> #{rowstart}
+    </select>
+
+    <select id="queryTableListCount" parameterType="pd" resultType="java.lang.Integer">
+        select
+        count(1)
+        from t_up_table_zs dt
+        left join t_up_system_zs ds on ds.system_code = dt.system_code
+        left join t_up_catalog_table_rel_zs dr
+        on dr.system_code = dt.system_code and dr.db_user = dt.db_user and dr.table_ename = dt.table_ename
+        where 1=1
+        <if test=" orgCode != null and orgCode != '' ">
+            and '01020' = #{orgCode}
+        </if>
+        <if test=" systemCode != null and systemCode != '' ">
+            and dt.system_code = #{systemCode}
+        </if>
+        <if test=" dbName != null and dbName != '' ">
+            and dt.db_user = #{dbName}
+        </if>
+        <if test=" tableName != null and tableName != '' ">
+            and dt.table_ename = #{tableName}
+        </if>
+        <if test=" oneCatalog != null and oneCatalog != '' ">
+            and dr.one_catalog_name = #{oneCatalog}
+        </if>
+        <if test=" twoCatalog != null and twoCatalog != '' ">
+            and dr.two_catalog_name = #{twoCatalog}
+        </if>
+        <if test=" threeCatalog != null and threeCatalog != '' ">
+            and dr.three_catalog_name = #{threeCatalog}
+        </if>
+    </select>
+
+    <select id="queryTableProList" parameterType="pd" resultType="pd">
+        select * from (
+        select
+        ROWNUM rowno
+        ,dc.column_Id as "columnId"
+        ,dt.table_Id as "tableId"
+        ,dc.column_ename as "columnName"
+        ,dc.column_cname as "columnCname"
+        ,dc.column_desc as "columnDesc"
+        ,dc.column_type as "columnType"
+        ,case when dc.is_pk = '是' then 'true' else 'false' end as "primarykey"
+        ,case when dc.is_required = '是' then 'true' else 'false' end as "required"
+        ,case when dc.is_sensitive = '是' then 'true' else 'false' end as "sensitived"
+        ,sysdate as "createTime"
+        ,dc.release_time as "updateTime"
+        from T_UP_table_ZS dt
+        inner join T_UP_COLUMN_ZS dc
+        on dc.System_Code = dt.System_Code
+        and dc.db_user = dt.db_user
+        and dc.table_ename =  dt.table_ename
+        where 1=1 and ROWNUM <![CDATA[<=]]> #{rowend}
+        <if test="tableIds != null and tableIds.length > 0">
+            and dt.table_Id in (
+            <foreach collection="tableIds"  item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+        ) zb
+        WHERE rowno <![CDATA[>=]]> #{rowstart}
+    </select>
+
+    <select id="queryTableProListCount" parameterType="pd" resultType="java.lang.Integer">
+        select count(1) from (
+        select
+        ROWNUM rowno
+        ,dc.column_Id as "columnId"
+        ,dt.table_Id as "tableId"
+        ,dc.column_ename as "columnName"
+        ,dc.column_cname as "columnCname"
+        ,dc.column_desc as "columnDesc"
+        ,dc.column_type as "columnType"
+        ,dc.is_pk as "primarykey"
+        ,dc.is_required as "required"
+        ,dc.is_sensitive as "sensitived"
+        ,dc.release_time as "createTime"
+        ,dc.release_time as "updateTime"
+        from T_UP_table_ZS dt
+        inner join T_UP_COLUMN_ZS dc
+        on dc.System_Code = dt.System_Code
+        and dc.db_user = dt.db_user
+        and dc.table_ename =  dt.table_ename
+        where 1=1
+        <if test="tableIds != null and tableIds.length > 0">
+            and dt.table_Id in (
+            <foreach collection="tableIds"  item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+        ) zb
+    </select>
+
+    <select id="queryDept"  parameterType="pd" resultType="pd">
+        select * from DEPT
+    </select>
+
+    <select id="queryt_dm_zb_catalog_num_zl" resultType="pd">
+        select
+        rowno as "rowno" ,
+        org_code as "org_code",
+        org_name as "org_name",
+        system_code as "system_code",
+        system_name as "system_name",
+        catalog_one_num as "catalog_one_num",
+        catalog_two_num as "catalog_two_num",
+        catalog_three_num as "catalog_three_num",
+        all_table_num as "all_table_num",
+        valid_table_num as "valid_table_num",
+        valid_column_num as "valid_column_num",
+        table_fmqd_num as "table_fmqd_num",
+        column_fmqd_table_num as "column_fmqd_table_num",
+        column_fmqd_column_num as "column_fmqd_column_num",
+        case when EXDIFFERENCE = 1 then '是' else '否' end as "exdifference",
+        batch_time as "batch_time"
+         from ( select
+        ROWNUM rowno,
+        tdzb.ORG_CODE as ORG_CODE,
+        tdzb.ORG_NAME as ORG_NAME,
+        tdzb.SYSTEM_CODE as SYSTEM_CODE,
+        tdzb.SYSTEM_NAME as SYSTEM_NAME,
+        tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM as CATALOG_ONE_NUM,
+        tdzb.CATALOG_TWO_NUM- t1.CATALOG_TWO_NUM as CATALOG_TWO_NUM,
+        tdzb.CATALOG_THREE_NUM- t1.CATALOG_THREE_NUM as CATALOG_THREE_NUM,
+        tdzb.ALL_TABLE_NUM- t1.ALL_TABLE_NUM as ALL_TABLE_NUM,
+        tdzb.VALID_TABLE_NUM- t1.VALID_TABLE_NUM as VALID_TABLE_NUM,
+        tdzb.VALID_COLUMN_NUM- t1.VALID_COLUMN_NUM as VALID_COLUMN_NUM,
+        tdzb.TABLE_FMQD_NUM- t1.TABLE_FMQD_NUM as TABLE_FMQD_NUM,
+        tdzb.COLUMN_FMQD_TABLE_NUM- t1.COLUMN_FMQD_TABLE_NUM as COLUMN_FMQD_TABLE_NUM,
+        tdzb.COLUMN_FMQD_COLUMN_NUM- t1.COLUMN_FMQD_COLUMN_NUM as COLUMN_FMQD_COLUMN_NUM,
+        case when
+        tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM != 0
+        or tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM != 0
+        or tdzb.CATALOG_TWO_NUM- t1.CATALOG_TWO_NUM != 0
+        or tdzb.CATALOG_THREE_NUM- t1.CATALOG_THREE_NUM != 0
+        or tdzb.ALL_TABLE_NUM- t1.ALL_TABLE_NUM != 0
+        or tdzb.VALID_TABLE_NUM- t1.VALID_TABLE_NUM != 0
+        or tdzb.VALID_COLUMN_NUM- t1.VALID_COLUMN_NUM != 0
+        or tdzb.TABLE_FMQD_NUM- t1.TABLE_FMQD_NUM != 0
+        or tdzb.COLUMN_FMQD_TABLE_NUM- t1.COLUMN_FMQD_TABLE_NUM != 0
+        or tdzb.COLUMN_FMQD_COLUMN_NUM- t1.COLUMN_FMQD_COLUMN_NUM != 0
+        then 1 else 0 end as EXDIFFERENCE,
+        to_char(tdzb.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        from T_DM_ZB_CATALOG_NUM tdzb
+        left join
+        (
+        select
+        '01020' as ORG_CODE /*网省编码*/
+        ,'国网黑龙江省电力有限公司' as ORG_NAME /*网省名称*/
+        ,zs.system_code /*系统编码*/
+        ,zs.simple_name /*系统名称*/
+        ,NVL(rel.one_catalog_name,0) AS CATALOG_ONE_NUM /*一级目录数量*/
+        ,NVL(rel.two_catalog_name,0) AS CATALOG_TWO_NUM /*二级目录数量*/
+        ,NVL(rel.three_catalog_name,0) AS CATALOG_THREE_NUM /*三级目录数量*/
+        ,NVL(tut.all_table_num,0) AS all_table_num /*全表数量*/
+        ,NVL(tut.valid_table_num,0) AS valid_table_num /*有效表*/
+        ,NVL(VALID_COLUMN_NUM,0) AS VALID_COLUMN_NUM /*有效表字段数量*/
+        ,NVL(tut.table_fmqd_num,0) AS table_fmqd_num /*表级负面清单*/
+        ,NVL(tut.column_fmqd_table_num,0) AS column_fmqd_table_num /*字段级负面清单*/
+        ,NVL(COLUMN_FMQD_COLUMN_NUM,0) AS COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        , to_DATE(zs.batch_time, 'yyyy/mm/dd') as batch_time /*有效表*/
+        from (
+        select menu.simple_name, menu.system_code,
+        to_char(SYSDATE-1, 'yyyy/mm/dd') as batch_time
+        from t_down_system_zs menu
+        ) zs
+        left join
+        (
+        select
+        rels.simple_name, rels.system_code, to_char(rels.batch_time, 'yyyy/mm/dd') as batch_time
+        , count(DISTINCT rels.one_catalog_name ) as one_catalog_name
+        , count(DISTINCT rels.two_catalog_name ) as two_catalog_name
+        , count(DISTINCT rels.three_catalog_name ) as three_catalog_name
+        from t_down_catalog_table_rel rels
+        group by rels.simple_name, rels.system_code,to_char(rels.batch_time, 'yyyy/mm/dd')
+        ) rel
+        on rel.simple_name=zs.simple_name and rel.system_code = zs.system_code and rel.batch_time = zs.batch_time
+        LEFT join (
+        select
+        dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd') as batch_time
+        ,count(1) as all_table_num /*全表数量*/
+        ,count(case when dt.table_type_code = '05001' then 1 else null end) as valid_table_num /*有效表*/
+        ,sum(case when dt.table_type_code = '05001' then To_number(dt.column_num) else 0 end) as VALID_COLUMN_NUM
+        /*有效表字段数量*/
+        ,count(case when dt.negative_type_code = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+        ,count(case when dt.negative_type_code = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+        ,sum(case when dt.negative_type_code = '04003' then To_number(dt.column_num) else 0 end) as
+        COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        from t_down_table dt
+        GROUP BY dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')
+        ) tut
+        on tut.batch_time=zs.batch_time and tut.system_code = zs.system_code and tut.simple_name = zs.simple_name
+        where tut.batch_time IS NOT NULL OR rel.simple_name IS NOT NULL
+        ) t1
+        on t1.ORG_CODE = tdzb.ORG_CODE
+        and t1.ORG_NAME = tdzb.ORG_NAME /*网省名称*/
+        and t1.system_code = tdzb.SYSTEM_CODE /*系统编码*/
+        and t1.simple_name = tdzb.SYSTEM_NAME /*系统名称*/
+        and t1.BATCH_TIME = tdzb.BATCH_TIME
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        ) zb
+        where 1=1
+        and rowno <![CDATA[>=]]> #{rowstart}
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+        order by BATCH_TIME desc
+    </select>
+
+    <select id="queryt_dm_zb_catalog_num_count_zl" resultType="Integer">
+        select count(1) from ( select
+        ROWNUM rowno,
+        tdzb.ORG_CODE as ORG_CODE,
+        tdzb.ORG_NAME as ORG_NAME,
+        tdzb.SYSTEM_CODE as SYSTEM_CODE,
+        tdzb.SYSTEM_NAME as SYSTEM_NAME,
+        tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM as CATALOG_ONE_NUM,
+        tdzb.CATALOG_TWO_NUM- t1.CATALOG_TWO_NUM as CATALOG_TWO_NUM,
+        tdzb.CATALOG_THREE_NUM- t1.CATALOG_THREE_NUM as CATALOG_THREE_NUM,
+        tdzb.ALL_TABLE_NUM- t1.ALL_TABLE_NUM as ALL_TABLE_NUM,
+        tdzb.VALID_TABLE_NUM- t1.VALID_TABLE_NUM as VALID_TABLE_NUM,
+        tdzb.VALID_COLUMN_NUM- t1.VALID_COLUMN_NUM as VALID_COLUMN_NUM,
+        tdzb.TABLE_FMQD_NUM- t1.TABLE_FMQD_NUM as TABLE_FMQD_NUM,
+        tdzb.COLUMN_FMQD_TABLE_NUM- t1.COLUMN_FMQD_TABLE_NUM as COLUMN_FMQD_TABLE_NUM,
+        tdzb.COLUMN_FMQD_COLUMN_NUM- t1.COLUMN_FMQD_COLUMN_NUM as COLUMN_FMQD_COLUMN_NUM,
+        case when
+        tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM != 0
+        or tdzb.CATALOG_ONE_NUM- t1.CATALOG_ONE_NUM != 0
+        or tdzb.CATALOG_TWO_NUM- t1.CATALOG_TWO_NUM != 0
+        or tdzb.CATALOG_THREE_NUM- t1.CATALOG_THREE_NUM != 0
+        or tdzb.ALL_TABLE_NUM- t1.ALL_TABLE_NUM != 0
+        or tdzb.VALID_TABLE_NUM- t1.VALID_TABLE_NUM != 0
+        or tdzb.VALID_COLUMN_NUM- t1.VALID_COLUMN_NUM != 0
+        or tdzb.TABLE_FMQD_NUM- t1.TABLE_FMQD_NUM != 0
+        or tdzb.COLUMN_FMQD_TABLE_NUM- t1.COLUMN_FMQD_TABLE_NUM != 0
+        or tdzb.COLUMN_FMQD_COLUMN_NUM- t1.COLUMN_FMQD_COLUMN_NUM != 0
+        then 1 else 0 end as EXDIFFERENCE,
+        to_char(tdzb.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        from T_DM_ZB_CATALOG_NUM tdzb
+        left join
+        (
+        select
+        '01020' as ORG_CODE /*网省编码*/
+        ,'国网黑龙江省电力有限公司' as ORG_NAME /*网省名称*/
+        ,zs.system_code /*系统编码*/
+        ,zs.simple_name /*系统名称*/
+        ,NVL(rel.one_catalog_name,0) AS CATALOG_ONE_NUM /*一级目录数量*/
+        ,NVL(rel.two_catalog_name,0) AS CATALOG_TWO_NUM /*二级目录数量*/
+        ,NVL(rel.three_catalog_name,0) AS CATALOG_THREE_NUM /*三级目录数量*/
+        ,NVL(tut.all_table_num,0) AS all_table_num /*全表数量*/
+        ,NVL(tut.valid_table_num,0) AS valid_table_num /*有效表*/
+        ,NVL(VALID_COLUMN_NUM,0) AS VALID_COLUMN_NUM /*有效表字段数量*/
+        ,NVL(tut.table_fmqd_num,0) AS table_fmqd_num /*表级负面清单*/
+        ,NVL(tut.column_fmqd_table_num,0) AS column_fmqd_table_num /*字段级负面清单*/
+        ,NVL(COLUMN_FMQD_COLUMN_NUM,0) AS COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        , to_DATE(zs.batch_time, 'yyyy/mm/dd') as batch_time /*有效表*/
+        from (
+        select menu.simple_name, menu.system_code,
+        to_char(SYSDATE-1, 'yyyy/mm/dd') as batch_time
+        from t_down_system_zs menu
+        ) zs
+        left join
+        (
+        select
+        rels.simple_name, rels.system_code, to_char(rels.batch_time, 'yyyy/mm/dd') as batch_time
+        , count(DISTINCT rels.one_catalog_name ) as one_catalog_name
+        , count(DISTINCT rels.two_catalog_name ) as two_catalog_name
+        , count(DISTINCT rels.three_catalog_name ) as three_catalog_name
+        from t_down_catalog_table_rel rels
+        group by rels.simple_name, rels.system_code,to_char(rels.batch_time, 'yyyy/mm/dd')
+        ) rel
+        on rel.simple_name=zs.simple_name and rel.system_code = zs.system_code and rel.batch_time = zs.batch_time
+        LEFT join (
+        select
+        dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd') as batch_time
+        ,count(1) as all_table_num /*全表数量*/
+        ,count(case when dt.table_type_code = '05001' then 1 else null end) as valid_table_num /*有效表*/
+        ,sum(case when dt.table_type_code = '05001' then To_number(dt.column_num) else 0 end) as VALID_COLUMN_NUM
+        /*有效表字段数量*/
+        ,count(case when dt.negative_type_code = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+        ,count(case when dt.negative_type_code = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+        ,sum(case when dt.negative_type_code = '04003' then To_number(dt.column_num) else 0 end) as
+        COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        from t_down_table dt
+        GROUP BY dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')
+        ) tut
+        on tut.batch_time=zs.batch_time and tut.system_code = zs.system_code and tut.simple_name = zs.simple_name
+        where tut.batch_time IS NOT NULL OR rel.simple_name IS NOT NULL
+        ) t1
+        on t1.ORG_CODE = tdzb.ORG_CODE
+        and t1.ORG_NAME = tdzb.ORG_NAME /*网省名称*/
+        and t1.system_code = tdzb.SYSTEM_CODE /*系统编码*/
+        and t1.simple_name = tdzb.SYSTEM_NAME /*系统名称*/
+        and t1.BATCH_TIME = tdzb.BATCH_TIME
+        ) zb
+        where 1=1
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+    </select>
+
+    <select id="queryt_dm_zb_catalog_num_cl" resultType="pd">
+        SELECT
+        rowno,
+        org_code as "org_code",
+        org_name as "org_name",
+        system_code as "system_code",
+        system_name as "system_name",
+        catalog_one_num as "catalog_one_num",
+        catalog_two_num as "catalog_two_num",
+        catalog_three_num as "catalog_three_num",
+        all_table_num as "all_table_num",
+        valid_table_num as "valid_table_num",
+        valid_column_num as "valid_column_num",
+        table_fmqd_num as "table_fmqd_num",
+        column_fmqd_table_num as "column_fmqd_table_num",
+        column_fmqd_column_num as "column_fmqd_column_num",
+        case when EXDIFFERENCE = 1 then '是' else '否' end as "exdifference",
+        BATCH_TIME AS "batch_time"
+        FROM
+        (SELECT
+        ROWNUM rowno,
+        ORG_CODE,
+        ORG_NAME,
+        SYSTEM_CODE,
+        SYSTEM_NAME,
+        CATALOG_ONE_NUM,
+        CATALOG_TWO_NUM,
+        CATALOG_THREE_NUM,
+        ALL_TABLE_NUM,
+        VALID_TABLE_NUM,
+        VALID_COLUMN_NUM,
+        TABLE_FMQD_NUM,
+        COLUMN_FMQD_TABLE_NUM,
+        COLUMN_FMQD_COLUMN_NUM,
+        case when
+        CL.CATALOG_ONE_NUM  != 0
+        or CL.CATALOG_ONE_NUM  != 0
+        or CL.CATALOG_TWO_NUM  != 0
+        or CL.CATALOG_THREE_NUM  != 0
+        or CL.ALL_TABLE_NUM  != 0
+        or CL.VALID_TABLE_NUM  != 0
+        or CL.VALID_COLUMN_NUM != 0
+        or CL.TABLE_FMQD_NUM  != 0
+        or CL.COLUMN_FMQD_TABLE_NUM  != 0
+        or CL.COLUMN_FMQD_COLUMN_NUM  != 0
+        then 1 else 0 end as EXDIFFERENCE,
+        to_char(CL.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        FROM T_DM_ZB_CATALOG_NUM_CL CL
+        WHERE 1=1
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        ) zb
+        where 1=1
+        and rowno <![CDATA[>=]]> #{rowstart}
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+        order by BATCH_TIME desc
+    </select>
+
+    <select id="queryt_dm_zb_catalog_num_count_cl" resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        (SELECT
+        ROWNUM rowno,
+        ORG_CODE,
+        ORG_NAME,
+        SYSTEM_CODE,
+        SYSTEM_NAME,
+        CATALOG_ONE_NUM,
+        CATALOG_TWO_NUM,
+        CATALOG_THREE_NUM,
+        ALL_TABLE_NUM,
+        VALID_TABLE_NUM,
+        VALID_COLUMN_NUM,
+        TABLE_FMQD_NUM,
+        COLUMN_FMQD_TABLE_NUM,
+        COLUMN_FMQD_COLUMN_NUM,
+        case when
+        CL.CATALOG_ONE_NUM  != 0
+        or CL.CATALOG_ONE_NUM  != 0
+        or CL.CATALOG_TWO_NUM  != 0
+        or CL.CATALOG_THREE_NUM  != 0
+        or CL.ALL_TABLE_NUM  != 0
+        or CL.VALID_TABLE_NUM  != 0
+        or CL.VALID_COLUMN_NUM != 0
+        or CL.TABLE_FMQD_NUM  != 0
+        or CL.COLUMN_FMQD_TABLE_NUM  != 0
+        or CL.COLUMN_FMQD_COLUMN_NUM  != 0
+        then 1 else 0 end as EXDIFFERENCE,
+        to_char(CL.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        FROM T_DM_ZB_CATALOG_NUM_CL CL
+        WHERE 1=1
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        ) zb
+        where 1=1
+        and rowno <![CDATA[>=]]> #{rowstart}
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+    </select>
+
+    <select id="queryt_t_dm_province_catalog_num_zl" resultType="pd">
+        SELECT
+        rowno,
+        org_code as "org_code",
+        org_name as "org_name",
+        system_code as "system_code",
+        system_name as "system_name",
+        catalog_one_num as "catalog_one_num",
+        catalog_two_num as "catalog_two_num",
+        catalog_three_num as "catalog_three_num",
+        all_table_num as "all_table_num",
+        valid_table_num as "valid_table_num",
+        valid_column_num as "valid_column_num",
+        table_fmqd_num as "table_fmqd_num",
+        column_fmqd_table_num as "column_fmqd_table_num",
+        column_fmqd_column_num as "column_fmqd_column_num",
+        case when EXDIFFERENCE = 1 then '是' else '否' end as "exdifference",
+        BATCH_TIME AS "batch_time"
+        FROM
+        (SELECT
+        ROWNUM rowno,
+        ORG_CODE,
+        ORG_NAME,
+        SYSTEM_CODE,
+        SYSTEM_NAME,
+        CATALOG_ONE_NUM,
+        CATALOG_TWO_NUM,
+        CATALOG_THREE_NUM,
+        ALL_TABLE_NUM,
+        VALID_TABLE_NUM,
+        VALID_COLUMN_NUM,
+        TABLE_FMQD_NUM,
+        COLUMN_FMQD_TABLE_NUM,
+        COLUMN_FMQD_COLUMN_NUM,
+        0 as EXDIFFERENCE,
+        to_char(CL.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        FROM T_DM_PROVINCE_CATALOG_NUM CL
+        WHERE 1=1
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        ) zb
+        where 1=1
+        and rowno <![CDATA[>=]]> #{rowstart}
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+        order by BATCH_TIME desc
+    </select>
+
+    <select id="queryt_t_dm_province_catalog_num_count_zl" resultType="Integer">
+        SELECT
+        count(1)
+        FROM
+        (SELECT
+        ROWNUM rowno,
+        ORG_CODE,
+        ORG_NAME,
+        SYSTEM_CODE,
+        SYSTEM_NAME,
+        CATALOG_ONE_NUM,
+        CATALOG_TWO_NUM,
+        CATALOG_THREE_NUM,
+        ALL_TABLE_NUM,
+        VALID_TABLE_NUM,
+        VALID_COLUMN_NUM,
+        TABLE_FMQD_NUM,
+        COLUMN_FMQD_TABLE_NUM,
+        COLUMN_FMQD_COLUMN_NUM,
+        0 as EXDIFFERENCE,
+        to_char(CL.BATCH_TIME,'yyyy-mm-dd') as BATCH_TIME
+        FROM T_DM_PROVINCE_CATALOG_NUM CL
+        WHERE 1=1
+        and ROWNUM <![CDATA[<=]]> #{rowend}
+        ) zb
+        where 1=1
+        and rowno <![CDATA[>=]]> #{rowstart}
+        <if test=" BATCH_TIME != null and BATCH_TIME != '' ">
+            and to_date(zb.BATCH_TIME,'yyyy-mm-dd') = to_date(#{BATCH_TIME,jdbcType=VARCHAR},'yyyy-mm-dd')
+        </if>
+        <if test=" EXDIFFERENCE != null and EXDIFFERENCE != '' ">
+            and zb.EXDIFFERENCE = #{EXDIFFERENCE}
+        </if>
+    </select>
+
+
+</mapper>

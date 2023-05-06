@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcProcessApplyDao">
+
+    <!-- 工单管理查询 -->
+    <select id="queryOrders" parameterType="pd" resultType="pd">
+        select
+        case jd.spzt
+        when '0' then '待审批'
+        when '1' then '审批通过'
+        when '2' then '审批驳回'
+        when '3' then '审批结束'
+        else '-' end as spzt,
+        jd.dqjdmc ,jd.lcpch ,IFNULL(rz.shrmc,t.CREATE_PERSON_NAME)  as shrmc ,t.*
+        from sjkflc_out_demand_application t
+        left join (
+            select * from (
+                select
+                    IF( @sqxqbm = a.sqxqbm, @rank := @rank + 1, @rank := 1 ) AS rank,
+                    ( @sqxqbm := a.sqxqbm ) temp ,a.*
+                from sjkflc_lczxjdb a ,( SELECT  @rank := 0 ,@sqxqbm := NULL ) b
+                order by a.sqxqbm,a.dqjdbm desc
+            ) t1 where t1.rank =1) jd
+        on t.DEMAND_CODE = jd.sqxqbm
+        left join (
+            select * from (
+                select
+                    IF( @lcpch = a.lcpch, @rank1 := @rank1 + 1, @rank1 := 1 ) AS rank,
+                    ( @lcpch := a.lcpch ) temp , a.*
+                from
+                sjkflc_lcsprzb a
+                ,( SELECT  @rank1 := 0 ,@lcpch := NULL ) b
+                order by a.lcpch,a.shsj desc
+            ) t2  where t2.rank =1
+        ) rz on jd.lcpch = rz.lcpch
+        where spzt is not null and spzt != '-1'
+        <if test=" demand_code != null and demand_code != ''  ">
+            and t.demand_code like concat('%',#{demand_code},'%')
+        </if>
+        <if test=" demand_name != null and demand_name != ''  ">
+            and t.demand_name like concat('%',#{demand_name},'%')
+        </if>
+        <if test=" create_person_code != null and create_person_code != ''  ">
+            and t.create_person_code = #{create_person_code}
+        </if>
+        <if test=" create_person_name != null and create_person_name != ''  ">
+            and t.create_person_name = like concat('%',#{create_person_name},'%')
+        </if>
+        <if test=" spzt != null and spzt != ''  ">
+            and spzt = #{spzt}
+        </if>
+    </select>
+
+    <!-- 查询申请去审批 -->
+    <select id="queryProgressToAudit" parameterType="pd" resultType="pd">
+        select t.id,
+        t.lcpch,
+        t.lcbm,
+        t.lcmc,
+        t.dqjdid,
+        t.dqjdbm,
+        t.dqjdmc,
+        t.dqjdlx,
+        t.sqrid,
+        t.sqrmc,
+        t.sqrssdw,
+        t.sqrssbm,
+        t.sqsj,
+        t.sjlc,
+        t.sqqxid,
+        t.sqxqid,
+        t.sqxqbm,
+        t.sqxqmc,
+        t.spzt,
+        t.bz,
+        t.zdyzd1,
+        t.zdyzd2,
+        t.zdyzd3,
+        jsb.jsmc as "jsmc",
+        jsb.id as "jsid",
+        t1.ID as "sqid",
+        t1.DEMAND_NAME as "demandName",
+        t1.DEMAND_CODE as "demandCode",
+        t1.DEMAND_ORG_NAME as "demandOrgName",
+        t1.DEMAND_ORG_TYPE as "demandOrgType",
+        date_format(t1.DEMAND_START_TIME, '%Y-%m-%d %h:%i:%s') as "demandStartTime",
+        date_format(t1.DEMAND_END_TIME, '%Y-%m-%d %h:%i:%s') as "demandEndTime",
+        t1.DEMAND_DESC_REASON as "demandDescReason",
+        t1.DEMAND_DESC_PURPOSE as "demandDescPurpose",
+        t1.DEMAND_CONTENT as "demandContent",
+        t1.DEMAND_TYPE_NAME as "demandTypeName",
+        t1.DEMAND_TYPE_CODE as "demandTypeCode",
+        t1.PROVIDE_FORM as "provideForm",
+        t1.PROVIDE_CARRIER as "provideCarrier",
+        t1.DATA_FREQ as "dataFreq",
+        t1.DEMAND_NAME_PEO as "demandNamePeo",
+        t1.DEMAND_NAME_TEL as "demandNameTel",
+        t1.UNDERTAKE_DEPT_BIG as "undertakeDeptBig",
+        t1.UNDERTAKE_DEPT_SMALL as "undertakeDeptSmall",
+        t1.UNDERTAKE_DEPT_PEO as "undertakeDeptPeo",
+        t1.UNDERTAKE_DEPT_MAIL as "undertakeDeptMail",
+        t1.UNDERTAKE_DEPT_TEL as "undertakeDeptTel",
+        t1.SOURCE_DEPT as "sourceDept",
+        date_format(t1.DATA_END_TIME, '%Y-%m-%d %h:%i:%s') as "dataEndTime",
+        t1.SM_FLAG as "smFlag",
+        t1.FJ_CODE as "fjCode",
+        t1.SB_STATE as "sbState",
+        date_format(t1.CREATE_TIME, '%Y-%m-%d %h:%i:%s')  as "createTime",
+        t1.CREATE_PERSON_CODE as "createPersonCode",
+        t1.CREATE_PERSON_NAME as "createPersonName",
+        ifnull(l2.zxshsj,t.sqsj) as zxshsj,
+        TABLE_ENAME as tableEname,
+        TABLE_CNAME as tableCname,
+        TABLE_DESC as tableDesc,
+        SIMPLE_NAME as simpleName,
+        SYSTEM_CODE as  systemCode,
+        t2.ht_code as "htCode"
+        from sjkflc_lczxjdb t
+        left join (select l2.lcpch ,max(l2.shsj) zxshsj from  sjkflc_lcsprzb l2 ) l2
+        on t.lcpch = l2.lcpch
+        left join
+        (select id,jsr,jsjs from sjkflc_lcjdb jd
+        <where>
+            1=1
+            <!-- 搜索符合条件的节点 -->
+            <if test=" jsrid != null and jsrid != '' ">
+                <![CDATA[and jd.jsr RLIKE '^${jsrid},.*|.*,${jsrid},.*|,${jsrid}$$|^${jsrid}$$']]>
+            </if>
+            <if test=" jsjs != null and jsjs != '' ">
+                <![CDATA[and jd.jsjs RLIKE '^${jsjs},.*|.*,${jsjs},.*|,${jsjs}$$|^${jsjs}$$']]>
+            </if>
+        </where>
+        ) jd1 on jd1.id = t.dqjdid
+        left join sjkflc_out_demand_application t1
+        on t1.DEMAND_CODE = t.sqxqbm and t1.DEMAND_NAME = t.sqxqmc
+        left join flow_jsb jsb
+        on jsb.jsmc = t.dqjdmc
+        LEFT JOIN sjkflc_process_audit t2
+        on t1.DEMAND_CODE = t2.DEMAND_CODE and t2.AUDIT_LINK = '合同签订确认'
+        where jd1.id is not null and t.spzt in ('0')
+        <if test=" sqxqid != null and sqxqid != ''  ">
+            and t.sqxqid like concat('%',#{sqxqid},'%')
+        </if>
+        <if test=" sqxqbm != null and sqxqbm != ''  ">
+            and t.sqxqbm like concat('%',#{sqxqbm},'%')
+        </if>
+        <if test=" sqxqmc != null and sqxqmc != ''  ">
+            and t.sqxqmc like concat('%',#{sqxqmc},'%')
+        </if>
+        <if test=" bz != null and bz != ''  ">
+            and t.bz like concat('%',#{bz},'%')
+        </if>
+        <if test=" sqrid != null and sqrid != ''  ">
+            and t.sqrid = #{sqrid}
+        </if>
+        order by t.id desc
+    </select>
+
+    <!-- 查询表名存在的流程ID及当前节点ID -->
+    <select id="queryZxStatus" parameterType="pd" resultType="pd">
+        select t.id,t.dqjdid,t.spzt from sjkflc_lczxjdb t
+        where t.sqxqid = #{sqxqid} and t.sqrid = #{sqrid}
+        <if test=" lcbm != null and lcbm != '' ">
+            and t.lcbm like concat('%',#{lcbm},'%')
+        </if>
+        order by t.id desc
+    </select>
+
+    <!-- 查询当前状态为提交申请的指定需求ID的流程信息（将第一步直接过滤） -->
+    <select id="queryProgressBySqxqID" resultType="pd">
+        select t.* from sjkflc_lczxjdb t
+        where t.sqxqid = #{sqxqid}
+        and t.dqjdmc = #{dqjdmc}
+    </select>
+
+    <!-- 查询最后一级流程 -->
+    <select id="queryLatestProgress" resultType="pd">
+        select t.id,
+        t.lcpch,
+        t.lcbm,
+        t.lcmc,
+        t.dqjdid,
+        t.dqjdbm,
+        t.dqjdmc,
+        t.dqjdlx,
+        t.sqrid,
+        t.sqrmc,
+        t.sqrssdw,
+        t.sqrssbm,
+        t.sqsj,
+        t.sjlc,
+        t.sqqxid,
+        t.sqxqid,
+        t.sqxqbm,
+        t.sqxqmc,
+        t.spzt,
+        t.bz,
+        t.zdyzd1,
+        t.zdyzd2,
+        t.zdyzd3
+        from sjkflc_lczxjdb t
+        <where>
+            false
+            <trim prefix="or">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <if test=" lcbm != null and lcbm != '' ">
+                        and t.lcbm = #{lcbm}
+                    </if>
+                    <if test=" sqrid != null and sqrid != '' ">
+                        and t.sqrid = #{sqrid}
+                    </if>
+                    <if test=" sqxqid != null and sqxqid != '' ">
+                        and t.sqxqid like concat('%',#{sqxqid},'%')
+                    </if>
+                    <if test=" sqxqbm != null and sqxqbm != '' ">
+                        and t.sqxqbm like concat('%',#{sqxqbm},'%')
+                    </if>
+                    <if test=" sqxqmc != null and sqxqmc != '' ">
+                        and t.sqxqmc like concat('%',#{sqxqmc},'%')
+                    </if>
+                    <if test=" sqxqmcbc != null and sqxqmcbc != '' ">
+                        and t.sqxqmc = #{sqxqmcbc}
+                    </if>
+                    <if test=" spzt != null and spzt != '' ">
+                        and t.spzt = #{spzt}
+                    </if>
+                    <if test=" spztno != null and spztno != '' ">
+                        and t.spzt != '2'
+                        and t.spzt != '3'
+                    </if>
+                    <if test=" lcpch != null and lcpch != '' ">
+                        and t.lcpch = #{lcpch}
+                    </if>
+                    <if test=" sjlc != null and sjlc != '' ">
+                        and t.sjlc = #{sjlc}
+                    </if>
+                    <if test=" bz != null and bz != '' ">
+                        and t.bz = #{bz}
+                    </if>
+                </trim>
+            </trim>
+        </where>
+    </select>
+
+    <!-- 新增流程状态信息 -->
+    <insert id="insertLatestProgress" parameterType="pd">
+        insert into sjkflc_lczxjdb
+        (
+        id,
+        lcpch,
+        lcbm,
+        lcmc,
+        dqjdid,
+        dqjdbm,
+        dqjdmc,
+        dqjdlx,
+        sqrid,
+        sqrmc,
+        sqrssdw,
+        sqrssbm,
+        sqsj,
+        sjlc,
+        sqqxid,
+        sqxqid,
+        sqxqbm,
+        sqxqmc,
+        spzt
+        )
+        values
+        (
+        UUID(),
+        #{lcpch},
+        #{lcbm},
+        #{lcmc},
+        #{dqjdid},
+        #{dqjdbm},
+        #{dqjdmc},
+        #{dqjdlx},
+        #{sqrid},
+        #{sqrmc},
+        #{sqrssdw},
+        #{sqrssbm},
+        date_format(#{sqsj},'%Y-%m-%d %H:%i:%s'),
+--         date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{sjlc},
+        #{sqqxid},
+        #{sqxqid},
+        #{sqxqbm},
+        #{sqxqmc},
+        #{spzt}
+        )
+    </insert>
+
+    <!-- 新增流程审批日志 -->
+    <insert id="insertProcessLog" parameterType="pd">
+        insert into sjkflc_lcsprzb
+        (
+        id,
+        lcpch,
+        lcbm,
+        lcmc,
+        jdbm,
+        jdmc,
+        jdlx,
+        jdzt,
+        shrid,
+        shrmc,
+        shrssdw,
+        shrssbm,
+        shsj,
+        shjg,
+        bz
+        )
+        values
+        (
+        UUID(),
+        #{lcpch},
+        #{lcbm},
+        #{lcmc},
+        #{jdbm},
+        #{jdmc},
+        #{jdlx},
+        #{jdzt},
+        #{shrid},
+        #{shrmc},
+        #{shrssdw},
+        #{shrssbm},
+        <!-- date_format(NOW(),'%Y-%m-%d %H:%i:%s'), -->
+        #{auditEndTime},
+        #{shjg},
+        #{bz}
+        )
+    </insert>
+
+    <!-- 更新流程最新状态 -->
+    <update id="editLatestProgress" parameterType="pd">
+        update sjkflc_lczxjdb
+        <trim suffixOverrides=",">
+            <set>
+                <if test="spzt != null">
+                    spzt = #{spzt},
+                </if>
+                <if test="dqjdid != null">
+                    dqjdid = #{dqjdid},
+                </if>
+                <if test="dqjdbm != null">
+                    dqjdbm = #{dqjdbm},
+                </if>
+                <if test="dqjdmc != null">
+                    dqjdmc = #{dqjdmc},
+                </if>
+                <if test="dqjdlx != null">
+                    dqjdlx = #{dqjdlx},
+                </if>
+            </set>
+        </trim>
+        <where>
+            false
+            <trim prefix="or">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <if test="id != null">
+                        and id=#{id}
+                    </if>
+                    <if test="lcbm != null">
+                        and lcbm=#{lcbm}
+                    </if>
+                </trim>
+            </trim>
+        </where>
+    </update>
+
+
+    <!--删除流程最新状态-->
+    <delete id="delLatestProgress" parameterType="java.lang.String">
+        delete from
+        sjkflc_lczxjdb
+        where  spzt = '0'
+        and sqxqbm = #{demandCode,jdbcType=VARCHAR}
+    </delete>
+
+    <!--删除流程审批日志-->
+    <delete id="delLcsprzb" parameterType="java.lang.String">
+        delete from
+        sjkflc_lcsprzb
+        where lcpch = #{lcpch,jdbcType=VARCHAR}
+    </delete>
+</mapper>

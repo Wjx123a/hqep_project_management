@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.LoginDao">
+
+
+    <!--    查询登陆人信息-->
+    <select id="loginPersonInfoMapper" parameterType="pd" resultType="pd">
+            SELECT
+                plr.id AS "id",
+                plr.LOGIN_NUM AS "loginNum",
+                plr.PASSWORD AS "password",
+                plr.ROLE_ID AS "roleId",
+                plr.ROLE_NAME AS "roleName",
+                plr.STATUS AS "status",
+                pp.NAME AS "name",
+                pp.PERSON_ID AS "personId",
+                pp.SEX AS "sex",
+                pp.IDENTITY_NUM AS "identityNum",
+                pp.PHONE AS "phone",
+                pp.PHOTO AS "photo",
+                pp.ORG_CODE AS "orgCode",
+                pp.ORG_NAME AS "orgName",
+                pp.DEP_CODE AS "depCode",
+                pp.DEP_NAME AS "depName",
+                plr.OPT_ID as "optId",
+	            plr.OPT_NAME as "optName",
+	            plr.OPT_EXPLAIN as "optExplain",
+                CASE
+                    WHEN plr.ROLE_ID = '1101' THEN '1'
+                    ELSE '0'
+                END "isAdmin"
+            FROM
+                PMSN_LOGIN_ROLE plr
+                LEFT JOIN PMSN_PERSON pp ON plr.ID = pp.LOGIN_ID
+                AND pp.VISIABLE = 1
+            WHERE
+                plr.LOGIN_NUM = #{loginNum}
+                AND plr.PASSWORD = #{password}
+                AND plr.VISIABLE = 1
+    </select>
+
+<!--    修改密码-->
+    <update id="updatePasswordMapper" parameterType="pd">
+            UPDATE
+                PMSN_LOGIN_ROLE
+            SET
+                PASSWORD = #{newPassword},
+                OPT_ID = #{optId},
+                OPT_NAME = #{optName},
+                OPT_EXPLAIN = #{optExplain},
+                OPT_TIME = NOW(),
+                MODIFY_TIME = NOW()
+            WHERE
+                LOGIN_NUM = #{loginNum}
+                and PASSWORD = #{password}
+                and VISIABLE =1
+    </update>
+
+    <update id="resetPassword" parameterType="pd">
+            UPDATE
+                PMSN_LOGIN_ROLE
+            SET
+                PASSWORD = 'c33367701511b4f6020ec61ded352059'
+            WHERE
+                ID = #{id}
+    </update>
+
+    <insert id="firstMenuAuth"  parameterType="pd">
+    insert INTO sys_auth (user_id ,menu_id)
+    (select #{user_id} as user_id,t.menu_id from sys_auth t where t.user_id = 'f5e7c061b5d24d3ba8d6a82f4f2a63ef')
+    </insert>
+
+
+</mapper>

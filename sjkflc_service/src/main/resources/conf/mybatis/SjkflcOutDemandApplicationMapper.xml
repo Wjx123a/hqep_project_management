@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcOutDemandApplicationDao">
+    <sql id="tableName">
+        pmsn.sjkflc_out_demand_application
+    </sql>
+    <sql id="baseDateColumnList">
+        ID, DEMAND_NAME, DEMAND_CODE, DEMAND_ORG_NAME, DEMAND_ORG_TYPE,
+        date_format(DEMAND_START_TIME, '%Y-%m-%d %H:%i:%s') as DEMAND_START_TIME,
+        date_format(DEMAND_END_TIME, '%Y-%m-%d %H:%i:%s') as DEMAND_END_TIME,
+        DEMAND_DESC_REASON, DEMAND_DESC_PURPOSE, DEMAND_CONTENT, DEMAND_TYPE_NAME, DEMAND_TYPE_CODE, PROVIDE_FORM, PROVIDE_CARRIER, DATA_FREQ, DEMAND_NAME_PEO, DEMAND_NAME_TEL, UNDERTAKE_DEPT_BIG, UNDERTAKE_DEPT_SMALL, UNDERTAKE_DEPT_PEO, UNDERTAKE_DEPT_MAIL, UNDERTAKE_DEPT_TEL, SOURCE_DEPT,
+        date_format(DATA_END_TIME, '%Y-%m-%d %H:%i:%s') as DATA_END_TIME,
+        SM_FLAG, SB_STATE,FJ_CODE,
+        date_format(CREATE_TIME, '%Y-%m-%d %H:%i:%s') as CREATE_TIME, CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, SFZC, SB_STATE_NAME,
+        TABLE_ENAME, TABLE_CNAME, TABLE_DESC, SIMPLE_NAME, SYSTEM_CODE
+    </sql>
+    <sql id="baseColumnList">
+        ID, DEMAND_NAME, DEMAND_CODE, DEMAND_ORG_NAME, DEMAND_ORG_TYPE,
+        DEMAND_START_TIME,
+        DEMAND_END_TIME,
+        DEMAND_DESC_REASON, DEMAND_DESC_PURPOSE, DEMAND_CONTENT, DEMAND_TYPE_NAME, DEMAND_TYPE_CODE, PROVIDE_FORM, PROVIDE_CARRIER, DATA_FREQ, DEMAND_NAME_PEO, DEMAND_NAME_TEL, UNDERTAKE_DEPT_BIG, UNDERTAKE_DEPT_SMALL, UNDERTAKE_DEPT_PEO, UNDERTAKE_DEPT_MAIL, UNDERTAKE_DEPT_TEL, SOURCE_DEPT,
+        DATA_END_TIME,
+        SM_FLAG, SB_STATE,FJ_CODE,
+        CREATE_TIME, CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, SFZC, SB_STATE_NAME,
+        TABLE_ENAME, TABLE_CNAME, TABLE_DESC, SIMPLE_NAME, SYSTEM_CODE
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOutDemandApplication" id="baseResultMap">
+        <result property="id" column="ID" jdbcType="VARCHAR"/>
+        <result property="demandName" column="DEMAND_NAME" jdbcType="VARCHAR"/>
+        <result property="demandCode" column="DEMAND_CODE" jdbcType="VARCHAR"/>
+        <result property="demandOrgName" column="DEMAND_ORG_NAME" jdbcType="VARCHAR"/>
+        <result property="demandOrgType" column="DEMAND_ORG_TYPE" jdbcType="VARCHAR"/>
+        <result property="demandStartTime" column="DEMAND_START_TIME" jdbcType="TIMESTAMP"/>
+        <result property="demandEndTime" column="DEMAND_END_TIME" jdbcType="TIMESTAMP"/>
+        <result property="demandDescReason" column="DEMAND_DESC_REASON" jdbcType="VARCHAR"/>
+        <result property="demandDescPurpose" column="DEMAND_DESC_PURPOSE" jdbcType="VARCHAR"/>
+        <result property="demandContent" column="DEMAND_CONTENT" jdbcType="VARCHAR"/>
+        <result property="demandTypeName" column="DEMAND_TYPE_NAME" jdbcType="VARCHAR"/>
+        <result property="demandTypeCode" column="DEMAND_TYPE_CODE" jdbcType="VARCHAR"/>
+        <result property="provideForm" column="PROVIDE_FORM" jdbcType="VARCHAR"/>
+        <result property="provideCarrier" column="PROVIDE_CARRIER" jdbcType="VARCHAR"/>
+        <result property="dataFreq" column="DATA_FREQ" jdbcType="VARCHAR"/>
+        <result property="demandNamePeo" column="DEMAND_NAME_PEO" jdbcType="VARCHAR"/>
+        <result property="demandNameTel" column="DEMAND_NAME_TEL" jdbcType="VARCHAR"/>
+        <result property="undertakeDeptBig" column="UNDERTAKE_DEPT_BIG" jdbcType="VARCHAR"/>
+        <result property="undertakeDeptSmall" column="UNDERTAKE_DEPT_SMALL" jdbcType="VARCHAR"/>
+        <result property="undertakeDeptPeo" column="UNDERTAKE_DEPT_PEO" jdbcType="VARCHAR"/>
+        <result property="undertakeDeptMail" column="UNDERTAKE_DEPT_MAIL" jdbcType="VARCHAR"/>
+        <result property="undertakeDeptTel" column="UNDERTAKE_DEPT_TEL" jdbcType="VARCHAR"/>
+        <result property="sourceDept" column="SOURCE_DEPT" jdbcType="VARCHAR"/>
+        <result property="dataEndTime" column="DATA_END_TIME" jdbcType="TIMESTAMP"/>
+        <result property="smFlag" column="SM_FLAG" jdbcType="VARCHAR"/>
+        <result property="sbState" column="SB_STATE" jdbcType="VARCHAR"/>
+        <result property="sbStateName" column="SB_STATE_NAME" jdbcType="VARCHAR"/>
+        <result property="fjCode" column="FJ_CODE" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createPersonCode" column="CREATE_PERSON_CODE" jdbcType="VARCHAR"/>
+        <result property="createPersonName" column="CREATE_PERSON_NAME" jdbcType="VARCHAR"/>
+        <result property="zdyzd01" column="ZDYZD01" jdbcType="VARCHAR"/>
+        <result property="sfzc" column="SFZC" jdbcType="VARCHAR"/>
+        <result property="tableEname" column="table_ename" jdbcType="VARCHAR"/>
+        <result property="tableCname" column="table_cname" jdbcType="VARCHAR"/>
+        <result property="tableDesc" column="table_desc" jdbcType="VARCHAR"/>
+        <result property="simpleName" column="simple_name" jdbcType="VARCHAR"/>
+        <result property="systemCode" column="system_code" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        <include refid="baseDateColumnList"/>
+        from
+        <include refid="tableName"/>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOutDemandApplication"
+            resultMap="baseResultMap">
+        select
+        <include refid="baseDateColumnList"/>
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="id != null and id != ''">
+                and ID = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="demandName != null and demandName != ''">
+                and LOCATE(#{demandName,jdbcType=VARCHAR},DEMAND_NAME) <![CDATA[>]]> 0
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and LOCATE(#{demandCode,jdbcType=VARCHAR},DEMAND_CODE) <![CDATA[>]]> 0
+            </if>
+            <if test="demandOrgName != null and demandOrgName != ''">
+                and LOCATE(#{demandOrgName,jdbcType=VARCHAR},DEMAND_ORG_NAME) <![CDATA[>]]> 0
+            </if>
+            <if test="demandOrgType != null and demandOrgType != ''">
+                and DEMAND_ORG_TYPE = #{demandOrgType,jdbcType=VARCHAR}
+            </if>
+            <if test="demandStartTime != null">
+                and DEMAND_START_TIME = #{demandStartTime,jdbcType=VARCHAR}
+            </if>
+            <if test="demandEndTime != null">
+                and DEMAND_END_TIME = #{demandEndTime,jdbcType=VARCHAR}
+            </if>
+            <if test="demandDescReason != null and demandDescReason != ''">
+                and DEMAND_DESC_REASON = #{demandDescReason,jdbcType=VARCHAR}
+            </if>
+            <if test="demandDescPurpose != null and demandDescPurpose != ''">
+                and DEMAND_DESC_PURPOSE = #{demandDescPurpose,jdbcType=VARCHAR}
+            </if>
+            <if test="demandContent != null and demandContent != ''">
+                and DEMAND_CONTENT = #{demandContent,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTypeName != null and demandTypeName != ''">
+                and DEMAND_TYPE_NAME = #{demandTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTypeCode != null and demandTypeCode != ''">
+                and DEMAND_TYPE_CODE = #{demandTypeCode,jdbcType=VARCHAR}
+            </if>
+            <if test="provideForm != null and provideForm != ''">
+                and PROVIDE_FORM = #{provideForm,jdbcType=VARCHAR}
+            </if>
+            <if test="provideCarrier != null and provideCarrier != ''">
+                and PROVIDE_CARRIER = #{provideCarrier,jdbcType=VARCHAR}
+            </if>
+            <if test="dataFreq != null and dataFreq != ''">
+                and DATA_FREQ = #{dataFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="demandNamePeo != null and demandNamePeo != ''">
+                and DEMAND_NAME_PEO = #{demandNamePeo,jdbcType=VARCHAR}
+            </if>
+            <if test="demandNameTel != null and demandNameTel != ''">
+                and DEMAND_NAME_TEL = #{demandNameTel,jdbcType=VARCHAR}
+            </if>
+            <if test="undertakeDeptBig != null and undertakeDeptBig != ''">
+                and UNDERTAKE_DEPT_BIG = #{undertakeDeptBig,jdbcType=VARCHAR}
+            </if>
+            <if test="undertakeDeptSmall != null and undertakeDeptSmall != ''">
+                and UNDERTAKE_DEPT_SMALL = #{undertakeDeptSmall,jdbcType=VARCHAR}
+            </if>
+            <if test="undertakeDeptPeo != null and undertakeDeptPeo != ''">
+                and UNDERTAKE_DEPT_PEO = #{undertakeDeptPeo,jdbcType=VARCHAR}
+            </if>
+            <if test="undertakeDeptMail != null and undertakeDeptMail != ''">
+                and UNDERTAKE_DEPT_MAIL = #{undertakeDeptMail,jdbcType=VARCHAR}
+            </if>
+            <if test="undertakeDeptTel != null and undertakeDeptTel != ''">
+                and UNDERTAKE_DEPT_TEL = #{undertakeDeptTel,jdbcType=VARCHAR}
+            </if>
+            <if test="sourceDept != null and sourceDept != ''">
+                and SOURCE_DEPT = #{sourceDept,jdbcType=VARCHAR}
+            </if>
+            <if test="dataEndTime != null">
+                and DATA_END_TIME = #{dataEndTime,jdbcType=VARCHAR}
+            </if>
+            <if test="smFlag != null and smFlag != ''">
+                and SM_FLAG = #{smFlag,jdbcType=VARCHAR}
+            </if>
+            <if test="sfzc != null and sfzc != ''">
+                and SFZC = #{sfzc,jdbcType=VARCHAR}
+            </if>
+            <if test="sbStateName != null and sbStateName != ''">
+                and SB_STATE_NAME = #{sbStateName,jdbcType=VARCHAR}
+            </if>
+            <if test="sbState != null and sbState != ''">
+                and SB_STATE = #{sbState,jdbcType=VARCHAR}
+            </if>
+            <if test="sbStateNo != null and sbStateNo != ''">
+                and (SB_STATE != '0' and SB_STATE is not null)
+            </if>
+            <if test="fjCode != null and fjCode != ''">
+                and FJ_CODE = #{fjCode,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and CREATE_TIME = #{createTime,jdbcType=VARCHAR}
+            </if>
+            <if test="createPersonCode != null and createPersonCode != ''">
+                and CREATE_PERSON_CODE = #{createPersonCode,jdbcType=VARCHAR}
+            </if>
+            <if test="createPersonName != null and createPersonName != ''">
+                and CREATE_PERSON_NAME = #{createPersonName,jdbcType=VARCHAR}
+            </if>
+            <if test="zdyzd01 != null and zdyzd01 != ''">
+                and ZDYZD01 = #{zdyzd01,jdbcType=VARCHAR}
+            </if>
+            <if test="tableEname != null and tableEname != ''">
+                and table_ename = #{tableEname,jdbcType=VARCHAR}
+            </if>
+            <if test="tableCname != null and tableCname != ''">
+                and table_cname = #{tableCname,jdbcType=VARCHAR}
+            </if>
+            <if test="tableDesc != null and tableDesc != ''">
+                and table_desc = #{tableDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="simpleName != null and simpleName != ''">
+                and simple_name = #{simpleName,jdbcType=VARCHAR}
+            </if>
+            <if test="systemCode != null and systemCode != ''">
+                and system_code = #{systemCode,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOutDemandApplication">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+        #{demandOrgName,jdbcType=VARCHAR}, #{demandOrgType,jdbcType=VARCHAR}, #{demandStartTime,jdbcType=VARCHAR},
+        #{demandEndTime,jdbcType=VARCHAR}, #{demandDescReason,jdbcType=VARCHAR}, #{demandDescPurpose,jdbcType=VARCHAR},
+        #{demandContent,jdbcType=VARCHAR}, #{demandTypeName,jdbcType=VARCHAR}, #{demandTypeCode,jdbcType=VARCHAR},
+        #{provideForm,jdbcType=VARCHAR}, #{provideCarrier,jdbcType=VARCHAR}, #{dataFreq,jdbcType=VARCHAR},
+        #{demandNamePeo,jdbcType=VARCHAR}, #{demandNameTel,jdbcType=VARCHAR}, #{undertakeDeptBig,jdbcType=VARCHAR},
+        #{undertakeDeptSmall,jdbcType=VARCHAR}, #{undertakeDeptPeo,jdbcType=VARCHAR},
+        #{undertakeDeptMail,jdbcType=VARCHAR}, #{undertakeDeptTel,jdbcType=VARCHAR}, #{sourceDept,jdbcType=VARCHAR},
+        #{dataEndTime,jdbcType=VARCHAR}, #{smFlag,jdbcType=VARCHAR}, #{sbState,jdbcType=VARCHAR}, #{fjCode,jdbcType=VARCHAR},
+        #{createTime,jdbcType=VARCHAR}, #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR},
+        #{zdyzd01,jdbcType=VARCHAR}, #{sfzc,jdbcType=VARCHAR}, #{sbStateName,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+        #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+        #{systemCode,jdbcType=VARCHAR} )
+    </insert>
+
+
+    <!--新增所有列-->
+    <insert id="insertForModel" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOutDemandApplication">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+        #{demandOrgName,jdbcType=VARCHAR}, #{demandOrgType,jdbcType=VARCHAR}, #{demandStartTime,jdbcType=VARCHAR},
+        #{demandEndTime,jdbcType=VARCHAR}, #{demandDescReason,jdbcType=VARCHAR}, #{demandDescPurpose,jdbcType=VARCHAR},
+        #{demandContent,jdbcType=VARCHAR}, #{demandTypeName,jdbcType=VARCHAR}, #{demandTypeCode,jdbcType=VARCHAR},
+        #{provideForm,jdbcType=VARCHAR}, #{provideCarrier,jdbcType=VARCHAR}, #{dataFreq,jdbcType=VARCHAR},
+        #{demandNamePeo,jdbcType=VARCHAR}, #{demandNameTel,jdbcType=VARCHAR}, #{undertakeDeptBig,jdbcType=VARCHAR},
+        #{undertakeDeptSmall,jdbcType=VARCHAR}, #{undertakeDeptPeo,jdbcType=VARCHAR},
+        #{undertakeDeptMail,jdbcType=VARCHAR}, #{undertakeDeptTel,jdbcType=VARCHAR}, #{sourceDept,jdbcType=VARCHAR},
+        #{dataEndTime,jdbcType=VARCHAR}, #{smFlag,jdbcType=VARCHAR}, #{sbState,jdbcType=VARCHAR}, #{fjCode,jdbcType=VARCHAR},
+        #{createTime,jdbcType=VARCHAR}, #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR},
+        #{zdyzd01,jdbcType=VARCHAR}, #{sfzc,jdbcType=VARCHAR}, #{sbStateName,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+        #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+        #{systemCode,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+            #{demandOrgName,jdbcType=VARCHAR}, #{demandOrgType,jdbcType=VARCHAR}, #{demandStartTime,jdbcType=VARCHAR},
+            #{demandEndTime,jdbcType=VARCHAR}, #{demandDescReason,jdbcType=VARCHAR},
+            #{demandDescPurpose,jdbcType=VARCHAR}, #{demandContent,jdbcType=VARCHAR},
+            #{demandTypeName,jdbcType=VARCHAR}, #{demandTypeCode,jdbcType=VARCHAR}, #{provideForm,jdbcType=VARCHAR},
+            #{provideCarrier,jdbcType=VARCHAR}, #{dataFreq,jdbcType=VARCHAR}, #{demandNamePeo,jdbcType=VARCHAR},
+            #{demandNameTel,jdbcType=VARCHAR}, #{undertakeDeptBig,jdbcType=VARCHAR},
+            #{undertakeDeptSmall,jdbcType=VARCHAR}, #{undertakeDeptPeo,jdbcType=VARCHAR},
+            #{undertakeDeptMail,jdbcType=VARCHAR}, #{undertakeDeptTel,jdbcType=VARCHAR}, #{sourceDept,jdbcType=VARCHAR},
+            #{dataEndTime,jdbcType=VARCHAR}, #{smFlag,jdbcType=VARCHAR}, #{sbState,jdbcType=VARCHAR}, #{fjCode,jdbcType=VARCHAR},
+            #{createTime,jdbcType=VARCHAR}, #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR},
+            #{zdyzd01,jdbcType=VARCHAR}, #{sfzc,jdbcType=VARCHAR}, #{sbStateName,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+            #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+            #{systemCode,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOutDemandApplication">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="id != null and id != ''">
+                ID = #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="demandName != null and demandName != ''">
+                DEMAND_NAME = #{demandName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandOrgName != null and demandOrgName != ''">
+                DEMAND_ORG_NAME = #{demandOrgName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandOrgType != null and demandOrgType != ''">
+                DEMAND_ORG_TYPE = #{demandOrgType,jdbcType=VARCHAR},
+            </if>
+            <if test="demandStartTime != null">
+                DEMAND_START_TIME = #{demandStartTime,jdbcType=VARCHAR},
+            </if>
+            <if test="demandEndTime != null">
+                DEMAND_END_TIME = #{demandEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="demandDescReason != null and demandDescReason != ''">
+                DEMAND_DESC_REASON = #{demandDescReason,jdbcType=VARCHAR},
+            </if>
+            <if test="demandDescPurpose != null and demandDescPurpose != ''">
+                DEMAND_DESC_PURPOSE = #{demandDescPurpose,jdbcType=VARCHAR},
+            </if>
+            <if test="demandContent != null and demandContent != ''">
+                DEMAND_CONTENT = #{demandContent,jdbcType=VARCHAR},
+            </if>
+            <if test="demandTypeName != null and demandTypeName != ''">
+                DEMAND_TYPE_NAME = #{demandTypeName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandTypeCode != null and demandTypeCode != ''">
+                DEMAND_TYPE_CODE = #{demandTypeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="provideForm != null and provideForm != ''">
+                PROVIDE_FORM = #{provideForm,jdbcType=VARCHAR},
+            </if>
+            <if test="provideCarrier != null and provideCarrier != ''">
+                PROVIDE_CARRIER = #{provideCarrier,jdbcType=VARCHAR},
+            </if>
+            <if test="dataFreq != null and dataFreq != ''">
+                DATA_FREQ = #{dataFreq,jdbcType=VARCHAR},
+            </if>
+            <if test="demandNamePeo != null and demandNamePeo != ''">
+                DEMAND_NAME_PEO = #{demandNamePeo,jdbcType=VARCHAR},
+            </if>
+            <if test="demandNameTel != null and demandNameTel != ''">
+                DEMAND_NAME_TEL = #{demandNameTel,jdbcType=VARCHAR},
+            </if>
+            <if test="undertakeDeptBig != null and undertakeDeptBig != ''">
+                UNDERTAKE_DEPT_BIG = #{undertakeDeptBig,jdbcType=VARCHAR},
+            </if>
+            <if test="undertakeDeptSmall != null and undertakeDeptSmall != ''">
+                UNDERTAKE_DEPT_SMALL = #{undertakeDeptSmall,jdbcType=VARCHAR},
+            </if>
+            <if test="undertakeDeptPeo != null and undertakeDeptPeo != ''">
+                UNDERTAKE_DEPT_PEO = #{undertakeDeptPeo,jdbcType=VARCHAR},
+            </if>
+            <if test="undertakeDeptMail != null and undertakeDeptMail != ''">
+                UNDERTAKE_DEPT_MAIL = #{undertakeDeptMail,jdbcType=VARCHAR},
+            </if>
+            <if test="undertakeDeptTel != null and undertakeDeptTel != ''">
+                UNDERTAKE_DEPT_TEL = #{undertakeDeptTel,jdbcType=VARCHAR},
+            </if>
+            <if test="sourceDept != null and sourceDept != ''">
+                SOURCE_DEPT = #{sourceDept,jdbcType=VARCHAR},
+            </if>
+            <if test="dataEndTime != null">
+                DATA_END_TIME = #{dataEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="smFlag != null and smFlag != ''">
+                SM_FLAG = #{smFlag,jdbcType=VARCHAR},
+            </if>
+            <if test="sbState != null and sbState != ''">
+                SB_STATE = #{sbState,jdbcType=VARCHAR},
+            </if>
+            <if test="fjCode != null and fjCode != ''">
+                FJ_CODE = #{fjCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="createPersonCode != null and createPersonCode != ''">
+                CREATE_PERSON_CODE = #{createPersonCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createPersonName != null and createPersonName != ''">
+                CREATE_PERSON_NAME = #{createPersonName,jdbcType=VARCHAR},
+            </if>
+            <if test="zdyzd01 != null and zdyzd01 != ''">
+                ZDYZD01 = #{zdyzd01,jdbcType=VARCHAR},
+            </if>
+            <if test="sfzc != null and sfzc != ''">
+                SFZC = #{sfzc,jdbcType=VARCHAR},
+            </if>
+            <if test="sbStateName != null and sbStateName != ''">
+                SB_STATE_NAME = #{sbStateName,jdbcType=VARCHAR},
+            </if>
+            <if test="tableEname != null and tableEname != ''">
+                table_ename = #{tableEname,jdbcType=VARCHAR},
+            </if>
+            <if test="tableCname != null and tableCname != ''">
+                table_cname = #{tableCname,jdbcType=VARCHAR},
+            </if>
+            <if test="tableDesc != null and tableDesc != ''">
+                table_desc = #{tableDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="simpleName != null and simpleName != ''">
+                simple_name = #{simpleName,jdbcType=VARCHAR},
+            </if>
+            <if test="systemCode != null and systemCode != ''">
+                system_code = #{systemCode,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>
+

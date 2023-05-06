@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.ReportCenterDao">
+    <update id="createTable" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.CreateTableAndTabbleName">
+        CREATE TABLE IF NOT EXISTS  ${tableName} (
+        `code_id` int NOT NULL AUTO_INCREMENT COMMENT '编号',
+        <foreach collection="customTables" item="item" separator="">
+            <if test="item.choose == true">
+                ${item.createTableFiledName} ${item.fieldType}
+                <choose>
+                    <when test="item.isNotNull != null and item.isNotNull !=''">
+                        NOT NULL
+                    </when>
+                </choose>
+                DEFAULT
+                <choose>
+                    <when test="item.defaultValue != null and item.defaultValue !=''">
+                        ${item.defaultValue}
+                    </when>
+                    <otherwise>
+                        NULL
+                    </otherwise>
+                </choose>
+                COMMENT
+                <choose>
+                    <when test="item.comment != null and item.comment !=''">
+                        '${item.comment}'
+                    </when>
+                    <otherwise>
+                        '${item.createTableFiledName}'
+                    </otherwise>
+                </choose>
+                ,
+            </if>
+        </foreach>
+        ZDYZD01 VARCHAR (255) COMMENT '自定义字段1',
+        ZDYZD02 VARCHAR (255) COMMENT '自定义字段2',
+        ZDYZD03 VARCHAR (255) COMMENT '自定义字段3',
+        PRIMARY KEY (`code_id`)
+        );
+    </update>
+    
+    
+    <select id="queryExistsTable" parameterType="String" resultType="pd">
+         SELECT COUNT(*) as count FROM information_schema.TABLES
+         WHERE table_name = #{tablename} and TABLE_SCHEMA = #{dbname} ;
+    </select>
+
+
+    <update id="grantQueryTableForUser" parameterType="pd">
+        grant select on table ${dbname}.${tablename} to ${username}@'%';
+    </update>
+
+
+    <update id="revokeQueryTableForUser" parameterType="pd">
+        revoke select on table ${dbname}.${tablename} from ${username}@'%';
+    </update>
+
+    <insert id="inertGrantForLogs" parameterType="pd">
+        INSERT INTO pmsn_bbzx_grant_logs
+        (username, grant_type, tablename, opstate, ztzh , create_time)
+         VALUES ( #{username},#{grant_type}, #{tablename}, #{opstate}, #{ztzh}, sysdate());
+
+    </insert>
+</mapper>
+

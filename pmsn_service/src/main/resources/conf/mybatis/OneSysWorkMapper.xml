@@ -1,0 +1,1155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.OneSysWorkDao">
+    <!-- 将待申请信息保存至订单栏 -->
+    <insert id="insertDataToShoppingcatOnesys" parameterType="pd">
+        insert into pmsn_onesys_work_shoppingcart
+        (
+        id,
+        sqrid,
+        sqrmc,
+        sqrssdw,
+        sqrssbm,
+        sqrlxfs,
+        sqbssxt,
+        sqbssbm,
+        sqbywbm,
+        sqbzwbm,
+        sqbxtyh,
+        sqbbjs,
+        sffmqd,
+        createtime,
+        sqbsqbm,
+        bz,
+        zt,
+        xtbm,
+        bsskj
+        )
+        values
+        (
+        UUID(),
+        #{sqrid},
+        #{sqrmc},
+        #{sqrssdw},
+        #{sqrssbm},
+        #{sqrlxfs},
+        #{sqbssxt},
+        #{sqbssbm},
+        #{sqbywbm},
+        #{sqbzwbm},
+        #{sqbxtyh},
+        #{sqbbjs},
+        #{sffmqd},
+        date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{sqbsqbm},
+        #{bz},
+        #{zt},
+        #{xtbm},
+        #{bsskj}
+        )
+    </insert>
+
+    <!--通过主键修改数据-订单栏-->
+    <update id="updateDataToShoppingcatOnesys" parameterType="pd">
+        update
+        pmsn_onesys_work_shoppingcart
+        <set>
+            <if test="zt != null and zt != ''">
+                zt = #{zt,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        id= #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!-- 根据登录人ID查询订单栏信息 -->
+    <select id="queryShoppingcatOnesys" parameterType="pd" resultType="pd">
+        select distinct t.*,zt.xt_zy as subject_name
+        ,case when zt.xt_bs_fs = '02' then '二级部署'
+        when zt.xt_bs_fs = '01' then '一级部署'
+        when zt.xt_bs_fs = '03' then '1.5级部署'
+        else '' end as bsfs
+        from pmsn_onesys_work_shoppingcart t
+        LEFT JOIN zt_zjb zt
+        on t.xtbm = zt.id
+        <where>
+            <if test=" sqrid != null and sqrid != '' ">
+                and t.sqrid = #{sqrid}
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != '' ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != '' ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != '' ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbxtyh != null and sqbxtyh != '' ">
+                and t.sqbxtyh like concat('%',#{sqbxtyh},'%')
+            </if>
+            <if test=" startsqsj != null and startsqsj != '' ">
+                and t.createtime &gt;=  #{startsqsj}
+            </if>
+            <if test=" endsqsj != null and endsqsj != '' ">
+                and t.createtime &lt;=  #{endsqsj}
+            </if>
+            and t.zt in ('0',"3")
+        </where>
+        order by t.createtime desc
+    </select>
+
+    <!--    通过主键删除数据-订单栏-->
+    <delete id="delShoppingcatOnesys" parameterType="pd">
+        delete from pmsn_onesys_work_shoppingcart
+        where  id = #{id} and zt =  '0'
+    </delete>
+
+    <!-- 查询提交订单信息的信息-->
+<!--    inner join pmsn_onesys_work_shoppingcart t2 on t1.shoppingcartId = t2.id and t2.zt = '1'-->
+
+    <select id="queryDataToOnesysWorkOrderList" parameterType="pd" resultType="pd">
+        select
+            t1.id,
+            case
+            when t1.subTime is null then "待上报"
+            when t1.subTime is not null and podwo.status != 2 then "申请中"
+            when t1.subTime is not null and podwo.status = 2 and t1.grantTime is null then "待授权"
+            when t1.subTime is not null and podwo.status = 2 and t1.grantTime is not null then "已授权"
+            else "流转中" end lczt,
+            t1.shoppingcartId,
+            t1.applyDept,
+            t1.applyTime,
+            t1.applyType,
+            t1.applyTypeSecond,
+            t1.demandDesc,
+            t1.demandTitle,
+            t1.dept,
+            "国网黑龙江省电力有限公司" as dept_name,
+            t1.phone,
+            t1.details,
+            t1.demandCode,
+            t1.demandId,
+            t1.description,
+            t1.status,
+            t1.code,
+            t1.applicationDept,
+            t1.applicationName,
+            t1.demandFreq,
+            case
+            when t1.demandFreq=0 then "按需"
+            when t1.demandFreq=1 then "1日/次"
+            when t1.demandFreq=2 then "1周/次"
+            when t1.demandFreq=3 then "1月/次"
+            when t1.demandFreq=4 then "1季/次"
+            when t1.demandFreq=5 then "半年/次"
+            when t1.demandFreq=6 then "1年/次"
+            when t1.demandFreq=7 then "一次性"
+            else "" end as demandFreq_name,
+            t1.firstTopicName,
+            t1.rangeDesc,
+            case
+            when t1.rangeDesc=0 then "总部"
+            when t1.rangeDesc=1 then "省公司"
+            when t1.rangeDesc=2 then "总部+省公司"
+            else "" end as rangeDesc_name,
+            t1.secondTopicName,
+            t1.topicRemark,
+            date_format(t1.creteTime,'%Y-%m-%d %H:%i:%s') as creteTime,
+            t1.updateTime,
+            t1.state,
+            t1.subTime,
+            t1.grantTime,
+            t1.grantUserNo,
+            t1.sqrssdw,
+            t1.sqrmc,
+            podwo.status as downStatus
+        from pmsn_onesys_work_order t1
+        left join pmsn_onesys_down_work_order podwo on t1.demandId = podwo.demandId
+        <where>
+            <if test="id != null and id != ''">
+                and t1.id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="sqrssdw != null and sqrssdw != ''">
+                and t1.sqrssdw = #{sqrssdw,jdbcType=VARCHAR}
+            </if>
+            <if test="sqrmc != null and sqrmc != ''">
+                and t1.sqrmc = #{sqrmc,jdbcType=VARCHAR}
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                and t1.topicRemark = #{topicRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                and t1.secondTopicName = #{secondTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                and t1.rangeDesc = #{rangeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                and t1.firstTopicName = #{firstTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                and t1.demandFreq = #{demandFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and t1.applicationName = #{applicationName,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                and t1.applicationDept = #{applicationDept,jdbcType=VARCHAR}
+            </if>
+            <if test="phone != null and phone != ''">
+                and t1.phone = #{phone,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                and t1.demandTitle = #{demandTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="demandDesc != null and demandDesc != ''">
+                and t1.demandDesc = #{demandDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="applyTypeSecond != null and applyTypeSecond != ''">
+                and t1.applyTypeSecond = #{applyTypeSecond,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                and t1.demandTitle = #{demandTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="applyDept != null and applyDept != ''">
+                and t1.applyDept = #{applyDept,jdbcType=VARCHAR}
+            </if>
+            <if test="applyType != null and applyType != ''">
+                and t1.applyType = #{applyType,jdbcType=VARCHAR}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and date_format(t1.creteTime,'%Y-%m-%d') &gt;= #{startTime,jdbcType=VARCHAR}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and date_format(t1.creteTime,'%Y-%m-%d') &lt;= #{endTime,jdbcType=VARCHAR}
+            </if>
+            <if test="grantType != null and grantType != '' and grantType == '数据授权'">
+                and t1.applyTime is not null
+                and podwo.status = '2'
+                and t1.grantTime is null
+            </if>
+            <if test="grantType != null and grantType != '' and grantType == '数据申请'">
+                and t1.applyTime is null
+            </if>
+            <if test="grantType != null and grantType != '' and grantType == '数据查询'">
+                and t1.applyTime is not null
+            </if>
+            <if test="userid != null and userid != ''">
+                and t1.userid = #{userid,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询提交国网订单子表信息-->
+    <select id="queryDataToOnesysWorkTablesList" parameterType="pd" resultType="pd">
+        select
+        tableId,
+        parentId,
+        applicationDept,
+        applicationName,
+        demandFreq,
+        deployType,
+        firstTopicName,
+        rangeDesc,
+        secondTopicName,
+        topicRemark,
+        objectCname,
+        objectName,
+        schemaName,
+        systemName,
+        subject_name,
+        sffmqd,
+        tableId as id,
+        objectCname as sqbzwbm,
+        objectName as sqbywbm,
+        schemaName as sqbxtyh,
+        systemName as sqbssxt,
+        deployType as bsfs
+        from pmsn_onesys_work_tables
+        <where>
+            <if test="tableId != null and tableId != ''">
+                and tableId = #{tableId,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null and parentId != ''">
+                and parentId = #{parentId,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                and applicationDept = #{applicationDept,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and applicationName = #{applicationName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                and demandFreq = #{demandFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="deployType != null and deployType != ''">
+                and deployType = #{deployType,jdbcType=VARCHAR}
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                and firstTopicName = #{firstTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                and rangeDesc = #{rangeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="systemName != null and systemName != ''">
+                and systemName = #{systemName,jdbcType=VARCHAR}
+            </if>
+            <if test="schemaName != null and schemaName != ''">
+                and schemaName = #{schemaName,jdbcType=VARCHAR}
+            </if>
+            <if test="objectName != null and objectName != ''">
+                and objectName = #{objectName,jdbcType=VARCHAR}
+            </if>
+            <if test="objectCname != null and objectCname != ''">
+                and objectCname = #{objectCname,jdbcType=VARCHAR}
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                and topicRemark = #{topicRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                and secondTopicName = #{secondTopicName,jdbcType=VARCHAR}
+            </if>
+        </where>
+
+    </select>
+
+    <!-- 查询提交国网的订单信息（只查询上传国网的相应字段)-->
+    <select id="queryListOnesysWorkOrderForGwFields" parameterType="pd" resultType="java.util.Map">
+        select
+            applyDept,
+            applyTime,
+            applyType,
+            applyTypeSecond,
+            demandDesc,
+            demandTitle,
+            dept,
+            phone,
+            details,
+            demandCode,
+            demandId,
+            description,
+            status,
+            code,
+            applicationDept,
+            applicationName,
+            demandFreq,
+            firstTopicName,
+            rangeDesc,
+            secondTopicName,
+            topicRemark,
+            creteTime,
+            updateTime,
+            state,
+            subTime,
+            grantTime,
+            grantUserNo
+        from pmsn_onesys_work_order
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                and topicRemark = #{topicRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                and secondTopicName = #{secondTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                and rangeDesc = #{rangeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                and firstTopicName = #{firstTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                and demandFreq = #{demandFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and applicationName = #{applicationName,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                and applicationDept = #{applicationDept,jdbcType=VARCHAR}
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone = #{phone,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                and demandTitle = #{demandTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="demandDesc != null and demandDesc != ''">
+                and demandDesc = #{demandDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="applyTypeSecond != null and applyTypeSecond != ''">
+                and applyTypeSecond = #{applyTypeSecond,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                and demandTitle = #{demandTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="applyDept != null and applyDept != ''">
+                and applyDept = #{applyDept,jdbcType=VARCHAR}
+            </if>
+            <if test="applyType != null and applyType != ''">
+                and applyType = #{applyType,jdbcType=VARCHAR}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                and date_format(creteTime,'%Y-%m-%d') &gt;= #{startTime,jdbcType=VARCHAR}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and date_format(creteTime,'%Y-%m-%d') &lt;= #{endTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--查询提交国网订单子表信息（只查询上传国网的相应字段)-->
+    <select id="queryListOnesysWorkTablesForGwFields" parameterType="pd" resultType="java.util.Map">
+        select
+            applicationDept,
+            applicationName,
+            demandFreq,
+            deployType,
+            firstTopicName,
+            rangeDesc,
+            secondTopicName,
+            topicRemark,
+            objectCname,
+            objectName,
+            schemaName,
+            systemName
+            from pmsn_onesys_work_tables
+        <where>
+            <if test="tableId != null and tableId != ''">
+                and tableId = #{tableId,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null and parentId != ''">
+                and parentId = #{parentId,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                and applicationDept = #{applicationDept,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and applicationName = #{applicationName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                and demandFreq = #{demandFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="deployType != null and deployType != ''">
+                and deployType = #{deployType,jdbcType=VARCHAR}
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                and firstTopicName = #{firstTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                and rangeDesc = #{rangeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="systemName != null and systemName != ''">
+                and systemName = #{systemName,jdbcType=VARCHAR}
+            </if>
+            <if test="schemaName != null and schemaName != ''">
+                and schemaName = #{schemaName,jdbcType=VARCHAR}
+            </if>
+            <if test="objectName != null and objectName != ''">
+                and objectName = #{objectName,jdbcType=VARCHAR}
+            </if>
+            <if test="objectCname != null and objectCname != ''">
+                and objectCname = #{objectCname,jdbcType=VARCHAR}
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                and topicRemark = #{topicRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                and secondTopicName = #{secondTopicName,jdbcType=VARCHAR}
+            </if>
+        </where>
+
+    </select>
+
+    <!-- 将待申请信息保存至网省创建订单表 -->
+    <insert id="insertDataToOnesysWorkOrder" parameterType="pd">
+        insert into pmsn_onesys_work_order
+        (
+            id,
+            shoppingcartId,
+            applyDept,
+            applyTime,
+            applyType,
+            applyTypeSecond,
+            demandDesc,
+            demandTitle,
+            dept,
+            phone,
+            details,
+            demandCode,
+            demandId,
+            description,
+            status,
+            code,
+            applicationDept,
+            applicationName,
+            demandFreq,
+            firstTopicName,
+            rangeDesc,
+            secondTopicName,
+            topicRemark,
+            creteTime,
+            updateTime,
+            state,
+            grantUserNo,
+            sqrssdw,
+            sqrmc,
+            userid
+        )
+        values
+        (
+            #{id},
+            #{shoppingcartId},
+            #{applyDept},
+            #{applyTime},
+            #{applyType},
+            #{applyTypeSecond},
+            #{demandDesc},
+            #{demandTitle},
+            #{dept},
+            #{phone},
+            #{details},
+            #{demandCode},
+            #{demandId},
+            #{description},
+            #{status},
+            #{code},
+            #{applicationDept},
+            #{applicationName},
+            #{demandFreq},
+            #{firstTopicName},
+            #{rangeDesc},
+            #{secondTopicName},
+            #{topicRemark},
+            NOW(),
+            NOW(),
+            '0',
+            #{grantUserNo},
+            #{sqrssdw},
+            #{sqrmc},
+            #{userid}
+    )
+    </insert>
+
+    <!-- 将待申请信息保存至网省创建订单子表 -->
+    <insert id="insertDataToOnesysWorkTables" parameterType="java.util.Map">
+        insert into pmsn_onesys_work_tables
+        (
+            tableId,
+            parentId,
+            applicationDept,
+            applicationName,
+            demandFreq,
+            deployType,
+            firstTopicName,
+            rangeDesc,
+            secondTopicName,
+            topicRemark,
+            objectCname,
+            objectName,
+            schemaName,
+            systemName,
+            subject_name,
+            sffmqd
+        )
+        values
+        (
+             #{tableId},
+             #{parentId},
+             #{applicationDept},
+             #{applicationName},
+             #{demandFreq},
+             #{deployType},
+             #{firstTopicName},
+             #{rangeDesc},
+             #{secondTopicName},
+             #{topicRemark},
+             #{objectCname},
+             #{objectName},
+             #{schemaName},
+             #{systemName},
+             #{subject_name},
+             #{sffmqd}
+        )
+    </insert>
+
+    <!-- 将待申请信息保存至网省上传附件表 -->
+    <insert id="insertDataToOnesysFiles" parameterType="pd">
+        insert into pmsn_onesys_work_files
+        (
+        fileId,
+        demandId,
+        taskId,
+        createTime,
+        fileName,
+        fileContent
+        )
+        values
+        (
+      fileId,
+        #{demandId},
+        #{taskId},
+        date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{fileName},
+        #{fileContent}
+        )
+    </insert>
+
+    <!--通过主键修改数据-网省创建订单表-->
+    <update id="updateDataToOnesysWorkOrder" parameterType="pd">
+        update
+            pmsn_onesys_work_order
+        <set>
+            <if test="id != null and id != ''">
+                id = #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="shoppingcartId != null and shoppingcartId != ''">
+                id = #{shoppingcartId,jdbcType=VARCHAR},
+            </if>
+            <if test="applyDept != null and applyDept != ''">
+                applyDept = #{applyDept,jdbcType=VARCHAR},
+            </if>
+            <if test="applyTime != null and applyTime != ''">
+                applyTime = #{applyTime,jdbcType=VARCHAR},
+            </if>
+            <if test="applyType != null and applyType != ''">
+                applyType = #{applyType,jdbcType=VARCHAR},
+            </if>
+            <if test="applyTypeSecond != null and applyTypeSecond != ''">
+                applyTypeSecond = #{applyTypeSecond,jdbcType=VARCHAR},
+            </if>
+            <if test="demandDesc != null and demandDesc != ''">
+                demandDesc = #{demandDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                demandTitle = #{demandTitle,jdbcType=VARCHAR},
+            </if>
+            <if test="dept != null and dept != ''">
+                dept = #{dept,jdbcType=VARCHAR},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone,jdbcType=VARCHAR},
+            </if>
+            <if test="details != null and details != ''">
+                details = #{details,jdbcType=VARCHAR},
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                demandCode = #{demandCode,jdbcType=VARCHAR},
+            </if>
+            <if test="demandId != null and demandId != ''">
+                demandId = #{demandId,jdbcType=VARCHAR},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null and code != ''">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                applicationName = #{applicationName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                demandFreq = #{demandFreq,jdbcType=VARCHAR},
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                firstTopicName = #{firstTopicName,jdbcType=VARCHAR},
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                rangeDesc = #{rangeDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                secondTopicName = #{secondTopicName,jdbcType=VARCHAR},
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                topicRemark = #{topicRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="state != null and state != ''">
+                state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="grantUserNo != null and grantUserNo != ''">
+                grantUserNo = #{grantUserNo,jdbcType=VARCHAR},
+            </if>
+            <if test="sqrssdw != null and sqrssdw != ''">
+                sqrssdw = #{sqrssdw,jdbcType=VARCHAR},
+            </if>
+            <if test="sqrmc != null and sqrmc != ''">
+                sqrmc = #{sqrmc,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                updateTime = #{updateTime},
+            </if>
+            <if test="creteTime != null and creteTime != ''">
+                creteTime = #{creteTime},
+            </if>
+            <if test="subTime != null and subTime != ''">
+                subTime = str_to_date(#{subTime}, '%Y-%m-%d %H:%i:%s'),
+            </if>
+            <if test="grantTime != null and grantTime != ''">
+                grantTime = #{grantTime},
+            </if>
+        </set>
+        where
+           id= #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键修改数据-网省创建订单子表 -->
+    <update id="updateDataToOnesysWorkTables" parameterType="pd">
+        update
+            pmsn_onesys_work_tables
+        <set>
+            <if test="tableId != null and tableId != ''">
+                tableId = #{tableId,jdbcType=VARCHAR},
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                applicationDept = #{applicationDept,jdbcType=VARCHAR},
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                applicationName = #{applicationName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                demandFreq = #{demandFreq,jdbcType=VARCHAR},
+            </if>
+            <if test="deployType != null and deployType != ''">
+                deployType = #{deployType,jdbcType=VARCHAR},
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                firstTopicName = #{firstTopicName,jdbcType=VARCHAR},
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                rangeDesc = #{rangeDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                secondTopicName = #{secondTopicName,jdbcType=VARCHAR},
+            </if>
+            <if test="topicRemark != null and topicRemark != ''">
+                topicRemark = #{topicRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="objectCname != null and objectCname != ''">
+                objectCname = #{objectCname,jdbcType=VARCHAR},
+            </if>
+            <if test="objectName != null and objectName != ''">
+                objectName = #{objectName,jdbcType=VARCHAR},
+            </if>
+            <if test="schemaName != null and schemaName != ''">
+                schemaName = #{schemaName,jdbcType=VARCHAR},
+            </if>
+            <if test="systemName != null and systemName != ''">
+                systemName = #{systemName,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        =tableId #{tableId,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键修改数据-网省上传附件表 -->
+    <update id="updateDataToOnesysWorkFiles" parameterType="pd">
+        update
+            pmsn_onesys_work_files
+        <set>
+            <if test="demandId != null and demandId != ''">
+                demandId = #{demandId,jdbcType=VARCHAR},
+            </if>
+            <if test="taskId != null and taskId != ''">
+                taskId = #{taskId,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                createTime = #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="fileName != null and fileName != ''">
+                fileName = #{fileName,jdbcType=VARCHAR},
+            </if>
+            <if test="fileContent != null">
+                fileContent = #{fileContent,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        fileId = #{fileId,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-网省创建订单表 -->
+    <delete id="deleteByOnesysWorkOrderId" parameterType="java.lang.String">
+        delete from
+            pmsn_onesys_work_order
+        where
+        id= #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <!--通过主键删除-网省创建订单表 -->
+    <delete id="deleteByOnesysWorkOrderShoppingcatId" parameterType="java.lang.String">
+        delete from
+            pmsn_onesys_work_order
+        where
+        shoppingcartId= #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <!--通过主键删除-网省创建订单子表 -->
+    <delete id="deleteByOnesysWorkTablesId" parameterType="java.lang.String">
+        delete from
+            pmsn_onesys_work_tables
+        where
+        tableId= #{tableId,jdbcType=VARCHAR}
+    </delete>
+
+    <!--通过主键删除-网省上传附件表 -->
+    <delete id="deleteByOnesysWorkFilesId" parameterType="java.lang.String">
+        delete from
+            pmsn_onesys_work_files
+        where
+        fileId = #{fileId,jdbcType=VARCHAR}
+    </delete>
+
+    <!-- 查询一级数据下发日志信息-->
+    <select id="queryDataToOnesysDownLogsList" parameterType="pd" resultType="pd">
+        select
+        id,logId, demandId,
+        date_format(createTime,'%Y-%m-%d %H:%i:%s') as createTime,
+        userName, logContent, remark,
+        date_format(downDate,'%Y-%m-%d %H:%i:%s') as downDate
+        from
+            pmsn_onesys_down_work_logs
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="logId != null and logId != ''">
+                and logId = #{logId,jdbcType=VARCHAR}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demandId = #{demandId,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime,jdbcType=VARCHAR}
+            </if>
+            <if test="userName != null and userName != ''">
+                and userName = #{userName,jdbcType=VARCHAR}
+            </if>
+            <if test="logContent != null and logContent != ''">
+                and logContent like concat('%',#{logContent},'%')
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by createTime desc
+    </select>
+
+    <!-- 新增一级数据下发日志信息 -->
+    <insert id="insertOnesysDownLogs" parameterType="pd">
+        insert into
+            pmsn_onesys_down_work_logs
+        (
+            id,logId, demandId, createTime, userName, logContent, remark,downDate
+        )
+        values
+        (
+        UUID(),
+        #{logId,jdbcType=VARCHAR}, #{demandId,jdbcType=VARCHAR},#{createTime,jdbcType=VARCHAR},
+        #{userName,jdbcType=VARCHAR}, #{logContent,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR},NOW() )
+    </insert>
+
+    <!-- 查询一级数据下发附件信息 -->
+    <select id="queryOnesysDownFilesList"  parameterType="pd" resultType="pd">
+        select
+            id, fileId, demandId, createTime, fileName, file, tarPath, tarFileName,downDate
+        from
+            pmsn_onesys_down_work_files
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{fileId,jdbcType=VARCHAR}
+            </if>
+            <if test="fileId != null and fileId != ''">
+                and fileId = #{fileId,jdbcType=VARCHAR}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demandId = #{demandId,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime,jdbcType=VARCHAR}
+            </if>
+            <if test="fileName != null and filename != ''">
+                and fileName = #{fileName,jdbcType=VARCHAR}
+            </if>
+            <if test="file != null and file != ''">
+                and file = #{file,jdbcType=VARCHAR}
+            </if>
+            <if test="tarPath != null and tarPath != ''">
+                and tarPath = #{tarPath,jdbcType=VARCHAR}
+            </if>
+            <if test="tarFileName != null and tarFileName != ''">
+                and tarFileName = #{tarFileName,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by createTime desc
+    </select>
+
+    <!-- 新增一级数据下发附件信息 -->
+    <insert id="insertOnesysDownFiles" parameterType="pd">
+        insert into
+        pmsn_onesys_down_work_files
+        (
+          id, fileId, demandId, createTime, fileName, file, tarPath, tarFileName,downDate
+        )
+        values
+        (
+        UUID(),
+        #{fileId,jdbcType=VARCHAR}, #{demandId,jdbcType=VARCHAR}, from_unixtime(#{createTime,jdbcType=VARCHAR}),
+        #{fileName,jdbcType=VARCHAR}, #{file,jdbcType=VARCHAR} ,
+         #{tarPath,jdbcType=VARCHAR} , #{tarFileName,jdbcType=VARCHAR} ,NOW() )
+    </insert>
+
+    <!-- 查询一级系统下发申请工单 -->
+    <select id="queryOnesysDownOrderList" parameterType="pd" resultType="pd">
+        select
+        id, demandId, parentId, demandCode, demandTitle, demandDesc,
+         priority, status, applyUserId, applyUserName, applyOrgName,
+          applyDeptName, applyTypeName, applyTypeSecondName,  createTime
+        from
+        pmsn_onesys_down_work_order
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demandId = #{demandId,jdbcType=VARCHAR}
+            </if>
+            <if test="parentId != null and parentId != ''">
+                and parentId = #{parentId,jdbcType=VARCHAR}
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and demandCode = #{demandCode,jdbcType=VARCHAR}
+            </if>
+            <if test="demandTitle != null and demandTitle != ''">
+                and demandTitle = #{demandTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="demandDesc != null and demandDesc != ''">
+                and demandDesc = #{demandDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="priority != null and priority != ''">
+                and priority = #{priority,jdbcType=VARCHAR}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status,jdbcType=VARCHAR}
+            </if>
+            <if test="applyUserId != null and applyUserId != ''">
+                and applyUserId = #{applyUserId,jdbcType=VARCHAR}
+            </if>
+            <if test="applyUserName != null and applyUserName != ''">
+                and applyUserName = #{applyUserName,jdbcType=VARCHAR}
+            </if>
+            <if test="applyOrgName != null and applyOrgName != ''">
+                and applyOrgName = #{applyOrgName,jdbcType=VARCHAR}
+            </if>
+            <if test="applyDeptName != null and applyDeptName != ''">
+                and applyDeptName = #{applyDeptName,jdbcType=VARCHAR}
+            </if>
+            <if test="applyTypeName != null and applyTypeName != ''">
+                and applyTypeName = #{applyTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="applyTypeSecondName != null and applyTypeSecondName != ''">
+                and applyTypeSecondName = #{applyTypeSecondName,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by createTime desc
+    </select>
+
+    <!-- 新增一级系统下发申请工单 -->
+    <insert id="insertOnesysDownOrder" parameterType="pd">
+        insert into
+        pmsn_onesys_down_work_order
+        (
+            id, demandId, parentId, demandCode, demandTitle,
+            demandDesc, priority, status, applyUserId, applyUserName,
+            applyOrgName, applyDeptName, applyTypeName, applyTypeSecondName,
+            createTime
+        )
+        values
+        (
+            UUID(), #{demandId,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR},
+            #{demandCode,jdbcType=VARCHAR}, #{demandTitle,jdbcType=VARCHAR},
+            #{demandDesc,jdbcType=VARCHAR}, #{priority,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+            #{applyUserId,jdbcType=VARCHAR}, #{applyUserName,jdbcType=VARCHAR},
+            #{applyOrgName,jdbcType=VARCHAR}, #{applyDeptName,jdbcType=VARCHAR},#{applyTypeName,jdbcType=VARCHAR},
+            #{applyTypeSecondName,jdbcType=VARCHAR},from_unixtime(#{createTime,jdbcType=VARCHAR})
+        )
+    </insert>
+
+    <!-- 查询一级系统下发申请工单子表 -->
+    <select id="queryOnesysDownTableList" parameterType="pd" resultType="pd">
+        select
+        demandDetailId, demandId, objectId, objectName, objectCname,
+         systemName, deployType, deptName, isFmqd, isDatawork,
+         demandFreq, firstTopicName, secondTopicName, topicDesc,
+         orgName, applicationDept, applicationName, rangeDesc,
+         dataSource, createTime
+        from
+        pmsn_onesys_down_work_table
+        <where>
+            <if test="demandDetailId != null and demandDetailId != ''">
+                and demandDetailId = #{demandDetailId,jdbcType=VARCHAR}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demandId = #{demandId,jdbcType=VARCHAR}
+            </if>
+            <if test="objectId != null and objectId != ''">
+                and objectId = #{objectId,jdbcType=VARCHAR}
+            </if>
+            <if test="objectName != null and objectName != ''">
+                and objectName = #{objectName,jdbcType=VARCHAR}
+            </if>
+            <if test="objectCname != null and objectCname != ''">
+                and objectCname = #{objectCname,jdbcType=VARCHAR}
+            </if>
+            <if test="systemName != null and systemName != ''">
+                and systemName = #{systemName,jdbcType=VARCHAR}
+            </if>
+            <if test="deployType != null and deployType != ''">
+                and deployType = #{deployType,jdbcType=VARCHAR}
+            </if>
+            <if test="deptName != null and deptName != ''">
+                and deptName = #{deptName,jdbcType=VARCHAR}
+            </if>
+            <if test="isFmqd != null and isFmqd != ''">
+                and isFmqd = #{isFmqd,jdbcType=VARCHAR}
+            </if>
+            <if test="isDatawork != null and isDatawork != ''">
+                and isDatawork = #{isDatawork,jdbcType=VARCHAR}
+            </if>
+            <if test="demandFreq != null and demandFreq != ''">
+                and demandFreq = #{demandFreq,jdbcType=VARCHAR}
+            </if>
+            <if test="firstTopicName != null and firstTopicName != ''">
+                and firstTopicName = #{firstTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="secondTopicName != null and secondTopicName != ''">
+                and secondTopicName = #{secondTopicName,jdbcType=VARCHAR}
+            </if>
+            <if test="topicDesc != null and topicDesc != ''">
+                and topicDesc = #{topicDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="orgName != null and orgName != ''">
+                and orgName = #{orgName,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationDept != null and applicationDept != ''">
+                and applicationDept = #{applicationDept,jdbcType=VARCHAR}
+            </if>
+            <if test="applicationName != null and applicationName != ''">
+                and applicationName = #{applicationName,jdbcType=VARCHAR}
+            </if>
+            <if test="rangeDesc != null and rangeDesc != ''">
+                and rangeDesc = #{rangeDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="dataSource != null and dataSource != ''">
+                and dataSource = #{dataSource,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by createTime desc
+    </select>
+
+    <!-- 新增一级系统下发申请工单子表 -->
+    <insert id="insertOnesysDownTable" parameterType="java.util.Map">
+        insert into
+        pmsn_onesys_down_work_table
+        (
+        id,
+         demandDetailId, demandId, objectId,
+         objectName, objectCname, systemName,
+         deployType, deptName, isFmqd,
+          isDatawork, demandFreq, firstTopicName, secondTopicName, topicDesc, orgName,
+          applicationDept, applicationName, rangeDesc, dataSource, createTime
+        )
+        values
+        (
+        uuid(),
+        #{demandDetailId,jdbcType=VARCHAR}, #{demandId,jdbcType=VARCHAR}, #{objectId,jdbcType=VARCHAR},
+        #{objectName,jdbcType=VARCHAR}, #{objectCname,jdbcType=VARCHAR}, #{systemName,jdbcType=VARCHAR},
+        #{deployType,jdbcType=VARCHAR}, #{deptName,jdbcType=VARCHAR}, #{isFmqd,jdbcType=VARCHAR},
+        #{isDatawork,jdbcType=VARCHAR}, #{demandFreq,jdbcType=VARCHAR}, #{firstTopicName,jdbcType=VARCHAR},
+        #{secondTopicName,jdbcType=VARCHAR}, #{topicDesc,jdbcType=VARCHAR}, #{rangeDesc,jdbcType=VARCHAR},
+        #{applicationDept,jdbcType=VARCHAR}, #{applicationName,jdbcType=VARCHAR}, #{rangeDesc,jdbcType=VARCHAR},
+        #{dataSource,jdbcType=VARCHAR}, from_unixtime(#{createTime,jdbcType=VARCHAR}) )
+    </insert>
+
+    <!--查询一级系统下发审批流程节点-->
+    <select id="queryOnesysDownActList"  parameterType="pd" resultType="pd">
+        select
+        CONCAT ( userName,'(',operate,')：',handleTime) as lcxq,
+        id, flowId, demandId, userName, userOrgPath, isHandle,
+        date_format(handleTime,'%Y-%m-%d %H:%i:%s') as handleTime,
+        nodeTitle, nodeName, nodeComment, nodeSort, operate,
+        date_format(createTime,'%Y-%m-%d %H:%i:%s') as createTime,
+        date_format(downDate,'%Y-%m-%d %H:%i:%s') as downDate,
+        '1' as state
+        from
+        pmsn_onesys_down_work_act
+        where userName is not null
+            <if test="flowId != null and flowId != ''">
+                and flowId = #{flowId,jdbcType=VARCHAR}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demandId = #{demandId,jdbcType=VARCHAR}
+            </if>
+            <if test="userName != null and userName != ''">
+                and userName = #{userName,jdbcType=VARCHAR}
+            </if>
+            <if test="userOrgPath != null and userOrgPath != ''">
+                and userOrgPath = #{userOrgPath,jdbcType=VARCHAR}
+            </if>
+            <if test="isHandle != null and isHandle != ''">
+                and isHandle = #{isHandle,jdbcType=VARCHAR}
+            </if>
+            <if test="handleTime != null">
+                and handleTime = #{handleTime,jdbcType=VARCHAR}
+            </if>
+            <if test="nodeTitle != null and nodeTitle != ''">
+                and nodeTitle = #{nodeTitle,jdbcType=VARCHAR}
+            </if>
+            <if test="nodeName != null and nodeName != ''">
+                and nodeName = #{nodeName,jdbcType=VARCHAR}
+            </if>
+            <if test="nodeComment != null and nodeComment != ''">
+                and nodeComment = #{nodeComment,jdbcType=VARCHAR}
+            </if>
+            <if test="nodeSort != null and nodeSort != ''">
+                and nodeSort = #{nodeSort,jdbcType=VARCHAR}
+            </if>
+            <if test="operate != null and operate != ''">
+                and operate = #{operate,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and createTime = #{createTime,jdbcType=VARCHAR}
+            </if>
+        order by createTime asc
+    </select>
+
+    <!--新增一级系统下发审批流程节点-->
+    <insert id="insertOnesysDownAct" parameterType="pd">
+        insert into
+        pmsn_onesys_down_work_act
+        (
+            id,flowId, demandId, userName, userOrgPath, isHandle, handleTime,
+            nodeTitle, nodeName, nodeComment, nodeSort, operate, createTime,downDate
+        )
+        values
+        (
+        UUID(),
+        #{flowId,jdbcType=VARCHAR}, #{demandId,jdbcType=VARCHAR}, #{userName,jdbcType=VARCHAR},
+        #{userOrgPath,jdbcType=VARCHAR}, #{isHandle,jdbcType=VARCHAR}, #{handleTime,jdbcType=VARCHAR},
+        #{nodeTitle,jdbcType=VARCHAR}, #{nodeName,jdbcType=VARCHAR}, #{nodeComment,jdbcType=VARCHAR},
+        #{nodeSort,jdbcType=VARCHAR}, #{operate,jdbcType=VARCHAR},
+        #{createTime,jdbcType=VARCHAR},NOW() )
+    </insert>
+
+
+</mapper>

@@ -1,0 +1,502 @@
+
+[
+  {
+    "id": "ff8080814a05f2d4014a523ee6c40050",
+    "name": "移动智能交互平台",
+    "code": "ff8080814a05f2d4014a523ee6c40050",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815e70af7501636775fd705c4c",
+    "name": "内网移动应用平台",
+    "code": "ff8080815e70af7501636775fd705c4c",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "402886ef44ab30c30144bfccbb0e000e",
+    "name": "数据管理服务平台",
+    "code": "402886ef44ab30c30144bfccbb0e000e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814d3399b4014db75e5f890f57",
+    "name": "SG-I6000",
+    "code": "ff8080814d3399b4014db75e5f890f57",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081570ee0f201576e3bd9fa5598",
+    "name": "电网运营监测模块系统",
+    "code": "ff808081570ee0f201576e3bd9fa5598",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081580cd5d201581ec5d3d307eb",
+    "name": "大数据平台",
+    "code": "ff808081580cd5d201581ec5d3d307eb",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081642a2d730164d5d425bd375d",
+    "name": "设备材料清册微应用",
+    "code": "ff808081642a2d730164d5d425bd375d",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081642a2d7301653c9da0874b28",
+    "name": "全能型供电所",
+    "code": "ff808081642a2d7301653c9da0874b28",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880867866d360167e337f3850006",
+    "name": "农网施工安全监督管控",
+    "code": "94c6880867866d360167e337f3850006",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081570ee0f201571341c9040038",
+    "name": "营销业务应用",
+    "code": "ff808081570ee0f201571341c9040038",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081570ee0f20157147313cc00a0",
+    "name": "运营检测",
+    "code": "ff808081570ee0f20157147313cc00a0",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081580cd5d20158be56f5fb01d5",
+    "name": "工程现场安全监督管控模块",
+    "code": "ff808081580cd5d20158be56f5fb01d5",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880867866d360167eda99df303cb",
+    "name": "智能化供电指挥系统",
+    "code": "94c6880867866d360167eda99df303cb",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a8a84b25b3d1ee9015b3d57ade10004",
+    "name": "云服务中心v2",
+    "code": "8a8a84b25b3d1ee9015b3d57ade10004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081642a2d730164d5adf11a36d3",
+    "name": "工程数据录入pc端 ",
+    "code": "ff808081642a2d730164d5adf11a36d3",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d26aa16c9c016ad7f122de5715",
+    "name": "移动基础平台mip2",
+    "code": "8a2688d26aa16c9c016ad7f122de5715",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d26aa16c9c016ad7fa1d8d574e",
+    "name": "内网移动设备管理",
+    "code": "8a2688d26aa16c9c016ad7fa1d8d574e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff80808155a664f80156e928896522ee",
+    "name": "配电网标准化设计管理系统",
+    "code": "ff80808155a664f80156e928896522ee",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814ab584e5014b4842bb6d0554",
+    "name": "营销_稽查",
+    "code": "ff8080814ab584e5014b4842bb6d0554",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080816788f3cf0167c41ebf43017b",
+    "name": "农电管理子系统",
+    "code": "ff8080816788f3cf0167c41ebf43017b",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815c695003015d1757354250ca",
+    "name": "智能化供电服务指挥系统",
+    "code": "ff8080815c695003015d1757354250ca",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a23694f424b956e01424b99dc5c0004",
+    "name": "电力交易系统",
+    "code": "8a23694f424b956e01424b99dc5c0004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff80808150853f540151ed4116475ad8",
+    "name": "外网门户网站",
+    "code": "ff80808150853f540151ed4116475ad8",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff80808147142c8d0148afa6b81f013b",
+    "name": "应急指挥应用0926",
+    "code": "ff80808147142c8d0148afa6b81f013b",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815a4bfd8b015b5ba195d82d1e",
+    "name": "统一视频",
+    "code": "ff8080815a4bfd8b015b5ba195d82d1e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028803b4faab589014fb133a2150004",
+    "name": "信息安全网络边界监测系统",
+    "code": "4028803b4faab589014fb133a2150004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880967866efe0168313555194c36",
+    "name": "地理信息gis",
+    "code": "94c6880967866efe0168313555194c36",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080816788f3cf016836d6bea136a0",
+    "name": "用电信息采集",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "402881483c18585e013c185c01c10001",
+    "name": "统一权限管理平台",
+    "code": "402881483c18585e013c185c01c10001",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814261462f014284b186d4000e",
+    "name": "员工报销应用",
+    "code": "ff8080814261462f014284b186d4000e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814789fd6e01488299def30be6",
+    "name": "IMS",
+    "code": "ff8080814789fd6e01488299def30be6",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a8082875fb18494015fb2dae0c9008f",
+    "name": "行为安全审计",
+    "code": "8a8082875fb18494015fb2dae0c9008f",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081594016db0159af57ec3b11a7",
+    "name": "BPM业务应用",
+    "code": "ff808081594016db0159af57ec3b11a7",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815a4bfd8b015b5ab4cb052c86",
+    "name": "海量平台",
+    "code": "ff8080815a4bfd8b015b5ab4cb052c86",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff80808153f6054e01547f5ca62b181d",
+    "name": "资产全寿命评估决策",
+    "code": "ff80808153f6054e01547f5ca62b181d",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814fd92d4201511e8c21516afa",
+    "name": "计量资产全寿命周期",
+    "code": "ff8080814fd92d4201511e8c21516afa",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815dbc6c95015dc5c8f954133d",
+    "name": "营销辅助决策（大一）",
+    "code": "ff8080815dbc6c95015dc5c8f954133d",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815dbc6c95015dcfd5b0c522a6",
+    "name": "营销移动作业应用系统",
+    "code": "ff8080815dbc6c95015dcfd5b0c522a6",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081642a2d730164d585acdf3666",
+    "name": "标签管理TAG",
+    "code": "ff808081642a2d730164d585acdf3666",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081642a2d730164fe617dce3c44",
+    "name": "门户2",
+    "code": "ff808081642a2d730164fe617dce3c44",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "2c909c976265fcbb0162a5495bda04e1",
+    "name": "营销安全监测",
+    "code": "2c909c976265fcbb0162a5495bda04e1",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080816788f3cf016836c344f5366a",
+    "name": "财务管控",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56a9f894b016b69590447722f",
+    "name": "数据管理组件",
+    "code": "94c68eb56a9f894b016b69590447722f",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028be8140f1f58a014131b2000803f6",
+    "name": "营销基础数据平台",
+    "code": "4028be8140f1f58a014131b2000803f6",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028ea884acefcf4014ad190cea30010",
+    "name": "营销稽查监控系统(二期)",
+    "code": "4028ea884acefcf4014ad190cea30010",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814d339ab7014d6a0a0b19114b",
+    "name": "pms2.0",
+    "code": "ff8080814d339ab7014d6a0a0b19114b",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080815355540101537d5f53ea6c2e",
+    "name": "营销远程实时费控",
+    "code": "ff8080815355540101537d5f53ea6c2e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080814e8072ff014e95c9d5181569",
+    "name": "原始凭证电子化系统",
+    "code": "ff8080814e8072ff014e95c9d5181569",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff808081570ee0f20157189aa47f00d4",
+    "name": "TMS",
+    "code": "ff808081570ee0f20157189aa47f00d4",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "402883fb6262c8ea016292a3ec880004",
+    "name": "移动终端管理系统",
+    "code": "402883fb6262c8ea016292a3ec880004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "ff8080816730ec44016759316bd7064e",
+    "name": "运营监测（控）信息支撑子系统",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb46a9f892f016b9cd4281727ac",
+    "name": "全能所乡镇供电所",
+    "code": "94c68eb46a9f892f016b9cd4281727ac",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb46a9f892f016b9cdef4d327e5",
+    "name": "县域供电服务指挥系统",
+    "code": "94c68eb46a9f892f016b9cdef4d327e5",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "297ebbc665c0e0c20165c0ed5fe90004",
+    "name": "用电信息采集系统安全监测应用",
+    "code": "297ebbc665c0e0c20165c0ed5fe90004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56c710928016d19ee34e8334b",
+    "name": "数字化审计平台",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880871a9f6d001721b3c851819b6",
+    "name": "全景质量信息支撑的差异化运维决策",
+    "code": "94c6880871a9f6d001721b3c851819b6",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d590175d4e8d9bd2fc4",
+    "name": "非结构化文件存储服务",
+    "code": "94c6880872359d590175d4e8d9bd2fc4",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56e02bcc7016eb107b1e55d8e",
+    "name": "结算单据电子化辅助工具",
+    "code": "94c68eb56e02bcc7016eb107b1e55d8e",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a59893a6aed4826016db4aff1b24b96",
+    "name": "物资智能配送管理系统",
+    "code": "8a59893a6aed4826016db4aff1b24b96",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "40283a146998ee5a016a100beb770177",
+    "name": "国家电网公司物资计划智能提报系统",
+    "code": "40283a146998ee5a016a100beb770177",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028ba146c94f6c6016c9d7ea0660222",
+    "name": "基于工程物资需求周期精准预测预算",
+    "code": "4028ba146c94f6c6016c9d7ea0660222",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028ba146c94f6c6016c9d7fc053024f",
+    "name": "业扩项目物资清册的智能应用",
+    "code": "4028ba146c94f6c6016c9d7fc053024f",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028ba146c94f6c6016c9d82b7f3027c",
+    "name": "在库可利用物资全量信息的协同应用",
+    "code": "4028ba146c94f6c6016c9d82b7f3027c",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028ba146c94f6c6016c9d4f020d01d8",
+    "name": "智慧供应链合理安排里程碑计划",
+    "code": "4028ba146c94f6c6016c9d4f020d01d8",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d5901773d30e7273619",
+    "name": "物联管理平台",
+    "code": "94c6880872359d5901773d30e7273619",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56e02bcc7016ea026163904c7",
+    "name": "s6000二期应用",
+    "code": "94c68eb56e02bcc7016ea026163904c7",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56e02bcc7016f651c71a07829",
+    "name": "协议库存自动匹配及可视化选购",
+    "code": "94c68eb56e02bcc7016f651c71a07829",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c68eb56e02bcc7016e167b378e085b",
+    "name": "营配贯通数据质量监测工具",
+    "code": "94c68eb56e02bcc7016e167b378e085b",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d590175d4824de22f8c",
+    "name": "供应链运营中心ESC",
+    "code": "94c6880872359d590175d4824de22f8c",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "2c909c9a685064f10168506ec8140004",
+    "name": "营销安全管控（省）",
+    "code": "2c909c9a685064f10168506ec8140004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d59017543f3b45a1ce4",
+    "name": "SG-I6000(2.0)",
+    "code": "94c6880872359d59017543f3b45a1ce4",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d590178620a4a7918d8",
+    "name": "供电服务指挥支撑系统底层支撑平台",
+    "code": "94c6880872359d590178620a4a7918d8",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "F580C85237D27EF7E040007F01007CFD",
+    "name": "基建全过程综合数字化管理平台",
+    "code": "F580C85237D27EF7E040007F01007CFD",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d590175970870ba5f70",
+    "name": "现代智慧供应链一站式服务平台",
+    "code": "94c6880872359d590175970870ba5f70",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d590177614fffa0618d",
+    "name": "新一代电力交易平台",
+    "code": "94c6880872359d590177614fffa0618d",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "94c6880872359d59017471be79955529",
+    "name": "电网资源业务中台",
+    "code": "94c6880872359d59017471be79955529",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d37a2d82f8017a7951fc9202f3",
+    "name": "新一代电费结算系统",
+    "code": "8a2688d37a2d82f8017a7951fc9202f3",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d37a2d82f8017a8a34c071032c",
+    "name": "量价费损按日监测平台",
+    "code": "8a2688d37a2d82f8017a8a34c071032c",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a20318c75889fdc0175d4f62866224d",
+    "name": "物联管理平台应用系统(新)",
+    "code": "8a20318c75889fdc0175d4f62866224d",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "4028beb753ace8b80154ec7314af25ce",
+    "name": "一体化交费接入管理-二期应用",
+    "code": "4028beb753ace8b80154ec7314af25ce",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d37a2d82f8017c2affdef93400",
+    "name": "物资调配平台升级系统",
+    "code": "8a2688d37a2d82f8017c2affdef93400",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "b4acff89eae54161b61c21ce247c6ecb",
+    "name": "im即时通讯系统",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d37a2d82f8017a3ccb06a00004",
+    "name": "后勤资产管理平台",
+    "code": "8a2688d37a2d82f8017a3ccb06a00004",
+    "isAvaliable": "Y"
+  },
+  {
+    "id": "8a2688d37a2d82f8017a423d7c20019b",
+    "name": "北斗卫星综合应用平台",
+    "code": "8a2688d37a2d82f8017a423d7c20019b",
+    "isAvaliable": "Y"
+  }
+]

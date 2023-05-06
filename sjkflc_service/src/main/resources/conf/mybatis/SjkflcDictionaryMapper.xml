@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcDictionaryDao">
+    <sql id="tableName">
+        pmsn.sjkflc_dictionary
+    </sql>
+    <sql id="baseColumnList">
+        dict_id, dict_name, dict_desc, disable, dict_sort, create_time, creater, dict_code        
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcDictionary" id="baseResultMap">
+        <result property="dictId" column="dict_id" jdbcType="VARCHAR"/>
+        <result property="dictName" column="dict_name" jdbcType="VARCHAR"/>
+        <result property="dictDesc" column="dict_desc" jdbcType="VARCHAR"/>
+        <result property="disable" column="disable" jdbcType="VARCHAR"/>
+        <result property="dictSort" column="dict_sort" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="creater" column="creater" jdbcType="VARCHAR"/>
+        <result property="dictCode" column="dict_code" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        <include refid="baseColumnList"/>
+        from
+        <include refid="tableName"/>
+        where
+        dict_id = #{dictId,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcDictionary"
+            resultMap="baseResultMap">
+        select
+        <include refid="baseColumnList"/>
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="dictId != null and dictId != ''">
+                and dict_id = #{dictId,jdbcType=VARCHAR}
+            </if>
+            <if test="dictName != null and dictName != ''">
+                and dict_name = #{dictName,jdbcType=VARCHAR}
+            </if>
+            <if test="dictDesc != null and dictDesc != ''">
+                and dict_desc = #{dictDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="disable != null and disable != ''">
+                and disable = #{disable,jdbcType=VARCHAR}
+            </if>
+            <if test="dictSort != null and dictSort != ''">
+                and dict_sort = #{dictSort,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime,jdbcType=VARCHAR}
+            </if>
+            <if test="creater != null and creater != ''">
+                and creater = #{creater,jdbcType=VARCHAR}
+            </if>
+            <if test="dictCode != null and dictCode != ''">
+                and dict_code = #{dictCode,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcDictionary">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{dictId,jdbcType=VARCHAR}, #{dictName,jdbcType=VARCHAR}, #{dictDesc,jdbcType=VARCHAR},
+        #{disable,jdbcType=VARCHAR}, #{dictSort,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+        #{creater,jdbcType=VARCHAR}, #{dictCode,jdbcType=VARCHAR} )
+    </insert>
+
+
+    <!--新增所有列-->
+    <insert id="insertForModel" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcDictionary">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{dictId,jdbcType=VARCHAR}, #{dictName,jdbcType=VARCHAR}, #{dictDesc,jdbcType=VARCHAR},
+        #{disable,jdbcType=VARCHAR}, #{dictSort,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+        #{creater,jdbcType=VARCHAR}, #{dictCode,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{dictId,jdbcType=VARCHAR}, #{dictName,jdbcType=VARCHAR}, #{dictDesc,jdbcType=VARCHAR},
+            #{disable,jdbcType=VARCHAR}, #{dictSort,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+            #{creater,jdbcType=VARCHAR}, #{dictCode,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcDictionary">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="dictName != null and dictName != ''">
+                dict_name = #{dictName,jdbcType=VARCHAR},
+            </if>
+            <if test="dictDesc != null and dictDesc != ''">
+                dict_desc = #{dictDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="disable != null and disable != ''">
+                disable = #{disable,jdbcType=VARCHAR},
+            </if>
+            <if test="dictSort != null and dictSort != ''">
+                dict_sort = #{dictSort,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="creater != null and creater != ''">
+                creater = #{creater,jdbcType=VARCHAR},
+            </if>
+            <if test="dictCode != null and dictCode != ''">
+                dict_code = #{dictCode,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        dict_id = #{dictId,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        dict_id = #{dictId,jdbcType=VARCHAR}
+    </delete>
+
+
+    <!--查询 部门名称-->
+    <select id="queryDeptList" resultType="java.util.Map">
+        select distinct dept_name from dict_system_dept
+    </select>
+
+
+    <!--查询 部门名称-->
+    <select id="querySysList" resultType="java.util.Map">
+        select distinct system_name, system_code from dict_system_dept
+        where system_name is not null and system_code is not null
+    </select>
+
+</mapper>
+

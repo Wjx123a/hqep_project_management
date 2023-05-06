@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.SysMenuDao">
+
+    <!--查询共性数据集菜单-->
+    <select id="queryGxsjj" parameterType="pd" resultType="pd">
+        select distinct
+        '共享数据集' as ONE_CATALOG_NAME,
+        sjjmc AS TWO_CATALOG_NAME,
+        '3' as level,
+        '' as name
+        from jcsjfw
+    </select>
+    <!-- 查询目录-->
+    <select id="querySysMenus" parameterType="pd" resultType="pd">
+        SELECT DISTINCT
+        <choose>
+            <when test="menu_level == 2">
+                A.ONE_CATALOG_NAME,A.TWO_CATALOG_NAME AS name,'2' as level
+            </when>
+            <when test="menu_level == 3">
+                A.ONE_CATALOG_NAME,A.TWO_CATALOG_NAME,A.THREE_CATALOG_NAME AS name,'3' as level
+            </when>
+            <when test="menu_level == 4">
+                A.ONE_CATALOG_NAME,A.TWO_CATALOG_NAME,A.THREE_CATALOG_NAME,A.FOUR_CATALOG_NAME AS name,'4' as level
+            </when>
+            <when test="menu_level == 5">
+                A.ONE_CATALOG_NAME,A.TWO_CATALOG_NAME,A.THREE_CATALOG_NAME,A.FOUR_CATALOG_NAME,A.FIVE_CATALOG_NAME AS name,'5' as level
+            </when>
+            <otherwise>
+                A.ONE_CATALOG_NAME AS name,'1' as level
+            </otherwise>
+        </choose>
+            FROM
+                SYS_MENU A INNER JOIN SYS_AUTH B
+            ON
+                A.ID = B.MENU_ID
+        <where>
+            1=1
+            <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+                AND A.FIVE_CATALOG_NAME = #{FIVE_CATALOG_NAME}
+            </if>
+            <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+                AND A.FOUR_CATALOG_NAME = #{FOUR_CATALOG_NAME}
+            </if>
+            <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+                AND A.THREE_CATALOG_NAME = #{THREE_CATALOG_NAME}
+            </if>
+            <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME != ''">
+                AND A.TWO_CATALOG_NAME = #{TWO_CATALOG_NAME}
+            </if>
+            <if test="ONE_CATALOG_NAME != null and ONE_CATALOG_NAME != ''">
+                AND A.ONE_CATALOG_NAME = #{ONE_CATALOG_NAME}
+            </if>
+            <if test="userId != null and userId != ''">
+                AND B.USER_ID = #{userId}
+            </if>
+            <if test=" system_name != null and system_name != '' ">
+                AND A.SYSTEM_NAME = #{system_name}
+            </if>
+        </where>
+        order by  A.id+0
+    </select>
+
+    <!--用户授权查看菜单-->
+    <insert id="accredit" parameterType="pd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+            SYS_AUTH(USER_ID,MENU_ID)
+        VALUES
+            (#{userId},#{menuId})
+    </insert>
+
+    <!--用户撤回授权查看菜单-->
+    <delete id="removeAccredit" parameterType="pd">
+        delete from SYS_AUTH
+        where USER_ID = #{userId}
+        and MENU_ID = #{menuId}
+    </delete>
+
+    <!--取消用户查看菜单的权限-->
+    <delete id="delAccredit" parameterType="pd">
+        DELETE FROM
+            SYS_AUTH(USER_ID,MENU_ID)
+        WHERE
+            USER_ID = #{userId},#{MENU_ID = menuId}
+    </delete>
+
+    <!--查询所有用户信息-->
+    <select id="queryUser" parameterType="pd" resultType="pd">
+        SELECT DISTINCT
+            ID,LOGIN_NUM AS NAME,ROLE_NAME,STATUS
+        FROM
+            PMSN_LOGIN_ROLE
+        WHERE 1=1
+        <if test="loginNum != null and loginNum != ''">
+            AND  LOGIN_NUM LIKE concat('%',#{loginNum},'%')
+        </if>
+    </select>
+
+    <!--修改用户启用状态-->
+    <update id="updateStatus" parameterType="pd">
+        UPDATE
+            PMSN_LOGIN_ROLE
+        SET
+        <choose>
+            <when test="status == 1">
+                STATUS = '0'
+            </when>
+            <otherwise>
+                STATUS = '1'
+            </otherwise>
+        </choose>
+        WHERE
+            ID = #{id}
+    </update>
+
+    <!--没有权限的菜单-->
+    <select id="querySysMenuNoAuth" parameterType="pd" resultType="pd">
+        SELECT DISTINCT
+            ONE_CATALOG_NAME AS name
+        FROM
+            SYS_MENU
+    </select>
+
+    <!--查询权限的id-->
+    <select id="queryAuthMenuId" parameterType="pd" resultType="pd">
+        <choose>
+            <when test="menu_level == 2">
+                SELECT DISTINCT
+                    TWO_CATALOG_NAME AS name,
+                CASE TWO_CATALOG_NAME
+                WHEN
+                TWO_CATALOG_NAME IN
+                (SELECT DISTINCT
+                TWO_CATALOG_NAME FROM SYS_AUTH A LEFT JOIN SYS_MENU B ON A.MENU_ID = B.ID
+                WHERE 1=1
+                <choose>
+                    <when test="userId != null and userId != ''">
+                        AND USER_ID = #{userId}
+                    </when>
+                    <otherwise>
+                        AND USER_ID IS NULL
+                    </otherwise>
+                </choose>
+                )
+                THEN
+                'NO'
+                ELSE
+                'YES'
+                END AS TAG,ONE_CATALOG_NAME,(SELECT "二" FROM DUAL) AS level
+                FROM
+                    SYS_MENU
+                WHERE 1=1
+                <if test="one_catalog_name != null and one_catalog_name != ''">
+                    AND ONE_CATALOG_NAME = #{one_catalog_name}
+                </if>
+            </when>
+            <when test="menu_level == 3">
+                SELECT DISTINCT
+                    THREE_CATALOG_NAME AS name,
+                CASE THREE_CATALOG_NAME
+                WHEN
+                THREE_CATALOG_NAME IN
+                (SELECT DISTINCT
+                THREE_CATALOG_NAME FROM SYS_AUTH A LEFT JOIN SYS_MENU B ON A.MENU_ID = B.ID
+                WHERE 1=1
+
+                <choose>
+                    <when test="userId != null and userId != ''">
+                        AND USER_ID = #{userId}
+                    </when>
+                    <otherwise>
+                        AND USER_ID IS NULL
+                    </otherwise>
+                </choose>
+                )
+                THEN
+                'NO'
+                ELSE
+                'YES'
+                END AS TAG,ONE_CATALOG_NAME,TWO_CATALOG_NAME,(SELECT "三" FROM DUAL) AS level
+                FROM
+                    SYS_MENU
+                WHERE 1=1
+                <if test="one_catalog_name != null and one_catalog_name != ''">
+                    AND ONE_CATALOG_NAME = #{one_catalog_name}
+                </if>
+                <if test="two_catalog_name != null and two_catalog_name != ''">
+                    AND two_catalog_name = #{two_catalog_name}
+                </if>
+            </when>
+            <when test="menu_level == 4">
+                SELECT DISTINCT
+                    FOUR_CATALOG_NAME AS name,
+                CASE FOUR_CATALOG_NAME
+                WHEN
+                FOUR_CATALOG_NAME IN
+                (SELECT DISTINCT
+                FOUR_CATALOG_NAME FROM SYS_AUTH A LEFT JOIN SYS_MENU B ON A.MENU_ID = B.ID
+                WHERE 1=1
+
+                <choose>
+                    <when test="userId != null and userId != ''">
+                        AND USER_ID = #{userId}
+                    </when>
+                    <otherwise>
+                        AND USER_ID IS NULL
+                    </otherwise>
+                </choose>
+                )
+                THEN
+                'NO'
+                ELSE
+                'YES'
+                END AS TAG,ONE_CATALOG_NAME,TWO_CATALOG_NAME,THREE_CATALOG_NAME,(SELECT "四" FROM DUAL) AS level
+                FROM
+                    SYS_MENU
+                WHERE 1=1
+                <if test="one_catalog_name != null and one_catalog_name != ''">
+                    AND ONE_CATALOG_NAME = #{one_catalog_name}
+                </if>
+                <if test="two_catalog_name != null and two_catalog_name != ''">
+                    AND two_catalog_name = #{two_catalog_name}
+                </if>
+                <if test="three_catalog_name != null and three_catalog_name != ''">
+                    AND three_catalog_name = #{three_catalog_name}
+                </if>
+            </when>
+            <when test="menu_level == 5">
+                SELECT DISTINCT
+                    FIVE_CATALOG_NAME AS name,
+                CASE FIVE_CATALOG_NAME
+                WHEN
+                FIVE_CATALOG_NAME IN
+                (SELECT DISTINCT
+                    FIVE_CATALOG_NAME FROM SYS_AUTH A LEFT JOIN SYS_MENU B ON A.MENU_ID = B.ID
+                WHERE 1=1
+
+                <choose>
+                    <when test="userId != null and userId != ''">
+                        AND USER_ID = #{userId}
+                    </when>
+                    <otherwise>
+                        AND USER_ID IS NULL
+                    </otherwise>
+                </choose>
+
+                )
+                THEN
+                'NO'
+                ELSE
+                'YES'
+                END AS TAG,ONE_CATALOG_NAME,TWO_CATALOG_NAME,THREE_CATALOG_NAME,FOUR_CATALOG_NAME,(SELECT "五" FROM DUAL) AS level
+                FROM
+                    SYS_MENU
+                WHERE 1=1
+                <if test="one_catalog_name != null and one_catalog_name != ''">
+                    AND ONE_CATALOG_NAME = #{one_catalog_name}
+                </if>
+                <if test="two_catalog_name != null and two_catalog_name != ''">
+                    AND two_catalog_name = #{two_catalog_name}
+                </if>
+                <if test="three_catalog_name != null and three_catalog_name != ''">
+                    AND three_catalog_name = #{three_catalog_name}
+                </if>
+                <if test="four_catalog_name != null and four_catalog_name != ''">
+                    AND four_catalog_name = #{four_catalog_name}
+                </if>
+            </when>
+            <otherwise>
+                SELECT DISTINCT
+                    ONE_CATALOG_NAME AS name,
+                CASE ONE_CATALOG_NAME
+                WHEN
+                ONE_CATALOG_NAME IN
+                (SELECT DISTINCT
+                ONE_CATALOG_NAME FROM SYS_AUTH A LEFT JOIN SYS_MENU B ON A.MENU_ID = B.ID
+                WHERE 1=1
+                <choose>
+                    <when test="userId != null and userId != ''">
+                        AND USER_ID = #{userId}
+                    </when>
+                    <otherwise>
+                        AND USER_ID IS NULL
+                    </otherwise>
+                </choose>
+                )
+                THEN
+                'NO'
+                ELSE
+                'YES'
+                END AS TAG,(SELECT "一" FROM DUAL) AS level
+                FROM
+                  SYS_MENU
+            </otherwise>
+        </choose>
+
+    </select>
+
+    <select id="queryMenuId" parameterType="pd" resultType="java.lang.String">
+        SELECT
+            distinct ID
+        FROM
+            SYS_MENU
+        WHERE
+          1=1
+        <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+            AND FIVE_CATALOG_NAME = #{FIVE_CATALOG_NAME}
+        </if>
+        <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+            AND FOUR_CATALOG_NAME = #{FOUR_CATALOG_NAME}
+        </if>
+        <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+            AND THREE_CATALOG_NAME = #{THREE_CATALOG_NAME}
+        </if>
+        <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME != ''">
+            AND TWO_CATALOG_NAME = #{TWO_CATALOG_NAME}
+        </if>
+        <if test="ONE_CATALOG_NAME != null and ONE_CATALOG_NAME != ''">
+            AND ONE_CATALOG_NAME = #{ONE_CATALOG_NAME}
+        </if>
+    </select>
+</mapper>

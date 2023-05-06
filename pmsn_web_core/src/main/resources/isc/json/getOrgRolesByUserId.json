@@ -1,0 +1,22 @@
+[
+  {
+    "resExt": null,
+    "id": "8a2688d37f49ad59017f77d3173a01e8",
+    "roleId": "8a2688d37f49ad59017f77ce9c1801ce",
+    "sporgId": "8a2688d37f49ad59017f77bce4100185",
+    "name": "物资部_物资专责1",
+    "isCreateToSap": null,
+    "code": "hrb_wzzz1",
+    "systemId": "8a2688d37f49ad59017f76fe3986014c"
+  },
+  {
+    "resExt": null,
+    "id": "8a2688d37f49ad59017f77d3173a01e8",
+    "roleId": "8a2688d37f49ad59017f77ce9c1801ce",
+    "sporgId": "8a2688d37f49ad59017f77bce4100185",
+    "name": "物资部_物资专责2",
+    "isCreateToSap": null,
+    "code": "hrb_wzzz2",
+    "systemId": "8a2688d37f49ad59017f76fe3986014c"
+  }
+]

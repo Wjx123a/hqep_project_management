@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.rcDao">
+    <select id="queryrc" parameterType="pd" resultType="pd">
+        select sscmc,sscssxt,count(1) as querynum from dict_rc t
+        where t.sscmc is not null and t.sscmc <![CDATA[<>]]> ''
+        <if test=" xtmc != null and xtmc != '' ">
+            and sscssxt like concat('%',#{xtmc},'%')
+        </if>
+        GROUP BY sscmc,sscssxt
+    </select>
+    <select id="querySelectOption" parameterType="pd" resultType="pd">
+        select cder.*
+        from pmsn_code_order cder
+        where
+        cder.apply_code is not null
+        and cder.apply_classification is not null
+        and cder.apply_type is not null
+        and cder.apply_business is not null
+        and cder.apply_belong is not null
+        and cder.apply_code != ''
+        and cder.apply_classification != ''
+        and cder.apply_type != ''
+        and cder.apply_business != ''
+        and cder.apply_belong != ''
+        <if test=" option_type != null and option_type != '' ">
+            and option_type = #{option_type}
+        </if>
+        <if test=" option_type == null and option_type == '' ">
+            and option_type is null
+        </if>
+        order by cder.apply_code
+    </select>
+
+</mapper>

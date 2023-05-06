@@ -1,0 +1,226 @@
+[
+  {
+    "id": "ff8080814d3399b4014d9da7ed2d6eb7",
+    "roleId": "ff8080814d339ab7014d7aabe09819b0",
+    "sporgId": "ff8080814d3399b4014d8a5dd87019d8",
+    "name": "地市专责",
+    "code": "gwhljsdlyxgsmsgdgs_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d3399b4014d9da7ed2d6eb7",
+    "roleId": "ff8080814d339ab7014d7aabe09819b0",
+    "sporgId": "ff8080814d3399b4014d8a5dd87019d8",
+    "name": "物资公司计划部",
+    "code": "gwhljsdlyxgsmsgdgs_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d988f67ce66cd",
+    "roleId": "ff8080814d339ab7014d987caa165b2c",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配电运维班技术负责人",
+    "code": "HLJ_PDYWBJSFZR",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "94c68eb46a9f892f016b4e8a510d0669",
+    "roleId": "94c68eb46a9f892f016b4e8319850665",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_地市公司配网供应商管理班长",
+    "code": "dsgspwgysglbz_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014e3d1b49794858",
+    "roleId": "ff8080814d339ab7014e3d17477b4854",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_日调度计划流程管理新_调度处理",
+    "code": "ddcl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf6d04b63814",
+    "roleId": "ff8080814e8078b0014eaf6c21a93812",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_调控值班长",
+    "code": "dkzbz",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff80808153f6054e01554cb65d5b6ddd",
+    "roleId": "ff80808153f6054e01554cb54d0a6ddc",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "农电部管理权限",
+    "code": "ndbglqx",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "94c68eb46a9f892f016b4e8db553066a",
+    "roleId": "94c68eb46a9f892f016b4e834fd40666",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_地市公司配网供应商管理专责",
+    "code": "dsgspwgysglzz_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d3399b4014d9da9f68d6ecb",
+    "roleId": "ff8080814d339ab7014d7aabe09819b0",
+    "sporgId": "ff8080814d3399b4014d8a5ea15419da",
+    "name": "配电运维一班_组织关联",
+    "code": "pdywyb_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014ebec2b1733df1",
+    "roleId": "ff8080814d339ab7014d7aabe09819b0",
+    "sporgId": "ff8080814e8078b0014ebec207363dee",
+    "name": "配网调度班_组织关联",
+    "code": "pwddbzzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d996b24ad7086",
+    "roleId": "ff8080814d339ab7014d995399b268ef",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_计划技术室_配网运维管理专责",
+    "code": "hlj_pwywglzz",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff808081557c8f0701586c7016ba5e6d",
+    "roleId": "ff808081557c8f0701586c6f823e5e6c",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "配网调控",
+    "code": "pwdk",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf7aaf043849",
+    "roleId": "ff8080814e8078b0014eaf79d8b73845",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配网调控班班长",
+    "code": "pwdkbbz",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014e3d36fd1c4873",
+    "roleId": "ff8080814d339ab7014e3d2189ec4860",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配网停电停役_日计划编入",
+    "code": "RDDJHBR",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014e3d18f7674855",
+    "roleId": "ff8080814d339ab7014e3d1305764851",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_日调度计划流程管理新_运方审核",
+    "code": "yfsh",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf797ffb3842",
+    "roleId": "ff8080814e8078b0014eaf6f9b4d3820",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_副值调度员",
+    "code": "fzddy",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d9895632c66e1",
+    "roleId": "ff8080814d339ab7014d987c47605b29",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配电运维班班长",
+    "code": "HLJ_PDYWBBZ",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d9895c28d66e2",
+    "roleId": "ff8080814d339ab7014d987c8adf5b2b",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配电运维班工作负责人",
+    "code": "HLJ_PDYWBGZFZR",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf7bd72a3851",
+    "roleId": "ff8080814e8078b0014eaf7afed2384c",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_地区调度班班长",
+    "code": "dqddbbz",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e53e68e014e66b4e9210c4a",
+    "roleId": "ff8080814e53e7f4014e5db65cfd0d25",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_工作票调度许可人",
+    "code": "gzpddxkr",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf91587f3872",
+    "roleId": "ff8080814e8078b0014eaf8bc5183869",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_运行方式专责",
+    "code": "yxfszz",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d987baaa25b22",
+    "roleId": "ff8080814d339ab7014d9875bd0f5af9",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_输电运检工",
+    "code": "HLJ_SDYJG",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814e8078b0014eaf769fd7383a",
+    "roleId": "ff8080814e8078b0014eaf7614d83839",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_主值调度员",
+    "code": "zzddy",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d3399b4014e3d4a2a1d5cb6",
+    "roleId": "ff8080814d339ab7014e3d25d2cb4867",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_停电停役流程管理_日调度计划编入",
+    "code": "RDDJHBR",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "94c68eb46a9f892f016b4e8db553066a",
+    "roleId": "94c68eb46a9f892f016b4e834fd40666",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_地市公司配网供应商管理专责",
+    "code": "dsgspwgysglzz_zzgl",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d3399b4014da48ba0cf7c3e",
+    "roleId": "ff8080814d3399b4014da48a79ca7c3d",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_图形应用",
+    "code": "hlj_txyy",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d988664b25b61",
+    "roleId": "ff8080814d339ab7014d987c64d85b2a",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配电运维班副班长",
+    "code": "HLJ_PDYWBFBZ",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  },
+  {
+    "id": "ff8080814d339ab7014d988e3c9366ca",
+    "roleId": "ff8080814d339ab7014d987bf35b5b25",
+    "sporgId": "ff8080814d339ab7014d79c329bf1972",
+    "name": "国网黑龙江省电力公司_配电运检室_配网检修管理专责",
+    "code": "HLJ_PDYJS_PWJXGLZZ",
+    "systemId": "ff8080814d339ab7014d6a0a0b19114b"
+  }
+]

@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcProcessAuditDao">
+    <sql id="tableName">
+        pmsn.sjkflc_process_audit
+    </sql>
+    <sql id="baseColumnList">
+        ID, DEMAND_NAME, DEMAND_CODE,
+        AUDIT_START_TIME,
+        AUDIT_END_TIME,
+        AUDIT_LINK,Audit_org, AUDIT_DEPT, AUDIT_PEO, AUDIT_OPINION, AUDIT_REASON, AUDIT_STATE,
+        CREATE_TIME,
+        CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, ZDYZD02, ZDYZD03,HT_CODE
+    </sql>
+    <sql id="baseDateColumnList">
+        ID, DEMAND_NAME, DEMAND_CODE,
+        date_format(AUDIT_START_TIME, '%Y-%m-%d %H:%i:%s') as AUDIT_START_TIME,
+        date_format(AUDIT_END_TIME, '%Y-%m-%d %H:%i:%s') as AUDIT_END_TIME,
+        AUDIT_LINK,Audit_org, AUDIT_DEPT, AUDIT_PEO, AUDIT_OPINION, AUDIT_REASON, AUDIT_STATE,
+        date_format(CREATE_TIME, '%Y-%m-%d %H:%i:%s') as CREATE_TIME,
+        CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, ZDYZD02, ZDYZD03,HT_CODE
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit" id="baseResultMap">
+        <result property="id" column="ID" jdbcType="VARCHAR"/>
+        <result property="demandName" column="DEMAND_NAME" jdbcType="VARCHAR"/>
+        <result property="demandCode" column="DEMAND_CODE" jdbcType="VARCHAR"/>
+        <result property="auditStartTime" column="AUDIT_START_TIME" jdbcType="TIMESTAMP"/>
+        <result property="auditEndTime" column="AUDIT_END_TIME" jdbcType="TIMESTAMP"/>
+        <result property="auditLink" column="AUDIT_LINK" jdbcType="VARCHAR"/>
+        <result property="auditOrg" column="Audit_org" jdbcType="VARCHAR"/>
+        <result property="auditDept" column="AUDIT_DEPT" jdbcType="VARCHAR"/>
+        <result property="auditPeo" column="AUDIT_PEO" jdbcType="VARCHAR"/>
+        <result property="auditOpinion" column="AUDIT_OPINION" jdbcType="VARCHAR"/>
+        <result property="auditReason" column="AUDIT_REASON" jdbcType="VARCHAR"/>
+        <result property="auditState" column="AUDIT_STATE" jdbcType="VARCHAR"/>
+        <result property="createTime" column="CREATE_TIME" jdbcType="TIMESTAMP"/>
+        <result property="createPersonCode" column="CREATE_PERSON_CODE" jdbcType="VARCHAR"/>
+        <result property="createPersonName" column="CREATE_PERSON_NAME" jdbcType="VARCHAR"/>
+        <result property="zdyzd01" column="ZDYZD01" jdbcType="VARCHAR"/>
+        <result property="zdyzd02" column="ZDYZD02" jdbcType="VARCHAR"/>
+        <result property="zdyzd03" column="ZDYZD03" jdbcType="VARCHAR"/>
+        <result property="spzt" column="SPZT" jdbcType="VARCHAR"/>
+        <result property="htCode" column="HT_CODE" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        <include refid="baseDateColumnList"/>
+        from
+        <include refid="tableName"/>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit"
+            resultMap="baseResultMap">
+        select
+            ID, DEMAND_NAME, DEMAND_CODE,
+            AUDIT_START_TIME,
+            AUDIT_END_TIME,
+            AUDIT_LINK,Audit_org, AUDIT_DEPT, AUDIT_PEO, AUDIT_OPINION, AUDIT_REASON, AUDIT_STATE,
+            CREATE_TIME,
+            CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, ZDYZD02, ZDYZD03,SPZT,HT_CODE
+        from
+        (
+        select
+            T1.ID, T1.DEMAND_NAME, T1.DEMAND_CODE,
+            date_format(T1.CREATE_TIME, '%Y-%m-%d %H:%i:%s')  as AUDIT_START_TIME,
+            date_format(T1.DEMAND_START_TIME, '%Y-%m-%d %H:%i:%s') AS  AUDIT_END_TIME,
+            '提交申请' as AUDIT_LINK,t3.org_name as Audit_org, T3.dep_name AS AUDIT_DEPT, T1.CREATE_PERSON_NAME AS AUDIT_PEO,
+            "" as AUDIT_OPINION, "" as AUDIT_REASON, "" as AUDIT_STATE,
+            date_format(T1.CREATE_TIME, '%Y-%m-%d %H:%i:%s') as CREATE_TIME,
+            "" as CREATE_PERSON_CODE, "" as CREATE_PERSON_NAME, "" as ZDYZD01, "" as ZDYZD02, "" as ZDYZD03,
+            "" as SPZT, "" as HT_CODE
+        from sjkflc_out_demand_application T1
+        LEFT JOIN pmsn_login_role T2
+        ON T1.CREATE_PERSON_CODE = T2.login_num
+        LEFT JOIN pmsn_person T3
+        ON T2.ID = T3.login_id
+        union all
+        select
+        ID, DEMAND_NAME, DEMAND_CODE,
+        date_format(AUDIT_START_TIME, '%Y-%m-%d %H:%i:%s') as AUDIT_START_TIME,
+        date_format(AUDIT_END_TIME, '%Y-%m-%d %H:%i:%s') as AUDIT_END_TIME,
+        AUDIT_LINK,Audit_org, AUDIT_DEPT, AUDIT_PEO, AUDIT_OPINION, AUDIT_REASON, AUDIT_STATE,
+        date_format(CREATE_TIME, '%Y-%m-%d %H:%i:%s') as CREATE_TIME,
+        CREATE_PERSON_CODE, CREATE_PERSON_NAME, ZDYZD01, ZDYZD02, ZDYZD03,
+        "已审批" as SPZT,  HT_CODE
+        from sjkflc_process_audit
+        union all
+        select
+        T1.ID, T1.sqxqmc as DEMAND_NAME, T1.sqxqbm as DEMAND_CODE,
+        (select max(date_format(AUDIT_END_TIME, '%Y-%m-%d %H:%i:%s')) as AUDIT_START_TIME from sjkflc_process_audit n
+        where n.DEMAND_CODE = T1.sqxqbm) as AUDIT_START_TIME,
+        "" AS  AUDIT_END_TIME,
+        t1.dqjdmc as AUDIT_LINK,  "" as  Audit_org,  "" AS AUDIT_DEPT, "" AS AUDIT_PEO,
+        "" as AUDIT_OPINION, "" as AUDIT_REASON, "" as AUDIT_STATE,
+        date_format(now(), '%Y-%m-%d %H:%i:%s') as CREATE_TIME,
+        "" as CREATE_PERSON_CODE, "" as CREATE_PERSON_NAME, "" as ZDYZD01, "" as ZDYZD02, "" as ZDYZD03,
+         "待审批" as SPZT, "" as HT_CODE
+        from
+        sjkflc_lczxjdb T1
+        where T1.spzt = '0'
+        ) tt
+        <where>
+            <if test="id != null and id != ''">
+                and ID = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="demandName != null and demandName != ''">
+                and DEMAND_NAME = #{demandName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+            </if>
+            <if test="auditStartTime != null">
+                and AUDIT_START_TIME = #{auditStartTime,jdbcType=VARCHAR}
+            </if>
+            <if test="auditEndTime != null">
+                and AUDIT_END_TIME = #{auditEndTime,jdbcType=VARCHAR}
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                and AUDIT_LINK = #{auditLink,jdbcType=VARCHAR}
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                and Audit_org = #{auditOrg,jdbcType=VARCHAR}
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                and AUDIT_DEPT = #{auditDept,jdbcType=VARCHAR}
+            </if>
+            <if test="auditPeo != null and auditPeo != ''">
+                and AUDIT_PEO = #{auditPeo,jdbcType=VARCHAR}
+            </if>
+            <if test="auditOpinion != null and auditOpinion != ''">
+                and AUDIT_OPINION = #{auditOpinion,jdbcType=VARCHAR}
+            </if>
+            <if test="auditReason != null and auditReason != ''">
+                and AUDIT_REASON = #{auditReason,jdbcType=VARCHAR}
+            </if>
+            <if test="auditState != null and auditState != ''">
+                and AUDIT_STATE = #{auditState,jdbcType=VARCHAR}
+            </if>
+            <if test="createTime != null">
+                and CREATE_TIME = #{createTime,jdbcType=VARCHAR}
+            </if>
+            <if test="createPersonCode != null and createPersonCode != ''">
+                and CREATE_PERSON_CODE = #{createPersonCode,jdbcType=VARCHAR}
+            </if>
+            <if test="createPersonName != null and createPersonName != ''">
+                and CREATE_PERSON_NAME = #{createPersonName,jdbcType=VARCHAR}
+            </if>
+            <if test="zdyzd01 != null and zdyzd01 != ''">
+                and ZDYZD01 = #{zdyzd01,jdbcType=VARCHAR}
+            </if>
+            <if test="zdyzd02 != null and zdyzd02 != ''">
+                and ZDYZD02 = #{zdyzd02,jdbcType=VARCHAR}
+            </if>
+            <if test="zdyzd03 != null and zdyzd03 != ''">
+                and ZDYZD03 = #{zdyzd03,jdbcType=VARCHAR}
+            </if>
+        </where>
+        order by create_time
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList_bak" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit"
+            resultMap="baseResultMap">
+        SELECT
+            t1.sqxqmc as DEMAND_NAME
+            ,t1.sqxqbm as DEMAND_CODE
+            ,t2.shsj as AUDIT_START_TIME
+            ,t2.shsj as AUDIT_END_TIME
+            ,t2.jdmc as AUDIT_LINK
+            ,t2.shrssbm as AUDIT_DEPT
+            ,t2.shrmc as AUDIT_PEO
+            ,t2.shjg as AUDIT_OPINION
+            ,t2.bz as AUDIT_REASON
+            ,"已审批" as AUDIT_STATE
+        FROM sjkflc_lczxjdb t1
+        left join sjkflc_lcsprzb t2
+        on t1.lcpch = t2.lcpch
+        where t1.sqxqbm = #{demandCode,jdbcType=VARCHAR}
+        		and t2.jdmc != '提交申请'
+        order by t2.shsj
+
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+        #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR},
+        #{auditOrg,jdbcType=VARCHAR},#{auditDept,jdbcType=VARCHAR}, #{auditPeo,jdbcType=VARCHAR}, #{auditOpinion,jdbcType=VARCHAR},
+        #{auditReason,jdbcType=VARCHAR}, #{auditState,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+        #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR}, #{zdyzd01,jdbcType=VARCHAR},
+        #{zdyzd02,jdbcType=VARCHAR}, #{zdyzd03,jdbcType=VARCHAR} , #{htCode,jdbcType=VARCHAR} )
+    </insert>
+
+
+    <!--新增所有列-->
+    <insert id="insertForModel" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+        #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR},
+        #{auditOrg,jdbcType=VARCHAR},#{auditDept,jdbcType=VARCHAR}, #{auditPeo,jdbcType=VARCHAR}, #{auditOpinion,jdbcType=VARCHAR},
+        #{auditReason,jdbcType=VARCHAR}, #{auditState,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+        #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR}, #{zdyzd01,jdbcType=VARCHAR},
+        #{zdyzd02,jdbcType=VARCHAR}, #{zdyzd03,jdbcType=VARCHAR} , #{htCode,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{id,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR},
+            #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR},
+            #{auditOrg,jdbcType=VARCHAR}, #{auditDept,jdbcType=VARCHAR}, #{auditPeo,jdbcType=VARCHAR}, #{auditOpinion,jdbcType=VARCHAR},
+            #{auditReason,jdbcType=VARCHAR}, #{auditState,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR},
+            #{createPersonCode,jdbcType=VARCHAR}, #{createPersonName,jdbcType=VARCHAR}, #{zdyzd01,jdbcType=VARCHAR},
+            #{zdyzd02,jdbcType=VARCHAR}, #{zdyzd03,jdbcType=VARCHAR} , #{htCode,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcProcessAudit">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="id != null and id != ''">
+                ID = #{id,jdbcType=VARCHAR},
+            </if>
+            <if test="demandName != null and demandName != ''">
+                DEMAND_NAME = #{demandName,jdbcType=VARCHAR},
+            </if>
+            <if test="auditStartTime != null">
+                AUDIT_START_TIME = #{auditStartTime,jdbcType=VARCHAR},
+            </if>
+            <if test="auditEndTime != null">
+                AUDIT_END_TIME = #{auditEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                AUDIT_LINK = #{auditLink,jdbcType=VARCHAR},
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                Audit_org = #{auditOrg,jdbcType=VARCHAR},
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                AUDIT_DEPT = #{auditDept,jdbcType=VARCHAR},
+            </if>
+            <if test="auditPeo != null and auditPeo != ''">
+                AUDIT_PEO = #{auditPeo,jdbcType=VARCHAR},
+            </if>
+            <if test="auditOpinion != null and auditOpinion != ''">
+                AUDIT_OPINION = #{auditOpinion,jdbcType=VARCHAR},
+            </if>
+            <if test="auditReason != null and auditReason != ''">
+                AUDIT_REASON = #{auditReason,jdbcType=VARCHAR},
+            </if>
+            <if test="auditState != null and auditState != ''">
+                AUDIT_STATE = #{auditState,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+            </if>
+            <if test="createPersonCode != null and createPersonCode != ''">
+                CREATE_PERSON_CODE = #{createPersonCode,jdbcType=VARCHAR},
+            </if>
+            <if test="createPersonName != null and createPersonName != ''">
+                CREATE_PERSON_NAME = #{createPersonName,jdbcType=VARCHAR},
+            </if>
+            <if test="zdyzd01 != null and zdyzd01 != ''">
+                ZDYZD01 = #{zdyzd01,jdbcType=VARCHAR},
+            </if>
+            <if test="zdyzd02 != null and zdyzd02 != ''">
+                ZDYZD02 = #{zdyzd02,jdbcType=VARCHAR},
+            </if>
+            <if test="zdyzd03 != null and zdyzd03 != ''">
+                ZDYZD03 = #{zdyzd03,jdbcType=VARCHAR},
+            </if>
+            <if test="htCode != null and htCode != ''">
+                HT_CODE = #{htCode,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        DEMAND_CODE = #{demandCode,jdbcType=VARCHAR}
+    </delete>
+
+</mapper>
+

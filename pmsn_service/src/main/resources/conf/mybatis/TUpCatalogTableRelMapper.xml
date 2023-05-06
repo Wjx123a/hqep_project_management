@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.TUpCatalogTableRelDao">
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryOneLevelList" parameterType="pd" resultType="pd">
+        select
+        <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME == '一级目录管理' ">
+            <if test="menu_level != null and menu_level != '' and menu_level == 3">
+                distinct IFNULL(simple_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                , '3' as level
+            </if>
+             <if test="menu_level != null and menu_level != '' and menu_level == 4">
+            distinct IFNULL(one_catalog_name,'') as name
+            , '数据目录管理' as ONE_CATALOG_NAME
+            , '一级目录管理' as TWO_CATALOG_NAME
+            ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+            , '4' as level
+             </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 5">
+                distinct IFNULL(two_catalog_name,'') as name,system_code
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                , '5' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 6">
+                distinct IFNULL(three_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                , '6' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 7">
+                distinct "" as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                ,#{SIX_CATALOG_NAME} as SIX_CATALOG_NAME
+                , '7' as level
+            </if>
+        </if>
+        <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME == '二级目录管理' ">
+            <if test="menu_level != null and menu_level != '' and menu_level == 3">
+                distinct IFNULL(simple_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                , '3' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 4">
+                distinct IFNULL(one_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                , '4' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 5">
+                distinct IFNULL(two_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                , '5' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 6">
+                distinct IFNULL(three_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                , '6' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 7">
+            distinct "" as name
+            , '数据目录管理' as ONE_CATALOG_NAME
+            , '二级目录管理' as TWO_CATALOG_NAME
+            ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+            ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+            ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+            ,#{SIX_CATALOG_NAME} as SIX_CATALOG_NAME
+            , '7' as level
+        </if>
+        </if>
+        from  t_down_catalog_table_rel_zs
+        <where>
+            <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+                and simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR} and one_catalog_name is not null
+            </if>
+            <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+                and one_catalog_name = #{FOUR_CATALOG_NAME,jdbcType=VARCHAR} and two_catalog_name is not null
+            </if>
+            <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+                and two_catalog_name = #{FIVE_CATALOG_NAME,jdbcType=VARCHAR} and three_catalog_name is not null
+            </if>
+            <if test="SIX_CATALOG_NAME != null and SIX_CATALOG_NAME != ''">
+                and three_catalog_name = #{SIX_CATALOG_NAME,jdbcType=VARCHAR} and three_catalog_name is not null
+            </if>
+        </where>
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryTwoLevelList" parameterType="pd" resultType="pd">
+        select
+        <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME == '一级目录管理' ">
+            <if test="menu_level != null and menu_level != '' and menu_level == 3">
+                distinct IFNULL(simple_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                , '3' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 4">
+                distinct IFNULL(one_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                , '4' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 5">
+                distinct IFNULL(two_catalog_name,'') as name,system_code
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                , '5' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 6">
+                distinct IFNULL(three_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                , '6' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 7">
+                distinct "" as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '一级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                ,#{SIX_CATALOG_NAME} as SIX_CATALOG_NAME
+                , '7' as level
+            </if>
+        </if>
+        <if test="TWO_CATALOG_NAME != null and TWO_CATALOG_NAME == '二级目录管理' ">
+            <if test="menu_level != null and menu_level != '' and menu_level == 3">
+                distinct IFNULL(simple_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                , '3' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 4">
+                distinct IFNULL(one_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                , '4' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 5">
+                distinct IFNULL(two_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                , '5' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 6">
+                distinct IFNULL(three_catalog_name,'') as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                , '6' as level
+            </if>
+            <if test="menu_level != null and menu_level != '' and menu_level == 7">
+                distinct "" as name
+                , '数据目录管理' as ONE_CATALOG_NAME
+                , '二级目录管理' as TWO_CATALOG_NAME
+                ,#{THREE_CATALOG_NAME} as THREE_CATALOG_NAME
+                ,#{FOUR_CATALOG_NAME} as FOUR_CATALOG_NAME
+                ,#{FIVE_CATALOG_NAME} as FIVE_CATALOG_NAME
+                ,#{SIX_CATALOG_NAME} as SIX_CATALOG_NAME
+                , '7' as level
+            </if>
+        </if>
+        from  t_up_catalog_table_rel
+        <where>
+            <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+                and simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+            </if>
+            <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+                and one_catalog_name = #{FOUR_CATALOG_NAME,jdbcType=VARCHAR}
+            </if>
+            <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+                and two_catalog_name = #{FIVE_CATALOG_NAME,jdbcType=VARCHAR}
+            </if>
+            <if test="SIX_CATALOG_NAME != null and SIX_CATALOG_NAME != ''">
+                and three_catalog_name = #{SIX_CATALOG_NAME,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!-- 一级目录数据查询 -->
+    <select id="queryOneLevelListByOneSystem" parameterType="pd" resultType="pd">
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,s.system_name xtmcqc, s.dept_name as ssbm,t.table_desc bjs,t.negative_type sffmqd
+        ,REPLACE( d.table_ename,"odps.","") as table_ename
+        ,d.table_cn_name as table_cn_name
+        ,LOWER(concat(zjb.front_connect,zjb.xt_code,'_',zjb.xt_bs_fs,'_',zjb.xt_jc_bm,'_',t.table_ename)) as ztqbm
+        ,upper(concat(zjb.xt_code,'_',zjb.xt_bs_fs,'_',zjb.xt_jc_bm,'_',t.table_ename)) as sqbm
+        ,case when zjb.xt_bs_fs = '02' then '二级部署'
+        when zjb.xt_bs_fs = '01' then '一级部署'
+        when zjb.xt_bs_fs = '03' then '1.5级部署'
+        else '' end bsfs
+        ,(
+        CASE
+        WHEN t.table_ename  = #{ywbm} THEN
+        1
+        WHEN t.table_ename  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd,
+        0 as sqrd
+        from t_down_table_zs t
+        left join t_down_catalog_table_rel_zs r
+        on t.system_code = r.system_code and t.table_ename = r.table_ename and r.db_user =  t.db_user
+        left join t_down_system_zs s
+        on s.system_code = r.system_code
+        left join zt_zjb zjb
+        on zjb.id = t.system_code
+        left join dict_sjzt_tables d
+        on d.table_ename =LOWER(concat(zjb.front_connect,zjb.xt_code,'_',zjb.xt_bs_fs,'_',zjb.xt_jc_bm,'_',t.table_ename))
+        where t.table_type = '有效表'
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            )
+        </if>
+        <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+            and t.simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+            and r.one_catalog_name = #{FOUR_CATALOG_NAME,jdbcType=VARCHAR}
+            and r.simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+            and r.two_catalog_name = #{FIVE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="SIX_CATALOG_NAME != null and SIX_CATALOG_NAME != ''">
+            and r.three_catalog_name = #{SIX_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test=" ssbm != null and ssbm != '' ">
+            and s.dept_name like concat('%',#{ssbm},'%')
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and t.negative_type = #{sffmqd}
+        </if>
+        <if test=" sffmqd == null or sffmqd == '' ">
+            and t.negative_type is null
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and t.db_user like concat('%',#{xtyh},'%')
+        </if>
+        <if test=" is_zt != null and is_zt != '' ">
+            <choose>
+                <when test="is_zt=='是'.toString()">
+                    and d.table_ename is not null
+                </when>
+                <when test="is_zt=='否'.toString()">
+                    and d.table_ename is null
+                </when>
+            </choose>
+        </if>
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by pxzd,e.ywbm asc,e.ssbm,e.xtmc
+    </select>
+
+    <!-- 二级目录数据查询 -->
+    <select id="queryOneLevelListByTwoSystem" parameterType="pd" resultType="pd">
+        select ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct j.*,d.* from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        REPLACE( IFNULL(dst.table_ename,dst1.table_ename),"odps.","") as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+            CASE
+            WHEN ywbm  = #{ywbm} THEN
+            1
+            WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+            2
+            WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+            3
+            WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+            4 ELSE 10
+            END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.system_name xtmcqc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+        <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+        left join t_up_catalog_table_rel_zs r
+        on t.simple_name = r.simple_name and t.table_ename = r.table_ename and r.db_user =  t.db_user
+        </if>
+        left join t_up_system_zs t2
+        on t2.system_code = t.system_code
+        where t.table_type = '有效表'
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            or t.table_desc like concat('%',#{ywbm},'%')
+            )
+        </if>
+        <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+            and t.simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="FOUR_CATALOG_NAME != null and FOUR_CATALOG_NAME != ''">
+            and r.simple_name = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+            and r.one_catalog_name = #{FOUR_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="FIVE_CATALOG_NAME != null and FIVE_CATALOG_NAME != ''">
+            and r.two_catalog_name = #{FIVE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test="SIX_CATALOG_NAME != null and SIX_CATALOG_NAME != ''">
+            and r.three_catalog_name = #{SIX_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and t.negative_type = #{sffmqd}
+        </if>
+        <if test=" sffmqd == null or sffmqd == '' ">
+            and t.negative_type is null
+        </if>
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        <where>
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and (ywbm like concat('%',#{ywbm},'%')
+                or zwbm like concat('%',#{ywbm},'%')
+                or bjs like concat('%',#{ywbm},'%')
+                )
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" is_zt != null and is_zt != '' ">
+                <choose>
+                    <when test="is_zt=='是'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is not null
+                    </when>
+                    <when test="is_zt=='否'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is null
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ) j
+        left join (select
+        t.sqbxtyh,t.sqbssxt,t.sqbywbm ,count(1) as sqrd
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层'
+        <if test="THREE_CATALOG_NAME != null and THREE_CATALOG_NAME != ''">
+            and t.sqbssxt = #{THREE_CATALOG_NAME,jdbcType=VARCHAR}
+        </if>
+        group by t.sqbxtyh,t.sqbssxt,t.sqbywbm
+        ) d on d.sqbywbm = j.ywbm and d.sqbxtyh = j.xtyh and d.sqbssxt = j.xtmc
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm asc,e.ssbm,e.xtmc
+        )  ls
+        order by pxzd
+    </select>
+
+
+    <!-- 数据中台 => 中台贴源层 => 菜单查询 -->
+    <select id="queryTycMenu" parameterType="pd" resultType="pd">
+        select
+            '数据中台' as ONE_CATALOG_NAME,
+            '中台贴源层' as TWO_CATALOG_NAME,
+            '3' as level,
+            xt_zw_sx as name
+        from zt_zjb
+        where zt_qz is not null and zt_qz != ''
+        order by xt_zw_sx
+    </select>
+
+    <!-- 数据中台 => 中台贴源层 => 菜单查询 最后一级 -->
+    <select id="queryTycMenuForLast" parameterType="pd" resultType="pd">
+        select
+            '数据中台' as ONE_CATALOG_NAME,
+            '中台贴源层' as TWO_CATALOG_NAME,
+            '4' as level,
+            xt_zw_sx as THREE_CATALOG_NAME,
+            '' as name
+        from zt_zjb
+        where zt_qz is not null
+        and xt_zw_sx = #{THREE_CATALOG_NAME}
+        order by xt_zw_sx
+    </select>
+
+
+
+</mapper>
+

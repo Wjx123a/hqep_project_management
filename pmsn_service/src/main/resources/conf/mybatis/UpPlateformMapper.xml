@@ -1,0 +1,1309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.UpPlateformDao">
+    <!--    查询同一工单不同批次结果-->
+    <select id="queryApplicationDiff" resultType="pd">
+      SELECT DISTINCT
+      a.org_name,
+      a.org_code,
+      a.demand_name,
+      a.demand_code,
+      a.demand_applicant,
+      a.demand_app_org,
+      a.demand_app_dept,
+      a.real_use_org,
+      a.real_use_dept,
+      a.demand_start_time,
+      a.demand_end_time,
+      a.demand_desc,
+      a.table_num,
+      a.negative_list_num,
+      a.sharing_mode,
+      a.apply_range,
+      a.apply_scene,
+      a.apply_scene as apply_scene_name,
+      a.modify_type,
+      a.batch_time,
+      a.demand_start_time as demand_accept_complete_time,
+		'0' as demand_accept_duration_time,
+		null as service_examine_time,
+		'0' as service_examine_duration_time,
+		null as data_access_time,
+		'0' as data_access_duration_time,
+		ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as authorization_time,
+		ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as complete_time,
+		cder.apply_classification,
+		cder.apply_code,
+		cder.apply_type,
+		cder.apply_business,
+		cder.apply_belong,
+		'否' as is_terminate
+      FROM
+      (
+      SELECT
+      '国网黑龙江省电力有限公司 ' org_name,
+      '01020' org_code,
+      CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+      orders.numId demand_code,
+      orders.person demand_applicant,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '本部' ELSE trim(
+      TRAILING '供电公司'
+      FROM
+      trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+      END AS demand_app_org,
+      orders.sqrssbm demand_app_dept,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '本部' ELSE trim(
+      TRAILING '供电公司'
+      FROM
+      trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+      END AS real_use_org,
+      orders.sqrssbm real_use_dept,
+      orders.sqdate demand_start_time,
+      CASE
+      orders.YesNoBh
+      WHEN 1 THEN
+      orders.bh ELSE orders.4sp
+      END demand_end_time,
+      jd.xqsm demand_desc,
+      count( orders.tableName ) table_num,
+      ( SELECT COUNT( 1 ) FROM pull_work_order
+       where isFmqd <![CDATA[<>]]>'非负面清单' and orders.numId = pull_work_order.numId and  pull_work_order.4sp IS NOT NULL ) negative_list_num,
+      '中台账号授权' sharing_mode,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '省公司' ELSE '地市公司'
+      END apply_range,
+      jd.xqsm apply_scene,
+      '1' modify_type,
+      max(orders.4sp) batch_time,
+		orders.yymc
+      FROM
+      pull_work_order orders
+      LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+      WHERE
+      orders.4sp IS NOT NULL
+      GROUP BY
+      orders.numId
+      ) a
+      LEFT JOIN (
+      SELECT
+      org_name org_code,
+      demand_name,
+      demand_code,
+      demand_applicant,
+      demand_app_org,
+      demand_app_dept,
+      real_use_org,
+      real_use_dept,
+      demand_start_time,
+      demand_end_time,
+      demand_desc,
+      table_num,
+      negative_list_num,
+      sharing_mode,
+      apply_range,
+      apply_scene,
+      modify_type,
+      batch_time
+      FROM
+      ods_sjml_internal_up_demand_application
+      ) b ON a.demand_code = b.demand_code
+     left join pmsn_code_order cder
+     on a.yymc = cder.apply_code
+      WHERE
+      a.table_num <![CDATA[<>]]> b.table_num
+  </select>
+    <!--    查询同一工单不同批次结果-->
+    <select id="queryApplicationDiff_new" resultType="pd">
+      SELECT DISTINCT
+      a.org_name,
+      a.org_code,
+      a.demand_name,
+      a.demand_code,
+      a.demand_applicant,
+      a.demand_app_org,
+      a.demand_app_dept,
+      a.real_use_org,
+      a.real_use_dept,
+      a.demand_start_time,
+      a.demand_end_time,
+      a.demand_desc,
+      a.table_num,
+      a.negative_list_num,
+      a.sharing_mode,
+      a.apply_range,
+      a.apply_scene,
+      a.apply_scene as apply_scene_name,
+      a.modify_type,
+      a.batch_time,
+      a.demand_start_time as demand_accept_complete_time,
+		'0' as demand_accept_duration_time,
+		null as service_examine_time,
+		'0' as service_examine_duration_time,
+		null as data_access_time,
+		'0' as data_access_duration_time,
+		ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as authorization_time,
+		ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as complete_time,
+		cder.apply_classification,
+		cder.apply_code,
+		cder.apply_type,
+		cder.apply_business,
+		cder.apply_belong,
+		'否' as is_terminate
+      FROM
+      (
+      SELECT
+      '国网黑龙江省电力有限公司 ' org_name,
+      '01020' org_code,
+      CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+      orders.numId demand_code,
+      orders.person demand_applicant,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '本部' ELSE trim(
+      TRAILING '供电公司'
+      FROM
+      trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+      END AS demand_app_org,
+      orders.sqrssbm demand_app_dept,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '本部' ELSE trim(
+      TRAILING '供电公司'
+      FROM
+      trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+      END AS real_use_org,
+      orders.sqrssbm real_use_dept,
+      orders.sqdate demand_start_time,
+      CASE
+      orders.YesNoBh
+      WHEN 1 THEN
+      orders.bh ELSE orders.4sp
+      END demand_end_time,
+      jd.xqsm demand_desc,
+      count( orders.tableName ) table_num,
+      ( SELECT COUNT( 1 ) FROM pull_work_order
+      where isFmqd <![CDATA[<>]]>'非负面清单' and orders.numId = pull_work_order.numId and  pull_work_order.4sp IS NOT NULL) negative_list_num,
+      '中台账号授权' sharing_mode,
+      CASE
+      orders.sqrssdw
+      WHEN '国网黑龙江省电力本部' THEN
+      '省公司' ELSE '地市公司'
+      END apply_range,
+      jd.xqsm apply_scene,
+      '1' modify_type,
+      max(orders.4sp) batch_time,
+		orders.yymc
+      FROM
+      pull_work_order orders
+      LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+      WHERE
+      orders.4sp IS NOT NULL
+      GROUP BY
+      orders.numId
+      ) a
+      LEFT JOIN (
+      SELECT
+      org_name org_code,
+      demand_name,
+      demand_code,
+      demand_applicant,
+      demand_app_org,
+      demand_app_dept,
+      real_use_org,
+      real_use_dept,
+      demand_start_time,
+      demand_end_time,
+      demand_desc,
+      table_num,
+      negative_list_num,
+      sharing_mode,
+      apply_range,
+      apply_belong,
+      apply_scene_name,
+      modify_type,
+      batch_time
+      FROM
+      ods_sjml_internal_up_demand_application_new
+      ) b ON a.demand_code = b.demand_code
+     left join pmsn_code_order cder
+     on a.yymc = cder.apply_code
+      WHERE
+      a.table_num <![CDATA[<>]]> b.table_num
+  </select>
+    <select id="queryApplication" resultType="pd">
+        SELECT DISTINCT
+        a.org_name,
+        a.org_code,
+        a.demand_name,
+        a.demand_code,
+        a.demand_applicant,
+        a.demand_app_org,
+        a.demand_app_dept,
+        a.real_use_org,
+        a.real_use_dept,
+        a.demand_start_time,
+        a.demand_end_time,
+        a.demand_desc,
+        a.table_num,
+        a.negative_list_num,
+        a.sharing_mode,
+        a.apply_range,
+        a.apply_scene,
+        a.apply_scene as apply_scene_name,
+        a.modify_type,
+        a.batch_time,
+        a.demand_start_time as demand_accept_complete_time,
+        '0' as demand_accept_duration_time,
+        null as service_examine_time,
+        '0' as service_examine_duration_time,
+        null as data_access_time,
+        '0' as data_access_duration_time,
+        ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as authorization_time,
+        ROUND((a.demand_end_time - a.demand_start_time)/60/60,4) as complete_time,
+        cder.apply_classification,
+        cder.apply_code,
+        cder.apply_type,
+        cder.apply_business,
+        cder.apply_belong,
+        '否' as is_terminate
+        FROM
+        (
+        SELECT
+        '国网黑龙江省电力有限公司 ' org_name,
+        '01020' org_code,
+        CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+        orders.numId demand_code,
+        orders.person demand_applicant,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '本部' ELSE trim(
+        TRAILING '供电公司'
+        FROM
+        trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+        END AS demand_app_org,
+        orders.sqrssbm demand_app_dept,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '本部' ELSE trim(
+        TRAILING '供电公司'
+        FROM
+        trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+        END AS real_use_org,
+        orders.sqrssbm real_use_dept,
+        orders.sqdate demand_start_time,
+        CASE
+        orders.YesNoBh
+        WHEN 1 THEN
+        orders.bh ELSE orders.4sp
+        END demand_end_time,
+        jd.xqsm demand_desc,
+        count( orders.tableName ) table_num,
+        ( SELECT COUNT( 1 ) FROM pull_work_order
+        WHERE isFmqd <![CDATA[<>]]>'非负面清单' and orders.numId = pull_work_order.numId and  pull_work_order.4sp IS NOT NULL) negative_list_num,
+        '中台账号授权' sharing_mode,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '省公司' ELSE '地市公司'
+        END apply_range,
+        jd.xqsm apply_scene,
+        '1' modify_type,
+        orders.4sp batch_time,
+        orders.yymc
+        FROM
+        pull_work_order orders
+        LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+        WHERE
+        orders.4sp IS NOT NULL
+        GROUP BY
+        orders.numId
+        ) a
+        LEFT JOIN (
+        SELECT
+        org_name org_code,
+        demand_name,
+        demand_code,
+        demand_applicant,
+        demand_app_org,
+        demand_app_dept,
+        real_use_org,
+        real_use_dept,
+        demand_start_time,
+        demand_end_time,
+        demand_desc,
+        table_num,
+        negative_list_num,
+        sharing_mode,
+        apply_range,
+        apply_scene,
+        modify_type,
+        batch_time
+        FROM
+        ods_sjml_internal_up_demand_application
+        ) b ON a.demand_code = b.demand_code
+        left join pmsn_code_order cder
+        on a.yymc = cder.apply_code
+        WHERE b.demand_code IS NULL
+    </select>
+
+    <select id="queryApplication_new" resultType="pd">
+        SELECT DISTINCT
+        a.org_name,
+        a.org_code,
+        a.demand_name,
+        a.demand_code,
+        a.demand_applicant,
+        a.demand_app_org,
+        a.demand_app_dept,
+        a.real_use_org,
+        a.real_use_dept,
+        a.demand_start_time,
+        a.demand_end_time,
+        a.demand_desc,
+        a.table_num,
+        a.negative_list_num,
+        a.sharing_mode,
+        a.apply_range,
+        a.apply_scene,
+        a.apply_scene as apply_scene_name,
+        a.modify_type,
+        a.batch_time,
+        a.demand_start_time as demand_accept_complete_time,
+        ROUND((TIMESTAMPDIFF(SECOND ,a.demand_start_time,a.demand_start_time))/60/60,4) as demand_accept_duration_time,
+        a.service_examine_time as service_examine_time,
+        ROUND((TIMESTAMPDIFF(SECOND ,a.demand_start_time,a.service_examine_time))/60/60,4) as service_examine_duration_time,
+        null as data_access_time,
+        null as data_access_duration_time,
+		case when a.service_examine_time is not null
+             then ROUND((TIMESTAMPDIFF(SECOND ,a.demand_start_time,a.service_examine_time))/60/60,4)
+             else ROUND((TIMESTAMPDIFF(SECOND ,a.demand_start_time,a.demand_end_time))/60/60,4) end as authorization_time,
+        ROUND((TIMESTAMPDIFF(SECOND ,a.demand_start_time,a.demand_end_time))/60/60,4) as complete_time,
+        cder.apply_classification,
+        cder.apply_code,
+        cder.apply_type,
+        cder.apply_business,
+        cder.apply_belong,
+        '否' as is_terminate
+        FROM
+        (
+        SELECT
+        '国网黑龙江省电力有限公司 ' org_name,
+        '01020' org_code,
+        CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+        orders.numId demand_code,
+        orders.person demand_applicant,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '本部' ELSE trim(
+        TRAILING '供电公司'
+        FROM
+        trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+        END AS demand_app_org,
+        orders.sqrssbm demand_app_dept,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '本部' ELSE trim(
+        TRAILING '供电公司'
+        FROM
+        trim( LEADING '国网黑龙江省电力有限公司' FROM orders.sqrssdw ))
+        END AS real_use_org,
+        orders.sqrssbm real_use_dept,
+        orders.sqdate demand_start_time,
+        CASE
+        orders.YesNoBh
+        WHEN 1 THEN
+        orders.bh ELSE orders.4sp
+        END demand_end_time,
+        jd.xqsm demand_desc,
+        count( orders.tableName ) table_num,
+        ( SELECT COUNT( 1 ) FROM pull_work_order
+        WHERE isFmqd <![CDATA[<>]]>'非负面清单' and orders.numId = pull_work_order.numId and  pull_work_order.4sp IS NOT NULL) negative_list_num,
+        '中台账号授权' sharing_mode,
+        CASE
+        orders.sqrssdw
+        WHEN '国网黑龙江省电力本部' THEN
+        '省公司' ELSE '地市公司'
+        END apply_range,
+        jd.xqsm apply_scene,
+        '1' modify_type,
+        orders.4sp batch_time,
+        orders.yymc,
+        ywsp3.3sp as service_examine_time
+        FROM
+        pull_work_order orders
+        left join  pull_work_order ywsp3
+        on orders.sqrid = ywsp3.sqrid and orders.sqperson = ywsp3.sqperson
+        and orders.xtbm = ywsp3.xtbm and orders.tableName = ywsp3.tableName
+        and orders.tableSystem = ywsp3.tableSystem and orders.tableDept = ywsp3.tableDept
+        and orders.tableSystem = ywsp3.tableSystem and orders.ztOwner = ywsp3.ztOwner and  ywsp3.spjb = 3
+        LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+        WHERE
+        orders.4sp IS NOT NULL
+        GROUP BY
+        orders.numId
+        ) a
+        LEFT JOIN (
+        SELECT
+        org_name org_code,
+        demand_name,
+        demand_code,
+        demand_applicant,
+        demand_app_org,
+        demand_app_dept,
+        real_use_org,
+        real_use_dept,
+        demand_start_time,
+        demand_end_time,
+        demand_desc,
+        table_num,
+        negative_list_num,
+        sharing_mode,
+        apply_range,
+        apply_scene_name,
+        modify_type,
+        batch_time
+        FROM
+        ods_sjml_internal_up_demand_application_new
+        ) b ON a.demand_code = b.demand_code
+        left join pmsn_code_order cder
+        on a.yymc = cder.apply_code
+        WHERE b.demand_code IS NULL
+        and cder.apply_code is not null
+        and cder.apply_classification is not null
+        and cder.apply_type is not null
+        and cder.apply_business is not null
+        and cder.apply_belong is not null
+    </select>
+
+
+    <insert id="instApplication"   parameterType="pd">
+        insert into
+          ods_sjml_internal_up_demand_application(
+              org_name,
+              org_code,
+              demand_name,
+              demand_code,
+              demand_applicant,
+              demand_app_org,
+              demand_app_dept,
+              real_use_org,
+              real_use_dept,
+              demand_start_time,
+              demand_end_time,
+              demand_desc,
+              table_num,
+              negative_list_num,
+              sharing_mode,
+              apply_range,
+              apply_scene,
+              modify_type,
+              batch_time)
+          values(
+              #{org_name},
+              #{org_code},
+              #{demand_name},
+              #{demand_code},
+              #{demand_applicant},
+              #{demand_app_org},
+              #{demand_app_dept},
+              #{real_use_org},
+              #{real_use_dept},
+              #{demand_start_time},
+              #{demand_end_time},
+              #{demand_desc},
+              #{table_num},
+              #{negative_list_num},
+              #{sharing_mode},
+              #{apply_range},
+              #{apply_scene},
+              #{modify_type},
+              #{batch_time})
+    </insert>
+    <insert id="instApplication_new"   parameterType="pd">
+        insert into
+          ods_sjml_internal_up_demand_application_new(
+              org_name,
+              org_code,
+              demand_name,
+              demand_code,
+              demand_applicant,
+              demand_app_org,
+              demand_app_dept,
+              real_use_org,
+              real_use_dept,
+              demand_start_time,
+              demand_end_time,
+              demand_desc,
+              table_num,
+              negative_list_num,
+              sharing_mode,
+              apply_range,
+              modify_type,
+              batch_time,
+              demand_accept_complete_time,
+            demand_accept_duration_time,
+            service_examine_time,
+            service_examine_duration_time,
+            data_access_time,
+            data_access_duration_time,
+            authorization_time,
+            complete_time,
+            apply_classification,
+            apply_code,
+            apply_type,
+            apply_business,
+            apply_belong,
+            apply_scene_name,
+            is_terminate
+              )
+          values(
+            #{org_name},
+            #{org_code},
+            #{demand_name},
+            #{demand_code},
+            #{demand_applicant},
+            #{demand_app_org},
+            #{demand_app_dept},
+            #{real_use_org},
+            #{real_use_dept},
+            #{demand_start_time},
+            #{demand_end_time},
+            #{demand_desc},
+            #{table_num},
+            #{negative_list_num},
+            #{sharing_mode},
+            #{apply_range},
+            #{modify_type},
+            #{batch_time},
+            #{demand_accept_complete_time},
+            #{demand_accept_duration_time},
+            #{service_examine_time},
+            #{service_examine_duration_time},
+            #{data_access_time},
+            #{data_access_duration_time},
+            #{authorization_time},
+            #{complete_time},
+            #{apply_classification},
+            #{apply_code},
+            #{apply_type},
+            #{apply_business},
+            #{apply_belong},
+            #{apply_scene_name},
+            #{is_terminate})
+    </insert>
+
+    <select id="queryProcess" resultType="pd">
+        SELECT
+            a.org_name,
+            a.org_code,
+            a.demand_name,
+            a.demand_code,
+            a.audit_link,
+            a.Audit_org,
+            a.Audit_dept,
+            a.audit_start_time,
+            a.audit_end_time,
+            a.audit_status,
+            a.modify_type,
+            a.batch_time
+        FROM
+            (
+                SELECT DISTINCT
+                    t.org_name,
+                    t.org_code,
+                    t.demand_name,
+                    t.demand_code,
+                    t.audit_link,
+                    t.Audit_org,
+                    t.Audit_dept,
+                    t.audit_start_time,
+                    t.audit_end_time,
+                    t.audit_status,
+                    t.modify_type,
+                    t.batch_time
+                FROM
+                    (
+                        SELECT
+                            '国网黑龙江省电力有限公司 ' org_name,
+                            '01020' org_code,
+                            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+                            orders.numId demand_code,
+                            '需求受理' audit_link,
+                            '本部' Audit_org,
+                            '互联网部' Audit_dept,
+                            orders.sqdate audit_start_time,
+                            orders.2sp audit_end_time,
+                            CASE
+                            orders.YesNoBh
+                            WHEN 1 THEN
+                            '已终止'
+                            WHEN 3 THEN
+                            '已完成'
+                            END AS audit_status,
+                            '1' modify_type,
+                            orders.2sp batch_time
+                        FROM
+                            pull_work_order orders
+                            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+                        WHERE
+                            orders.sqdate IS NOT NULL
+                          AND orders.4sp IS NOT NULL UNION ALL
+                        SELECT
+                            '国网黑龙江省电力有限公司 ' org_name,
+                            '01020' org_code,
+                            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+                            orders.numId demand_code,
+                            '业务审核' audit_link,
+                            '本部' Audit_org,
+                            '互联网部' Audit_dept,
+                            orders.2sp audit_start_time,
+                            orders.3sp audit_end_time,
+                            CASE
+                            orders.YesNoBh
+                            WHEN 1 THEN
+                            '已终止'
+                            WHEN 3 THEN
+                            '已完成'
+                            END AS audit_status,
+                            '1' modify_type,
+                            orders.3sp batch_time
+                        FROM
+                            pull_work_order orders
+                            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+                        WHERE
+                            orders.3sp IS NOT NULL
+                          AND 4sp IS NOT NULL UNION ALL
+                        SELECT
+                            '国网黑龙江省电力有限公司 ' org_name,
+                            '01020' org_code,
+                            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+                            orders.numId demand_code,
+                            '授权实施' audit_link,
+                            '省信通' Audit_org,
+                            '互联网部' Audit_dept,
+                            orders.3sp audit_start_time,
+                            orders.4sp audit_end_time,
+                            CASE
+                            orders.YesNoBh
+                            WHEN 1 THEN
+                            '已终止'
+                            WHEN 3 THEN
+                            '已完成'
+                            END AS audit_status,
+                            '1' modify_type,
+                            orders.4sp batch_time
+                        FROM
+                            pull_work_order orders
+                            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+                        WHERE
+                            orders.3sp IS NOT NULL
+                          AND 4sp IS NOT NULL UNION ALL
+                        SELECT
+                            '国网黑龙江省电力有限公司 ' org_name,
+                            '01020' org_code,
+                            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+                            orders.numId demand_code,
+                            '授权实施' audit_link,
+                            '省信通' Audit_org,
+                            '互联网部' Audit_dept,
+                            orders.2sp audit_start_time,
+                            orders.4sp audit_end_time,
+                            CASE
+                            orders.YesNoBh
+                            WHEN 1 THEN
+                            '已终止'
+                            WHEN 3 THEN
+                            '已完成'
+                            END AS audit_status,
+                            '1' modify_type,
+                            orders.4sp batch_time
+                        FROM
+                            pull_work_order orders
+                            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+                        WHERE
+                            orders.3sp IS NULL
+                          AND 4sp IS NOT NULL
+                    ) t
+                GROUP BY
+                    audit_link,
+                    demand_code
+            ) a
+                LEFT JOIN ( SELECT org_name, org_code, demand_name, demand_code, audit_link, Audit_org, Audit_dept, audit_start_time, audit_end_time, audit_status, modify_type, batch_time FROM ods_sjml_internal_up_audit_process ) b ON a.demand_code = b.demand_code
+                AND a.audit_link = b.audit_link
+                AND a.audit_status = b.audit_status
+        WHERE
+            b.demand_code IS NULL
+    </select>
+
+
+    <insert id="instProcess" parameterType="pd">
+            insert into ods_sjml_internal_up_audit_process(
+            org_name,
+            org_code,
+            demand_name,
+            demand_code,
+            audit_link,
+            Audit_org,
+            Audit_dept,
+            audit_start_time,
+            audit_end_time,
+            audit_status,
+            modify_type,
+            batch_time)
+            values(
+            #{org_name},
+            #{org_code},
+            #{demand_name},
+            #{demand_code},
+            #{audit_link},
+            #{Audit_org},
+            #{Audit_dept},
+            #{audit_start_time},
+            #{audit_end_time},
+            #{audit_status},
+            #{modify_type},
+            #{batch_time}
+            )
+
+    </insert>
+
+    <!-- 如果不是贴源层 和源端的数据表 那么系统名称为数据中台 系统编码为 '' 使用case when 语句进行调整-->
+    <select id="queryDemandTable" resultType="pd">
+        SELECT
+            '国网黑龙江省电力有限公司 ' org_name,
+            '01020' org_code,
+            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+            orders.numId demand_code,
+            orders.lcspid,
+            CASE
+                orders.isFmqd
+                WHEN '非负面清单' THEN
+                    '否' ELSE '是'
+                END AS is_negative,
+            orders.tableName table_ename,
+            orders.sqbzwbm table_cname,
+          	orders.tableSystem  as simple_name,
+            orders.xtbm system_code,
+            '1' modify_type,
+            orders.4sp batch_time,
+            orders.syncBj,
+            ifnull(zjb.xt_zy,"") as subject_name
+        FROM
+            pull_work_order orders
+            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+             LEFT JOIN zt_zjb zjb on orders.xtbm = zjb.id
+        WHERE
+            orders.4sp IS NOT NULL
+          and orders.syncBj is null
+     </select>
+
+    <!-- 如果不是贴源层 和源端的数据表 那么系统名称为数据中台 系统编码为 '' 使用case when 语句进行调整-->
+    <select id="queryDemandTable_new" resultType="pd">
+        SELECT
+            '国网黑龙江省电力有限公司 ' org_name,
+            '01020' org_code,
+            CONCAT( orders.sqrssdw, jd.xqsm, orders.sqdate ) demand_name,
+            orders.numId demand_code,
+            orders.lcspid,
+            CASE
+                orders.isFmqd
+                WHEN '非负面清单' THEN
+                    '否' ELSE '是'
+                END AS is_negative,
+            orders.tableName table_ename,
+            orders.sqbzwbm table_cname,
+          	orders.tableSystem  as simple_name,
+            orders.xtbm system_code,
+            '1' modify_type,
+            orders.4sp batch_time,
+            orders.syncBj,
+            ifnull(zjb.xt_zy,"") as subject_name
+        FROM
+            pull_work_order orders
+            LEFT JOIN flow_lczxjdb jd ON orders.lcspid = jd.lcpch
+             LEFT JOIN zt_zjb zjb on orders.xtbm = zjb.id
+        WHERE
+            orders.4sp IS NOT NULL
+          and orders.syncBj != '2' and zjb.xt_zy is not null
+     </select>
+
+
+    <insert id="instDemandTable" parameterType="pd">
+        insert into ods_sjml_internal_up_demand_table(
+            org_name,
+            org_code,
+            demand_name,
+            demand_code,
+            is_negative,
+            table_ename,
+            table_cname,
+            simple_name,
+            system_code,
+            modify_type,
+            batch_time
+            )
+        values(
+            #{org_name},
+            #{org_code},
+            #{demand_name},
+            #{demand_code},
+            #{is_negative},
+            #{table_ename},
+            #{table_cname},
+            #{simple_name},
+            #{system_code},
+            #{modify_type},
+            #{batch_time}
+            )
+    </insert>
+    <insert id="instDemandTable_new" parameterType="pd">
+        insert into ods_sjml_internal_up_demand_table_new(
+            org_name,
+            org_code,
+            demand_name,
+            demand_code,
+            is_negative,
+            table_ename,
+            table_cname,
+            simple_name,
+            system_code,
+            modify_type,
+            batch_time,
+            subject_name
+            )
+        values(
+            #{org_name},
+            #{org_code},
+            #{demand_name},
+            #{demand_code},
+            #{is_negative},
+            #{table_ename},
+            #{table_cname},
+            #{simple_name},
+            #{system_code},
+            #{modify_type},
+            #{batch_time},
+            #{subject_name}
+            )
+    </insert>
+    <select id="queryProcessBh" resultType="pd">
+        select a.org_name,
+        a.org_code,
+        a.demand_name,
+        a.demand_code,
+        a.demand_applicant,
+        a.demand_app_org,
+        a.demand_app_dept,
+        a.real_use_org,
+        a.real_use_dept,
+        a.demand_start_time,
+        a.demand_end_time,
+        a.demand_desc,
+        a.table_num,
+        a.negative_list_num,
+        a.sharing_mode,
+        a.apply_range,
+        a.apply_scene,
+        a.modify_type,
+        a.batch_time
+
+        from
+        (select
+        '国网黑龙江省电力有限公司 'org_name,
+        '01020' org_code,
+        CONCAT(orders.sqrssdw,jd.xqsm,orders.sqdate) demand_name,
+        orders.lcspid demand_code,
+        orders.person demand_applicant,
+        CASE
+        orders.sqrssdw
+        WHEN
+        '国网黑龙江省电力本部'
+        THEN
+        '本部'
+        ELSE
+
+        trim(trailing '供电公司' from trim(leading '国网黑龙江省电力有限公司' from orders.sqrssdw))
+        END AS
+        demand_app_org,
+        orders.sqrssbm demand_app_dept,
+        CASE
+        orders.sqrssdw
+        WHEN
+        '国网黑龙江省电力本部'
+        THEN
+        '本部'
+        ELSE
+
+        trim(trailing '供电公司' from trim(leading '国网黑龙江省电力有限公司' from orders.sqrssdw))
+        END AS
+        real_use_org,
+        orders.sqrssbm real_use_dept,
+        orders.sqdate demand_start_time,
+        CASE
+        orders.YesNoBh
+        WHEN
+        1
+        THEN
+        orders.bh
+        ELSE
+        orders.4sp
+        END
+        demand_end_time,
+        jd.xqsm demand_desc,
+        count(orders.tableName)
+        table_num,
+        (SELECT COUNT(1) FROM pull_work_order
+        WHERE isFmqd <![CDATA[<>]]>'非负面清单' and orders.numId = pull_work_order.numId and  pull_work_order.4sp IS NOT NULL) negative_list_num,
+        '中台账号授权' sharing_mode,
+
+
+        CASE orders.sqrssdw
+        WHEN
+        '国网黑龙江省电力本部'
+        THEN
+        '省公司'
+        ELSE
+        '地市公司'
+        end
+        apply_range,
+        jd.xqsm apply_scene,
+        '1' modify_type,
+        now() batch_time
+        FROM
+        pull_work_order orders left join  flow_lczxjdb jd on orders.lcspid = jd.lcpch group by orders.lcspid) a
+        left join
+        (select
+        org_name
+        org_code,
+        demand_name,
+        demand_code,
+        demand_applicant,
+        demand_app_org,
+        demand_app_dept,
+        real_use_org,
+        real_use_dept,
+        demand_start_time,
+        demand_end_time,
+        demand_desc,
+        table_num,
+        negative_list_num,
+        sharing_mode,
+        apply_range,
+        apply_scene,
+        modify_type,
+        batch_time
+        from ods_sjml_internal_up_demand_application
+        ) b
+        on a.demand_code = b.demand_code where b.demand_end_time is  null and a.demand_end_time is not null
+    </select>
+    <update id="updateProcessBh" parameterType="pd">
+        UPDATE
+          ods_sjml_internal_up_demand_application
+        SET
+          demand_end_time=#{demand_end_time},modify_type = '2'
+        WHERE
+          demand_code = #{demand_code}
+    </update>
+    <delete id="delProcess" parameterType="pd">
+        delete from
+          ods_sjml_internal_up_audit_process
+        where
+          demand_code = #{demand_code}
+    </delete>
+
+    <delete id="delProcessLzz" parameterType="pd">
+        delete from
+        ods_sjml_internal_up_audit_process
+        where
+        demand_code = #{demand_code} and audit_link='需求受理' and audit_status='流转中'
+    </delete>
+    <!--update
+              ods_sjml_internal_up_audit_process
+            set
+              audit_status ='已完成'
+            where
+              demand_code = #{demand_code}-->
+
+    <update id="updateApplication" parameterType="pd">
+        UPDATE
+            ods_sjml_internal_up_demand_application
+        SET
+            table_num = #{table_num},negative_list_num = #{negative_list_num},batch_time = #{batch_time}
+        WHERE
+            demand_code = #{demand_code}
+    </update>
+
+    <update id="updateApplication_new" parameterType="pd">
+        UPDATE
+            ods_sjml_internal_up_demand_application_new
+        SET
+            table_num = #{table_num},negative_list_num = #{negative_list_num}, batch_time = #{batch_time}
+        WHERE
+            demand_code = #{demand_code}
+    </update>
+
+
+<!--    以下不动-->
+
+    <!--    /**-->
+    <!--    * 执行省侧统计结果-->
+    <!--    * 用于生成 上报国网统计表-->
+    <!--    * 方便张一飞省侧自查数据-->
+    <!--    */-->
+    <insert id="insert_merge_t_dm_province_catalog_num">
+        MERGE INTO t_dm_province_catalog_num a
+            USING (
+
+                select
+                    '01020' as ORG_CODE  /*网省编码*/
+                     ,'国网黑龙江省电力有限公司' as ORG_NAME  /*网省名称*/
+                     ,zs.system_code as SYSTEM_CODE /*系统编码*/
+                     ,zs.simple_name as SYSTEM_NAME  /*系统名称*/
+                     ,NVL(rel.one_catalog_name,0) AS CATALOG_ONE_NUM /*一级目录数量*/
+                     ,NVL(rel.two_catalog_name,0) AS CATALOG_TWO_NUM  /*二级目录数量*/
+                     ,NVL(rel.three_catalog_name,0) AS CATALOG_THREE_NUM  /*三级目录数量*/
+                     ,NVL(tut.all_table_num,0) AS  all_table_num /*全表数量*/
+                     ,NVL(tut.valid_table_num,0) AS  valid_table_num /*有效表*/
+                     ,NVL(tuc.VALID_COLUMN_NUM,0) AS VALID_COLUMN_NUM   /*有效表字段数量*/
+                     ,NVL(tut.table_fmqd_num,0) AS table_fmqd_num  /*表级负面清单*/
+                     ,NVL(tut.column_fmqd_table_num,0) AS column_fmqd_table_num  /*字段级负面清单*/
+                     ,NVL(tuc.COLUMN_FMQD_COLUMN_NUM,0) AS COLUMN_FMQD_COLUMN_NUM  /*字段级负面清单字段数量*/
+                     , to_DATE(zs.batch_time, 'yyyy/mm/dd')  as  batch_time /*批次时间*/
+                from (
+                         select menu.simple_name, menu.system_code,
+                                to_char(SYSDATE, 'yyyy/mm/dd')  as  batch_time
+                         from t_up_system_zs menu
+                     ) zs
+                         left join
+                     (
+                         select
+                             rels.simple_name, rels.system_code, to_char(rels.batch_time, 'yyyy/mm/dd')  as batch_time
+                              , count(DISTINCT rels.one_catalog_name ) as one_catalog_name
+                              , count(DISTINCT rels.two_catalog_name ) as two_catalog_name
+                              , count(DISTINCT rels.three_catalog_name ) as three_catalog_name
+                         from t_up_catalog_table_rel rels
+                         group by rels.simple_name, rels.system_code,to_char(rels.batch_time, 'yyyy/mm/dd')
+                     ) rel
+                     on rel.simple_name=zs.simple_name and rel.system_code =  zs.system_code and rel.batch_time = zs.batch_time
+                         LEFT join (
+                    select
+                        dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')  as batch_time
+                         ,count(1) as all_table_num /*全表数量*/
+                         ,count(case when dt.table_type_code = '05001' then 1 else null end) as valid_table_num /*有效表*/
+                         -- ,sum(case when dt.table_type_code = '05001' then To_number(dt.column_num) else 0 end) as VALID_COLUMN_NUM /*有效表字段数量*/
+                         ,count(case when dt.negative_type_code = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+                         ,count(case when dt.negative_type_code = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+                         -- ,sum(case when dt.negative_type_code = '04003' then To_number(dt.column_num) else 0 end) as COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+                    from t_up_table dt
+                    GROUP BY  dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')
+                ) tut
+                                   on tut.batch_time=zs.batch_time and tut.system_code = zs.system_code and tut.simple_name = zs.simple_name
+                         left join (
+                    select dc.SYSTEM_CODE, to_char(dc.batch_time, 'yyyy/mm/dd') as  batch_time
+                         ,count(case when dt.table_type_code = '05001' then 1 else null end) as VALID_COLUMN_NUM
+                         ,count(case when dt.table_type_code = '04003' then 1 else null end) as COLUMN_FMQD_COLUMN_NUM
+                    from t_up_table dt
+                             inner join T_UP_COLUMN dc
+                                        on dt.SYSTEM_CODE = dc.SYSTEM_CODE and dt.DB_USER = dc.DB_USER and dt.TABLE_ENAME = dc.TABLE_ENAME
+                    where dt.batch_time > TO_DATE (to_char(SYSDATE, 'yyyy/mm/dd'), 'yyyy/mm/dd HH:mi:ss')
+                    group by dc.SYSTEM_CODE,to_char(dc.batch_time, 'yyyy/mm/dd')
+                ) tuc
+                                   on tuc.batch_time=zs.batch_time and tuc.system_code = zs.system_code
+                where tut.batch_time IS NOT NULL OR rel.simple_name IS NOT NULL
+            ) b
+            ON (b.batch_time = a.batch_time and a.SYSTEM_CODE = b.SYSTEM_CODE and a.ORG_CODE = b.ORG_CODE and a.ORG_NAME = b.ORG_NAME)
+            WHEN MATCHED THEN
+                UPDATE SET
+                    -- 	a.ORG_CODE = b.ORG_CODE,
+                    -- a.ORG_NAME = b.ORG_NAME,
+                    -- a.SYSTEM_CODE = b.SYSTEM_CODE,
+                    a.SYSTEM_NAME = b.SYSTEM_NAME,
+                    a.CATALOG_ONE_NUM = b.CATALOG_ONE_NUM,
+                    a.CATALOG_TWO_NUM = b.CATALOG_TWO_NUM,
+                    a.CATALOG_THREE_NUM = b.CATALOG_THREE_NUM,
+                    a.ALL_TABLE_NUM = b.ALL_TABLE_NUM,
+                    a.VALID_TABLE_NUM = b.VALID_TABLE_NUM,
+                    a.VALID_COLUMN_NUM = b.VALID_COLUMN_NUM,
+                    a.TABLE_FMQD_NUM = b.TABLE_FMQD_NUM,
+                    a.COLUMN_FMQD_TABLE_NUM = b.COLUMN_FMQD_TABLE_NUM,
+                    a.COLUMN_FMQD_COLUMN_NUM = b.COLUMN_FMQD_COLUMN_NUM
+            WHEN NOT MATCHED THEN
+                INSERT (
+                        a.ORG_CODE,
+                        a.ORG_NAME,
+                        a.SYSTEM_CODE,
+                        a.SYSTEM_NAME,
+                        a.CATALOG_ONE_NUM,
+                        a.CATALOG_TWO_NUM,
+                        a.CATALOG_THREE_NUM,
+                        a.ALL_TABLE_NUM,
+                        a.VALID_TABLE_NUM,
+                        a.VALID_COLUMN_NUM,
+                        a.TABLE_FMQD_NUM,
+                        a.COLUMN_FMQD_TABLE_NUM,
+                        a.COLUMN_FMQD_COLUMN_NUM,
+                        a.batch_time) VALUES (
+                                                 b.ORG_CODE,
+                                                 b.ORG_NAME,
+                                                 b.SYSTEM_CODE,
+                                                 b.SYSTEM_NAME,
+                                                 b.CATALOG_ONE_NUM,
+                                                 b.CATALOG_TWO_NUM,
+                                                 b.CATALOG_THREE_NUM,
+                                                 b.ALL_TABLE_NUM,
+                                                 b.VALID_TABLE_NUM,
+                                                 b.VALID_COLUMN_NUM,
+                                                 b.TABLE_FMQD_NUM,
+                                                 b.COLUMN_FMQD_TABLE_NUM,
+                                                 b.COLUMN_FMQD_COLUMN_NUM,
+                                                 b.batch_time)
+    </insert>
+
+    <insert id="inser_t_dm_zb_catalog_num_check">
+        insert into T_DM_ZB_CATALOG_NUM_CHECK
+        (
+        select
+        '01020' as ORG_CODE  /*网省编码*/
+        ,'国网黑龙江省电力有限公司' as ORG_NAME  /*网省名称*/
+        ,zs.system_code /*系统编码*/
+        ,zs.simple_name  /*系统名称*/
+        ,NVL(rel.one_catalog_name,0) AS one_catalog_name /*一级目录数量*/
+        ,NVL(rel.two_catalog_name,0) AS two_catalog_name  /*二级目录数量*/
+        ,NVL(rel.three_catalog_name,0) AS three_catalog_name  /*三级目录数量*/
+        ,NVL(tut.all_table_num,0) AS  all_table_num /*全表数量*/
+        ,NVL(tut.valid_table_num,0) AS  valid_table_num /*有效表*/
+        ,NVL(VALID_COLUMN_NUM,0) AS VALID_COLUMN_NUM   /*有效表字段数量*/
+        ,NVL(tut.table_fmqd_num,0) AS table_fmqd_num  /*表级负面清单*/
+        ,NVL(tut.column_fmqd_table_num,0) AS column_fmqd_table_num  /*字段级负面清单*/
+        ,NVL(COLUMN_FMQD_COLUMN_NUM,0) AS COLUMN_FMQD_COLUMN_NUM  /*字段级负面清单字段数量*/
+        , to_DATE(zs.batch_time, 'yyyy/mm/dd')  as  batch_time /*有效表*/
+         from (
+        select menu.simple_name, menu.system_code,
+        to_char(SYSDATE-1, 'yyyy/mm/dd')  as  batch_time
+        from t_DOWN_system_zs menu
+        ) zs
+        left join
+        (
+        select
+         rels.simple_name, rels.system_code, to_char(rels.batch_time, 'yyyy/mm/dd')  as batch_time
+        , count(DISTINCT rels.one_catalog_name ) as one_catalog_name
+        , count(DISTINCT rels.two_catalog_name ) as two_catalog_name
+        , count(DISTINCT rels.three_catalog_name ) as three_catalog_name
+        from t_down_catalog_table_rel rels
+        group by rels.simple_name, rels.system_code,to_char(rels.batch_time, 'yyyy/mm/dd')
+        ) rel
+        on rel.simple_name=zs.simple_name and rel.system_code =  zs.system_code and rel.batch_time = zs.batch_time
+        LEFT join (
+        select
+        dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')  as batch_time
+        ,count(1) as all_table_num /*全表数量*/
+        ,count(case when dt.table_type_code = '05001' then 1 else null end) as valid_table_num /*有效表*/
+        ,sum(case when dt.table_type_code = '05001' then To_number(dt.column_num) else 0 end) as VALID_COLUMN_NUM /*有效表字段数量*/
+        ,count(case when dt.negative_type_code = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+        ,count(case when dt.negative_type_code = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+        ,sum(case when dt.negative_type_code = '04003' then To_number(dt.column_num) else 0 end) as COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        from t_down_table dt
+        GROUP BY  dt.system_code, dt.simple_name, to_char(dt.batch_time, 'yyyy/mm/dd')
+        ) tut
+        on tut.batch_time=zs.batch_time and tut.system_code = zs.system_code and tut.simple_name = zs.simple_name
+        where tut.batch_time IS NOT NULL OR rel.simple_name IS NOT NULL
+        )
+
+    </insert>
+<!--    /**-->
+<!--    * 执行总部存量数据统计结果-->
+<!--    * 用于生成 总部存量数据差异统计结果-->
+<!--    * 该表属于自建表 用于生成统计结果 方便查询速度-->
+<!--    */-->
+    <insert id="inser_t_dm_zb_catalog_num_cl">
+         insert into T_DM_ZB_CATALOG_NUM_CL
+         (
+        select
+        '01020' as ORG_CODE  /*网省编码*/
+        ,'国网黑龙江省电力有限公司' as ORG_NAME  /*网省名称*/
+        ,zs.system_code /*系统编码*/
+        ,zs.simple_name  /*系统名称*/
+        ,NVL(rel.one_catalog_name,0) - NVL(rel_GW.one_catalog_name,0) AS one_catalog_name /*一级目录数量*/
+        ,NVL(rel.two_catalog_name,0) - NVL(rel_GW.two_catalog_name,0) AS two_catalog_name  /*二级目录数量*/
+        ,NVL(rel.three_catalog_name,0) - NVL(rel_GW.three_catalog_name,0) AS three_catalog_name  /*三级目录数量*/
+        ,NVL(tut.all_table_num,0) - NVL(tut_GW.all_table_num,0) AS  all_table_num /*全表数量*/
+        ,NVL(tut.valid_table_num,0) - NVL(tut_GW.valid_table_num,0)  AS  valid_table_num /*有效表*/
+        ,NVL(tut.VALID_COLUMN_NUM,0) - NVL(tut_GW.VALID_COLUMN_NUM,0) AS VALID_COLUMN_NUM   /*有效表字段数量*/
+        ,NVL(tut.table_fmqd_num,0) - NVL(tut_GW.table_fmqd_num,0) AS table_fmqd_num  /*表级负面清单*/
+        ,NVL(tut.column_fmqd_table_num,0) - NVL(tut_GW.column_fmqd_table_num,0) AS column_fmqd_table_num  /*字段级负面清单*/
+        ,NVL(tut.COLUMN_FMQD_COLUMN_NUM,0) - NVL(tut_GW.COLUMN_FMQD_COLUMN_NUM,0) AS COLUMN_FMQD_COLUMN_NUM
+		,sysdate as batch_time
+         from (
+        select menu.simple_name, menu.system_code
+    --    to_char(SYSDATE-1, 'yyyy/mm/dd')
+        from t_down_system_zs menu
+        ) zs
+        left join
+        (
+        select
+         rels.simple_name, rels.system_code
+        , count(DISTINCT rels.one_catalog_name ) as one_catalog_name
+        , count(DISTINCT rels.two_catalog_name ) as two_catalog_name
+        , count(DISTINCT rels.three_catalog_name ) as three_catalog_name
+        from t_down_catalog_table_rel_zs rels
+        group by rels.simple_name, rels.system_code
+        ) rel
+        on rel.simple_name=zs.simple_name and rel.system_code =  zs.system_code
+        left join(
+        select
+         rels.systemName AS simple_name, rels.systemCode AS system_code
+        , count(DISTINCT rels.oneCatalogName ) as one_catalog_name
+        , count(DISTINCT rels.twoCatalogName ) as two_catalog_name
+        , count(DISTINCT rels.threeCatalogName ) as three_catalog_name
+        from T_DOWN_CATALOG_TABLE_REL_GW rels
+        group by rels.systemName, rels.systemCode
+        ) rel_GW
+		on rel_GW.simple_name=zs.simple_name and rel_GW.system_code =  zs.system_code
+        LEFT join (
+        select
+        dt.system_code, dt.simple_name
+        ,count(1) as all_table_num /*全表数量*/
+        ,count(case when dt.table_type_code = '05001' then 1 else null end) as valid_table_num /*有效表*/
+        ,sum(case when dt.table_type_code = '05001' then To_number(dt.column_num) else 0 end) as VALID_COLUMN_NUM /*有效表字段数量*/
+        ,count(case when dt.negative_type_code = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+        ,count(case when dt.negative_type_code = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+        ,sum(case when dt.negative_type_code = '04003' then To_number(dt.column_num) else 0 end) as COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        from t_down_table_zs dt
+        GROUP BY  dt.system_code, dt.simple_name
+        ) tut
+        on tut.system_code = zs.system_code and tut.simple_name = zs.simple_name
+        LEFT join (
+        select
+        dt.systemCode AS system_code, dt.systemName AS simple_name
+        ,count(1) as all_table_num /*全表数量*/
+        ,count(case when dt.tableTypeCode = '05001' then 1 else null end) as valid_table_num /*有效表*/
+        ,sum(case when dt.tableTypeCode = '05001' then To_number(dt.columnNum) else 0 end) as VALID_COLUMN_NUM /*有效表字段数量*/
+        ,count(case when dt.tableTypeCode = '04002' then 1 else null end) as table_fmqd_num /*表级负面清单*/
+        ,count(case when dt.tableTypeCode = '04003' then 1 else null end) as column_fmqd_table_num /*字段级负面清单*/
+        ,sum(case when dt.tableTypeCode = '04003' then To_number(dt.columnNum) else 0 end) as COLUMN_FMQD_COLUMN_NUM /*字段级负面清单字段数量*/
+        from T_DOWN_TABLE_GW dt
+        GROUP BY  dt.systemCode, dt.systemName
+        ) tut_GW
+        on tut_GW.system_code = zs.system_code and tut_GW.simple_name = zs.simple_name
+
+        )
+    </insert>
+
+
+</mapper>

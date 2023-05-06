@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.UpdatedictsjztsqDao">
+    <insert id="Updatedictsjztsq" >
+      INSERT IGNORE INTO dict_sjzt_tables (table_ename,table_cn_name,table_type,negative_type,table_cname,batch_time)
+		SELECT
+			table_name,
+			SUBSTRING_INDEX(table_name, '.', -1) as table_cn_name,
+			table_type,
+			case when table_type = '共享层生产' or table_type = '分析层' then '非负面清单' else '' end as  negative_type,
+			table_cn_name as table_cname,
+			CURRENT_TIMESTAMP
+		FROM
+			pull_column_dict
+			where pull_column_dict.table_name like "odps.sjzt_hlj_ods_pro.%"
+			or table_name   like "odps.sjzt_hlj_ds_pro.%"
+			or table_name   like "odps.sjzt_hlj_dwd_pro.%"
+			or table_type = "分析层"
+    </insert>
+</mapper>

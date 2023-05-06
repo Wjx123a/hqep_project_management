@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.interface_serv.dao.DicIpWhiteListDao">
+
+    <resultMap type="com.hqep.dataSharingPlatform.common.model.DicIpWhiteList" id="DicIpWhiteListMap">
+        <result property="ip" column="ip" jdbcType="VARCHAR"/>
+        <result property="power" column="power" jdbcType="VARCHAR"/>
+        <result property="ms" column="ms" jdbcType="VARCHAR"/>
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--查询符合条件的行数据-->
+    <select id="selectByModel" parameterType="com.hqep.dataSharingPlatform.common.model.DicIpWhiteList" resultMap="DicIpWhiteListMap">
+        select
+          ip, power, ms, id,username
+        from dic_ip_white_list
+          <where>
+            <if test="ip != null and ip != ''">
+                and ip like concat('%',#{ip},'%')
+            </if>
+            <if test="power != null and power != ''">
+                and power = #{power}
+            </if>
+            <if test="ms != null and ms != ''">
+                and ms like concat('%',#{ms},'%')
+            </if>
+            <if test="id != null and id != ''">
+                and id = #{lcmc}
+            </if>
+        </where>
+    </select>
+
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.common.model.DicIpWhiteList">
+        insert into dic_ip_white_list(power, ms, id,ip,username)
+        values (#{power}, #{ms}, uuid(),#{ip},#{username})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.common.model.DicIpWhiteList">
+        update dic_ip_white_list
+        <set>
+            <if test="power != null and power != ''">
+                power = #{power},
+            </if>
+            <if test="ms != null and ms != ''">
+                ms = #{ms},
+            </if>
+            <if test="id != null and id != ''">
+                id = #{id},
+            </if>
+            <if test="ip != null and ip != ''">
+                id = #{ip},
+            </if>
+        </set>
+       where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from dic_ip_white_list where id =#{id}
+    </delete>
+
+</mapper>

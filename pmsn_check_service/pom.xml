@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>hqep_project_management</artifactId>
+        <groupId>com.hqep</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>pmsn_check_service</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.hqep</groupId>
+            <artifactId>interface_service</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--isc 下发工具库-->
+<!--        <dependency>-->
+<!--            <groupId>com.sgcc</groupId>-->
+<!--            <artifactId>isc_sm_agent_V2.2_20190919_new-2.2_yyfwzx</artifactId>-->
+<!--            <version>2.2_22321</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.sgcc</groupId>-->
+<!--            <artifactId>isc_sso_agent_2.2_20191204</artifactId>-->
+<!--            <version>2.2_20191204</version>-->
+<!--        </dependency>-->
+
+    </dependencies>
+
+</project>

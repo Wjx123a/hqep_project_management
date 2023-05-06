@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.RevokeAuthJobDao">
+
+<!-- 定时设置使用时间收回权限 -->
+    <update id="revokeAuthJob">
+        UPDATE
+        pull_work_order pwo,
+        pull_work_order t
+        SET
+        pwo.revokeNameCode = 'sys_code',
+        pwo.revokeName = 'sys_name',
+        pwo.revokeTime = t.use_time
+        where
+        pwo.numId = t.numId and pwo.lcspid = t.lcspid and
+        pwo.use_time is not null and pwo.revokeTime is null
+        and date_format(pwo.use_time,'%Y-%m-%d %H:%i:%s') <![CDATA[<]]> date_format(NOW(),'%Y-%m-%d %H:%i:%s')
+    </update>
+    <select id="queryRevokeAuthList" resultType="com.hqep.dataSharingPlatform.common.utils.PageData">
+        select
+        pwo.numid,
+        pwo.lcspid,
+        pwo.sqrid,
+        pwo.sqperson,
+        pwo.revokeNameCode,
+        pwo.revokeName,
+        pwo.revokeTime,
+        pwo.use_time,
+        fl.sqbsqbm
+        from  pull_work_order pwo
+        inner join
+        flow_lczxjdb fl
+        on fl.lcpch = pwo.lcspid
+        where
+        pwo.use_time is not null and pwo.revokeTime is null
+        and date_format(pwo.use_time,'%Y-%m-%d %H:%i:%s') <![CDATA[<]]> date_format(NOW(),'%Y-%m-%d %H:%i:%s')
+    </select>
+</mapper>

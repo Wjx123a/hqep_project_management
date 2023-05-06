@@ -1,0 +1,1590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.AllTableDao">
+
+    <!--查询数据标签-->
+    <select id="querybq" parameterType="String" resultType="String">
+        select t.bq_name from self_ads_sjglbq t
+        where  t.name_a = #{table_name}
+
+    </select>
+    <select id="queryxxbq" parameterType="String" resultType="String">
+        select t.bq_name from self_ads_sjglbq t
+        where 1=1
+        <if test=" SYSTEM_CODE != null and SYSTEM_CODE != '' ">
+            and SYSTEM_CODE = #{SYSTEM_CODE}
+        </if>
+    </select>
+    <!-- 查询是否主键重复-->
+    <select id="queryCount" parameterType="String" resultType="Integer">
+        select count(*) from flow_alltable t where concat(t.yh,t.ywbm,t.ywzdmc) = #{param}
+    </select>
+
+    <!-- 查询全量表信息-->
+    <select id="queryParmList" parameterType="pd" resultType="pd">
+        select
+          t.xtmc,t.ssbm,t.yh,t.ywbm,t.zwbm,t.bjs,t.ywzdmc,t.zwzdmc,t.zdjs,t.zdlx,t.zdcd,t.sfwk,
+          case m.sjbywmc is null when true then '否' else '是' end as sffmqd,m.mgzdlx
+        from flow_alltable t
+        left join flow_fmqd_mgzd m on t.ywbm = m.sjbywmc and t.ywzdmc = m.zdywmc
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and t.xtmc like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and t.ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.ywbm like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+        limit #{pageIndex},#{pageSize}
+    </select>
+
+    <!-- 查询全量表信息总条数-->
+    <select id="queryListCount" parameterType="pd" resultType="java.lang.Integer">
+        select count(*) from flow_alltable t
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and t.xtmc like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and t.ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.ywbm like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询全量表信息【备份】-->
+    <select id="queryParmListNew" parameterType="pd" resultType="pd">
+        select
+        t.xtmc,t.ssbm,t.yh,t.ywbm,t.zwbm,t.bjs,t.ywzdmc,t.zwzdmc,t.zdjs,t.zdlx,t.zdcd,t.sfwk
+        from flow_alltable t
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and xtmc like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and ywbm like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 修改全量表信息-->
+    <update id="updateParm" parameterType="pd">
+        update flow_alltable
+        set
+        <if test=" column != null and column != '' ">
+            column = #{column},
+        </if>
+        <if test=" column != null and column != '' ">
+            column = #{column},
+        </if>
+        where column = #{column} and column = #{column}
+    </update>
+
+    <!-- 逐条新增(暂时没用) -->
+    <insert id="insertPerCon" parameterType="java.util.Map">
+        insert into flow_alltable (
+        id,
+        xtmc,
+        ssbm,
+        yh,
+        ywbm,
+        zwbm,
+        bjs,
+        ywzdmc,
+        zwzdmc,
+        zdjs,
+        zdlx,
+        zdcd,
+        sfwk
+        )
+        VALUES
+        (
+        UUID(),
+        #{xtmc},
+        #{ssbm},
+        #{yh},
+        #{ywbm},
+        #{zwbm},
+        #{bjs},
+        #{ywzdmc},
+        #{zwzdmc},
+        #{zdjs},
+        #{zdlx},
+        #{zdcd},
+        #{sfwk}
+        )
+    </insert>
+
+    <!-- 批量新增 -->
+    <insert id="insertPlan" parameterType="list">
+        insert into flow_alltable (
+        id,
+        xtmc,
+        ssbm,
+        yh,
+        ywbm,
+        zwbm,
+        bjs,
+        ywzdmc,
+        zwzdmc,
+        zdjs,
+        zdlx,
+        zdcd,
+        sfwk
+        )
+        <foreach collection="list" item="item" index="index" separator="union all">
+            (SELECT
+            UUID(),
+            #{item.xtmc},
+            #{item.ssbm},
+            #{item.yh},
+            #{item.ywbm},
+            #{item.zwbm},
+            #{item.bjs},
+            #{item.ywzdmc},
+            #{item.zwzdmc},
+            #{item.zdjs},
+            #{item.zdlx},
+            #{item.zdcd},
+            #{item.sfwk}
+            FROM dual)
+        </foreach>
+    </insert>
+
+    <!-- 20210302第二次修改 -->
+    <!-- 根据系统查询表信息 -->
+    <select id="queryTableListBySytem" parameterType="pd" resultType="pd">
+        select ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct j.*,d.* from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        REPLACE( IFNULL(dst.table_ename,dst1.table_ename),"odps.","") as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+        CASE
+        WHEN ywbm  = #{ywbm} THEN
+        1
+        WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t left join dict_system_dept t2 on t2.system_name = t.simple_name
+        where t.table_type = '有效表' and t.simple_name = #{xtmc}
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            or t.table_desc like concat('%',#{ywbm},'%')
+            )
+        </if>
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        <where>
+            <!--     a.ywbm not in (select j.sqbywbm from flow_lczxjdb j where (j.spzt = '0' or j.spzt = '1') and j.sqrid = #{sqrid})-->
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and (ywbm like concat('%',#{ywbm},'%')
+                or zwbm like concat('%',#{ywbm},'%')
+                or bjs like concat('%',#{ywbm},'%')
+                )
+            </if>
+            <if test=" sffmqd != null and sffmqd != '' ">
+                and sffmqd = #{sffmqd}
+            </if>
+            <if test=" sffmqd == null or sffmqd == '' ">
+                and sffmqd is null
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" is_zt != null and is_zt != '' ">
+                <choose>
+                    <when test="is_zt=='是'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is not null
+                    </when>
+                    <when test="is_zt=='否'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is null
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ) j
+        left join
+        ( select a.sqbywbm,a.sqbzwbm,count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbywbm,a.sqbzwbm
+        ) d on d.sqbywbm = j.ywbm and d.sqbzwbm = j.zwbm
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+        limit #{beginNum},#{pageRows}
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm asc,e.ssbm,e.xtmc
+        )  ls
+        order by pxzd
+    </select>
+
+    <!-- 根据系统查询表信息总条数 -->
+    <select id="queryTableListBySytemCount" parameterType="pd" resultType="java.lang.Integer">
+    select count(1) from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct j.*,d.* from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        IFNULL(dst.table_ename,dst1.table_ename) as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+        CASE
+        WHEN ywbm  = #{ywbm} THEN
+        1
+        WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t left join dict_system_dept t2 on t2.system_name = t.simple_name
+        where t.table_type = '有效表' and t.simple_name = #{xtmc}
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            or t.table_desc like concat('%',#{ywbm},'%')
+            )
+        </if>
+
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        <where>
+            <!--     a.ywbm not in (select j.sqbywbm from flow_lczxjdb j where (j.spzt = '0' or j.spzt = '1') and j.sqrid = #{sqrid})-->
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and (ywbm like concat('%',#{ywbm},'%')
+                or zwbm like concat('%',#{ywbm},'%')
+                or bjs like concat('%',#{ywbm},'%')
+                )
+            </if>
+            <if test=" sffmqd != null and sffmqd != '' ">
+                and sffmqd = #{sffmqd}
+            </if>
+            <if test=" sffmqd == null or sffmqd == '' ">
+                and sffmqd is null
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" is_zt != null and is_zt != '' ">
+                <choose>
+                    <when test="is_zt=='是'.toString()">
+                        and   IFNULL(dst.table_ename,dst1.table_ename)  is not null
+                    </when>
+                    <when test="is_zt=='否'.toString()">
+                        and   IFNULL(dst.table_ename,dst1.table_ename)  is null
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ) j
+        left join
+        ( select a.sqbywbm,a.sqbzwbm,count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbywbm,a.sqbzwbm limit 0,20
+        ) d on d.sqbywbm = j.ywbm   and d.sqbzwbm = j.zwbm
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+        ) e,(select (@rowNum:=#{beginNum})) f
+        )  ls
+        order by pxzd
+    </select>
+    <!-- 根据系统查询表信息-详情 -->
+    <select id="queryTableListBySytemDetail" parameterType="pd" resultType="pd">
+        select distinct
+        b.negative_type sffmqd,b.db_user xtyh,b.table_cname zwbm,b.table_ename ywbm,
+        t.table_ename ywbm1,t.simple_name xtmc,t2.dept_name ssbm,t.org_name ssbm1,
+        t.column_ename ywzdmc,t.column_cname zwzdmc,t.column_desc zdjs,
+        t.column_type zdlx,t.is_pk sfzj,t.is_required sfwk,t.is_sensitive sfmgzd
+        from t_up_column_zs t
+        left join t_up_table_zs b on t.table_ename = b.table_ename
+        left join t_up_system_zs t2 on t2.system_code = t.system_code
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and t.simple_name like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and t2.dept_name = #{ssbm}
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and b.table_ename =#{ywbm}
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and b.db_user = #{xtyh}
+            </if>
+            <if test=" ywzdmc != null and ywzdmc != '' ">
+                and t.column_ename like concat('%',#{ywzdmc},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 一级目录=》 根据系统查询表信息-详情 -->
+    <select id="queryTableListByOneSytemDetail" parameterType="pd" resultType="pd">
+        select distinct
+        b.negative_type sffmqd,b.db_user xtyh,b.table_cname zwbm,b.table_ename ywbm,
+        t.table_ename ywbm1,t.simple_name xtmc,t2.dept_name ssbm,t.org_name ssbm1,
+        t.column_ename ywzdmc,t.column_cname zwzdmc,t.column_desc zdjs,
+        t.column_type zdlx,t.is_pk sfzj,t.is_required sfwk,t.is_sensitive sfmgzd
+        from t_down_table_zs b
+        left join t_down_column_zs t
+        on t.table_ename = b.table_ename and t.simple_name = b.simple_name and t.db_user = b.db_user
+        left join dict_system_dept t2 on t2.system_name=b.simple_name
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and b.simple_name like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and b.table_ename =#{ywbm}
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and b.db_user = #{xtyh}
+            </if>
+            <if test=" ywzdmc != null and ywzdmc != '' ">
+                and  t.column_ename like concat('%',#{ywzdmc},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询数据表的总计条数(申请热度) 暂时没用 -->
+    <select id="queryTableAllApplyCount" parameterType="pd" resultType="java.lang.Integer">
+        select count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.sqbywbm = #{sqbywbm}) a
+    </select>
+
+    <!-- 查询当前表是否已经收藏 count(*)  <![CDATA[<=]]>-->
+    <select id="queryIsCollection" parameterType="pd" resultType="java.lang.Integer">
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+             when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 2
+             when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from flow_shoppingcart t
+        where t.sqbssxt = #{xtmc} and t.sqbssbm = #{ssbm}
+        and t.sqbxtyh = #{xtyh} and t.sqbywbm = #{ywbm}
+        and t.sqrid like concat('%',#{sqrid},'%') and t.zt != -2
+        <if test=" sqbsqbm != null and sqbsqbm != '' ">
+            and t.sqbsqbm = #{sqbsqbm}
+        </if>
+    </select>
+
+    <!-- 查询当前表是否已经收藏  贴源层使用-->
+    <select id="queryIsCollectionTyc" parameterType="pd" resultType="java.lang.Integer">
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+             when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 2
+             when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from flow_shoppingcart t
+        where  1=1 and t.zt != -2
+        and t.sqrid like concat('%',#{sqrid},'%')
+        <if test=" sqbsqbm != null and sqbsqbm != '' ">
+            and t.sqbsqbm = #{sqbsqbm}
+        </if>
+    </select>
+
+    <!-- 查询共享层表信息 -->
+    <select id="queryGxcTableList" parameterType="pd" resultType="pd">
+        select distinct t.table_name,t.table_cn_name,t.table_type,t.pull_time
+        from pull_column_dict t
+        where  t.table_type like '共享层%'
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.table_name like concat('%',#{ywbm},'%')
+            </if>
+            <if test=" zwbm != null and zwbm != '' ">
+                and t.table_cn_name like concat('%',#{zwbm},'%')
+            </if>
+    </select>
+
+    <!-- 查询共享层表信息-字段 -->
+    <select id="queryGxcTableListColumn" parameterType="pd" resultType="pd">
+        select t.column_name,t.column_cn_name,t.column_type,t.column_length,t.column_nullable
+        from pull_column_dict t
+        <where>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.table_name like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 贴源层是否接入表 -->
+    <select id="queryZjztTableCount" parameterType="pd" resultType="java.lang.Integer">
+            select count(1) from (
+            SELECT
+                distinct
+                t1.simple_name,
+                t1.table_ename,
+                t1.db_user,
+                upper(
+                    concat(
+                        t2.zt_qz,
+                        t1.db_user,
+                        '_',
+                        t1.table_ename
+                    )
+                ) sjzt_bm,
+                upper(
+                    concat(
+                        t2.zt_qz,
+                        t2.xt_slm,
+                        t1.db_user,
+                        '_',
+                        t1.table_ename
+                    )
+                ) sjzt_bm1
+            FROM
+                t_up_table_zs t1
+            LEFT JOIN zt_zjb t2 ON t2.id = t1.system_code
+            WHERE
+                t1.system_code = #{ system_code}
+            AND t1.table_ename = #{table_ename}
+            AND t1.db_user=#{db_user}
+                    ) t
+        join dict_sjzt_tables sjzt
+        on (upper(sjzt.table_cn_name) = upper(t.sjzt_bm)
+        or upper(sjzt.table_cn_name) = upper(t.sjzt_bm1))
+    </select>
+
+    <!-- 一级目录系统是否接入表 -->
+    <select id="queryOneSysZjztTableCount" parameterType="pd" resultType="java.lang.Integer">
+            select count(1) from (
+            SELECT
+                distinct
+                t1.simple_name,
+                t1.table_ename,
+                t1.db_user,
+                  upper(
+                    concat(
+                        t2.xt_code,
+                        '_',
+                        t2.xt_bs_fs,
+                        '_',
+                        t2.xt_jc_bm,
+                        '_',
+                        t1.table_ename
+                    )
+                ) sjzt_bm
+            FROM
+                t_down_table_zst1
+            LEFT JOIN zt_zjb t2 ON t2.id = t1.system_code
+            WHERE
+                t1.system_code = #{ system_code}
+            AND t1.table_ename = #{table_ename}
+            AND t1.db_user=#{db_user}
+                    ) t
+        join dict_sjzt_tables sjzt
+        on upper(sjzt.table_cn_name) = upper(t.sjzt_bm)
+    </select>
+
+    <!-- 加入热词   -->
+    <insert id="insertrc" parameterType="pd" >
+        insert into dict_rc(
+        sscmc,
+        sscssxt,
+        ssrmc,
+        ssrid,
+        ssrssbm
+        ) values (
+        #{ywbmrc},
+        #{xtmc},
+        #{yhmc},
+        #{sqrid},
+        #{yhbm}
+        )
+    </insert>
+
+    <!-- 查询热词   -->
+    <select id="queryrc" parameterType="pd" resultType="pd">
+        select    sscmc,
+        sscssxt,
+       count(1) as querynum
+				from dict_rc
+				where sscmc is not null and sscmc != ''
+				GROUP BY sscmc,sscssxt
+    </select>
+
+    <!-- 根据贴源层查询表信息 使用-->
+    <select id="queryTableListByTYCSystem" parameterType="pd" resultType="pd">
+        select distinct ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        SELECT
+        '' as xtyh
+        ,case when t.table_cname = '' or t.table_cname = 'null'
+        or t.table_cname = '*' or t.table_cname is null  then '' else t.table_cname end  AS  zwbm
+        ,t.table_cn_name as ywbm
+        ,zjb.id as system_code
+        ,zjb.xt_zw_sx as xtmc
+        ,zjb.xt_zw as xtmcqc
+        ,t2.dept_name ssbm
+        ,'' as bjs
+        ,case when t.negative_type = '' or t.negative_type is null then '非负面清单' else t.negative_type end  as sffmqd
+        ,REPLACE(t.table_ename,"odps.","") AS sqbm
+        ,REPLACE(t.table_ename,"odps.","") as table_ename
+        ,t.table_cn_name as table_cn_name
+        -- ,'' as pxzd
+        ,(
+        CASE
+        WHEN t.table_cn_name  = #{ywbm} THEN
+        1
+        WHEN t.table_cn_name  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN t.table_cn_name  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN t.table_cn_name  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        , d.sqbywbm AS sqbywbm,
+        d.sqbzwbm AS sqbzwbm,
+        d.sqrd AS sqrd
+        FROM
+        dict_sjzt_tables t
+        inner join zt_zjb zjb
+        on t.table_cn_name LIKE LOWER(concat(replace(zjb.zt_qz,"_","\_"), '%' )) and zjb.zt_qz is not null and zjb.zt_qz!= ''
+        AND (t.table_type = '贴源层生产' or t.table_type = '*') and zjb.xt_zw_sx =  #{xtmc}
+        left join dict_system_dept t2 on t2.system_name = zjb.xt_zw_sx
+        left join ( select REPLACE(LOWER(a.sqbsqbm),"odps.","") as sqbywbm,a.sqbzwbm,count(a.sqbsqbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbsqbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbsqbm,a.sqbzwbm
+        ) d on d.sqbywbm = t.table_ename
+        WHERE
+        1 = 1
+        and zjb.zt_qz is not null and zjb.zt_qz != ''
+        AND (t.table_type = '贴源层生产' or t.table_type = '*')
+        <if test=" ywbm != null and ywbm != '' ">
+            and t.table_cn_name like concat('%',#{ywbm},'%')
+        </if>
+
+        <if test=" ssbm != null and ssbm != '' ">
+            and t2.dept_name like concat('%',#{ssbm},'%')
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_cn_name like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            )
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and case when t.negative_type = '' or t.negative_type is null then '非负面清单' else t.negative_type end = #{sffmqd}
+        </if>
+        and zjb.xt_zw_sx =  #{xtmc}
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm asc
+        )  ls
+        order by pxzd
+    </select>
+
+    <!-- 根据贴源层查询表信息 使用 已经废弃 原因为要去掉t_up_table-->
+    <select id="queryTableListByTYCSystem_out" parameterType="pd" resultType="pd">
+        select ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct
+        j.xtyh AS xtyh,
+        j.zwbm AS zwbm,
+        j.ywbm,
+        -- AS ywbm_sm,
+        j.system_code AS system_code,
+        j.xtmc AS xtmc,
+        j.ssbm AS ssbm,
+        j.bjs AS bjs,
+        j.sffmqd AS sffmqd,
+        j.sqbm AS sqbm,
+        REPLACE(j.table_ename,"odps.","") AS table_ename,
+        -- REPLACE(j.table_ename,"odps.","") AS ywbm ,
+        j.table_cn_name AS table_cn_name,
+        j.pxzd AS pxzd,
+        d.sqbywbm AS sqbywbm,
+        d.sqbzwbm AS sqbzwbm,
+        d.sqrd AS sqrd
+        from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        IFNULL(dst.table_ename,dst1.table_ename) as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+        CASE
+        WHEN ywbm  = #{ywbm} THEN
+        1
+        WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm
+        ,t.table_ename ywbm
+        ,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t left join dict_system_dept t2 on t2.system_name = t.simple_name
+        where t.table_type = '有效表' and t.simple_name = #{xtmc}
+<!--        <if test=" ywbm != null and ywbm != '' ">-->
+<!--            and (t.table_ename like concat('%',#{ywbm},'%')-->
+<!--            or t.table_cname like concat('%',#{ywbm},'%')-->
+<!--            or t.table_desc like concat('%',#{ywbm},'%')-->
+<!--            )-->
+<!--        </if>-->
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        where 1=1
+        <if test=" ywbm != null and ywbm != '' ">
+            and IFNULL(dst.table_ename,dst1.table_ename) like concat('%',#{ywbm},'%')
+        </if>
+
+        <if test=" ssbm != null and ssbm != '' ">
+            and ssbm like concat('%',#{ssbm},'%')
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and (ywbm like concat('%',#{ywbm},'%')
+            or zwbm like concat('%',#{ywbm},'%')
+            or bjs like concat('%',#{ywbm},'%')
+            )
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and sffmqd = #{sffmqd}
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and xtyh like concat('%',#{xtyh},'%')
+        </if>
+        <if test=" is_zt != null and is_zt != '' ">
+            <choose>
+                <when test="is_zt=='是'.toString()">
+                    and    IFNULL(dst.table_ename,dst1.table_ename) is not null
+                </when>
+                <when test="is_zt=='否'.toString()">
+                    and    IFNULL(dst.table_ename,dst1.table_ename) is null
+                </when>
+            </choose>
+        </if>
+        ) j
+        left join
+        ( select a.sqbywbm,a.sqbzwbm,count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbywbm,a.sqbzwbm
+        ) d on d.sqbywbm = j.ywbm and d.sqbzwbm = j.zwbm
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm asc,e.ssbm,e.xtmc
+        )  ls
+        order by pxzd
+    </select>
+
+    <select id="queryTableListByTYCSystem_old" parameterType="pd" resultType="pd">
+        select ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct
+        j.xtyh AS xtyh,
+        j.zwbm AS zwbm,
+        j.ywbm AS ywbm_sm,
+        j.system_code AS system_code,
+        j.xtmc AS xtmc,
+        j.ssbm AS ssbm,
+        j.bjs AS bjs,
+        j.sffmqd AS sffmqd,
+        j.sqbm AS sqbm,
+        REPLACE(j.table_ename,"odps.","") AS table_ename,
+        REPLACE(j.table_ename,"odps.","") AS ywbm ,
+        j.table_cn_name AS table_cn_name,
+        j.pxzd AS pxzd,
+        d.sqbywbm AS sqbywbm,
+        d.sqbzwbm AS sqbzwbm,
+        d.sqrd AS sqrd
+        from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        IFNULL(dst.table_ename,dst1.table_ename) as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+        CASE
+        WHEN ywbm  = #{ywbm} THEN
+        1
+        WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm
+        ,t.table_ename ywbm
+        ,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t left join dict_system_dept t2 on t2.system_name = t.simple_name
+        where t.table_type = '有效表' and t.simple_name = #{xtmc}
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            or t.table_desc like concat('%',#{ywbm},'%')
+            )
+        </if>
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        <where>
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and (ywbm like concat('%',#{ywbm},'%')
+                or zwbm like concat('%',#{ywbm},'%')
+                or bjs like concat('%',#{ywbm},'%')
+                )
+            </if>
+            <if test=" sffmqd != null and sffmqd != '' ">
+                and sffmqd = #{sffmqd}
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" is_zt != null and is_zt != '' ">
+                <choose>
+                    <when test="is_zt=='是'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is not null
+                    </when>
+                    <when test="is_zt=='否'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is null
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ) j
+        left join
+        ( select a.sqbywbm,a.sqbzwbm,count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbywbm,a.sqbzwbm
+        ) d on d.sqbywbm = j.ywbm and d.sqbzwbm = j.zwbm
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm_sm asc,e.ssbm,e.xtmc
+        )  ls
+        order by pxzd
+    </select>
+
+    <!-- 根据共享层查询表信息 使用-->
+    <select id="queryTableListByGXCXTY" parameterType="pd" resultType="pd">
+        SELECT
+        ( @rowNum := @rowNum + 1 ) AS rownum,
+        e.sqbm AS table_ename,
+        REPLACE( e.sqbm,"sjzt_hlj_dwd_pro.","") AS sqbywbm,
+        e.table_ename as ywbm,
+        e.zwbm AS zwbm,
+        ifnull(e.zwbm,'暂无') AS bjs,
+        e.sffmqd,
+        '0' as sqrd,
+--         CASE
+--         WHEN zjb_id is not null and zjb_xt_zw is not null THEN zjb_xt_zw
+--         WHEN gxc_table_name_zt is not null and gxc_system_name is not null  THEN gxc_system_name
+--         ELSE  "" end as xtmc,
+--         CASE
+--         WHEN zjb_id is not null THEN zjb_id
+--         WHEN gxc_table_name_zt is not null and gxc_system_code is not null THEN gxc_system_code
+--         ELSE  "" end system_code,
+        e.xtmc as belongname,
+        IFNULL(zjb_system_name,'') as xtmc,
+        IFNULL(zjb_system_name_qc,'') as xtmcqc,
+        IFNULL(zjb_system_code,'') as system_code,
+        IFNULL(dst_dept_name,'') as dept_name,
+        '数据中台' as ssbm
+        FROM
+        (
+        SELECT
+        t.table_ename,
+        REPLACE(t.table_ename,"odps.","") AS sqbm,
+        ifnull(t.table_cname,"") AS zwbm,
+        t.negative_type as sffmqd,
+        CASE
+--         WHEN zjb.id is not null THEN zjb.xt_zw
+        WHEN t.table_ename LIKE "%dwd_itg%" THEN
+        "综合域"
+        WHEN t.table_ename LIKE "%dwd_ast%" THEN
+        "资产域"
+        WHEN t.table_ename LIKE "%dwd_prj%" THEN
+        "项目域"
+        WHEN t.table_ename LIKE "%dwd_mat%" THEN
+        "物资域"
+        WHEN t.table_ename LIKE "%dwd_mrt%" THEN
+        "市场域"
+        WHEN t.table_ename LIKE "%dwd_cst%" THEN
+        "客户域"
+        WHEN t.table_ename LIKE "%dwd_grid%" THEN
+        "电网域"
+        WHEN t.table_ename LIKE "%dwd_fin%" THEN
+        "财务域"
+        WHEN t.table_ename LIKE "%dwd_saf%" THEN
+        "安全域"
+--         WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.UN03_03_HZ_FCM_%" THEN
+--         "财务管控系统"
+--         WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.un15_02_amr_%" THEN
+--         "用电信息采集系统"
+        ELSE "其他"
+        END as xtmc,
+        (
+        CASE
+        WHEN t.table_ename  = #{ywbm} THEN
+        1
+        WHEN t.table_ename  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) AS pxzd
+        ,ifnull(zjb.id,g.system_code) as zjb_system_code
+        ,ifnull(zjb.xt_zw_sx,g.system_name) as zjb_system_name
+        ,ifnull(zjb.xt_zw,dst.system_name_qc) as zjb_system_name_qc
+        ,dst.dept_name as dst_dept_name
+--         ,zjb.id as zjb_id
+--         ,zjb.xt_zw as zjb_xt_zw
+--         ,g.table_name_zt as gxc_table_name_zt
+--         ,g.system_name	as gxc_system_name
+--         ,g.system_code as gxc_system_code
+        FROM
+        dict_sjzt_tables t
+        left join zt_zjb zjb
+        on t.table_ename LIKE LOWER(concat(zjb.front_connect,concat(zjb.xt_code, '%' )))
+        and zjb.xt_code is not null and zjb.xt_code != ''
+        left join pmsn_code_gxc g
+        on g.table_name_zt = t.table_ename and g.table_type = '共享层'
+        left join dict_system_dept dst
+        on dst.system_code = ifnull(zjb.id,g.system_code)
+        WHERE
+        1 = 1
+        AND t.table_type = '共享层生产'
+        <if test=" xtmcbh != null and xtmcbh != '' ">
+            and t.table_ename like concat('%',#{xtmcbh},'%')
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and  t.table_ename like concat('%',#{ywbm},'%')
+        </if>
+        ) e,(select (@rowNum:=#{beginNum})) f
+        where 1=1
+        <if test=" xtmc != null and xtmc != '' ">
+            and xtmc = #{xtmc}
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and e.sffmqd = #{sffmqd}
+        </if>
+    </select>
+
+    <!-- 根据分析层查询表信息 使用-->
+    <select id="queryTableListByFXCXTY" parameterType="pd" resultType="pd">
+        SELECT
+        ( @rowNum := @rowNum + 1 ) AS rownum,
+        REPLACE( e.sqbm,"odps.","") as table_ename,
+        e.sqbm as ywbm,
+        REPLACE( REPLACE( e.sqbm,"odps.sjzt_hlj_dwd_pro.",""), "sjzt_hlj_dwd_pro.","") sqbywbm,
+        IFNULL(e.zwbm,"") as zwbm,
+        e.sffmqd,
+        e.sqrd
+        ,CASE
+        WHEN zjb_id is not null and zjb_xt_zw is not null THEN zjb_xt_zw
+        WHEN gxc_table_name_zt is not null and gxc_system_name is not null  THEN gxc_system_name
+        ELSE  "" end as xtmc,
+        CASE
+        WHEN zjb_id is not null THEN zjb_id
+        WHEN gxc_table_name_zt is not null and gxc_system_code is not null THEN gxc_system_code
+        ELSE  "" end system_code
+        ,'数据中台' as ssbm
+        FROM
+        (
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        REPLACE(t.table_ename,"odps.","") AS sqbm,
+        ifnull(t.table_cname,"") AS zwbm,
+        t.negative_type as sffmqd,
+        CASE
+        WHEN t.table_ename LIKE "%.dim_%" THEN
+        "维度表"
+        WHEN t.table_ename LIKE "%.dws_%" THEN
+        "汇总宽表"
+        WHEN t.table_ename LIKE "%.ads_%" THEN
+        "应用层表"
+        WHEN t.table_ename LIKE "%.fct_%" THEN
+        "事实明细层表"
+        ELSE "其他分析层表"
+        END "xtmc",
+        CASE
+        WHEN t.table_ename LIKE "%.dim_%" THEN
+        "dim_table"
+        WHEN t.table_ename LIKE "%.dws_%" THEN
+        "dws_table"
+        WHEN t.table_ename LIKE "%.ads_%" THEN
+        "ads_table"
+        WHEN t.table_ename LIKE "%.fct_%" THEN
+        "fct_table"
+        ELSE "qtfxcb"
+        END "system_code"
+        ,(
+        CASE
+        WHEN t.table_ename  = #{ywbm} THEN
+        1
+        WHEN t.table_ename  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) AS pxzd
+        ,zjb.id as zjb_id
+        ,zjb.xt_zw as zjb_xt_zw
+        ,g.table_name_zt as gxc_table_name_zt
+        ,g.system_name	as gxc_system_name
+        ,g.system_code as gxc_system_code
+        FROM
+        dict_sjzt_tables t
+        left join zt_zjb zjb
+        on t.table_ename LIKE LOWER(concat(zjb.front_connect,concat(LOWER(zjb.xt_code), '%' )))
+        left join pmsn_code_gxc g
+        on g.table_name_zt = t.table_ename and g.table_type = '分析层'
+        WHERE
+        1 = 1
+        AND t.table_type = '分析层'
+        <if test=" xtmcbh != null and xtmcbh != '' ">
+            and t.table_ename like concat('%',#{xtmcbh},'%')
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and  t.table_ename like concat('%',#{ywbm},'%')
+        </if>
+        ) j
+        LEFT JOIN (
+        SELECT
+        a.sqbsqbm,
+        ifnull(a.sqbzwbm,"") as sqbzwbm,
+        count( a.sqbywbm ) sqrd
+        FROM
+        (
+        SELECT DISTINCT
+        t.lcpch,
+        t.sqrmc,
+        t.sqrlxfs,
+        t.sqbssxt,
+        t.sqbssbm,
+        t.sqbywbm,
+        t.sqbzwbm,
+        t.sqsj,
+        t.sqyh,
+        t.xqsm,
+        t.sqbsqbm
+        FROM
+        flow_lczxjdb t
+        WHERE
+        t.sqrid IS NOT NULL
+        AND t.sjlc IS NULL
+        AND t.spzt != '-1'
+        --         AND t.bz != '共享层'
+        ) a
+        GROUP BY
+        a.sqbsqbm
+        ) d ON d.sqbsqbm = j.sqbm
+        AND d.sqbzwbm = j.zwbm
+        ORDER BY
+        sqrd DESC
+        ) e,(select (@rowNum:=#{beginNum})) f
+        where xtmc = #{xtmc}
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and e.sffmqd = #{sffmqd}
+        </if>
+        ORDER BY pxzd,e.sqbm
+    </select>
+
+    <!-- 根据贴源层查询表的详情信息 使用-->
+    <select id="queryTableListByTYCXTYForDetails" parameterType="pd" resultType="pd">
+        select
+            dst.table_ename,
+            dst.negative_type as sffmqd,
+            '-' as sfmgzd,
+            '-' as sfwk,
+            '-' as sfzj,
+            IFNULL(dmt.dept_name,'数据中台') as ssbm,
+            '国网黑龙江省电力有限公司' as ssbm1,
+            '-' as xtyh,
+            dst.table_ename as ywbm,
+            dst.table_ename as ywbm1,
+            case when pct.column_name = '' or pct.column_name = 'null'
+            or pct.column_name = '*' or pct.column_name is null  then '' else pct.column_name end  AS  ywzdmc
+            ,case when pct.column_cn_name = '' or pct.column_cn_name = 'null'
+            or pct.column_cn_name = '*' or pct.column_cn_name is null  then '' else pct.column_cn_name end  AS  zwzdmc
+            ,case when pct.column_cn_name = '' or pct.column_cn_name = 'null'
+            or pct.column_cn_name = '*' or pct.column_cn_name is null  then '' else pct.column_cn_name end  AS  zdjs
+            ,pct.table_cn_name as zwbm
+            ,pct.column_type as zdlx
+        from dict_sjzt_tables dst
+        left join pull_column_dict pct
+        on dst.table_ename = pct.table_name
+        left join zt_zjb zjb
+        on dst.table_cn_name LIKE LOWER(concat(LOWER(zjb.zt_qz), '%' )) and zjb.zt_qz is not null and zjb.zt_qz != ''
+        left join pmsn_code_gxc g
+        on g.table_name_zt = dst.table_ename and g.table_type = '贴源层'
+        left join dict_system_dept dmt
+        on dmt.system_code = ifnull(zjb.id,g.system_code)
+        where dst.table_ename = #{ywbm}
+        and pct.table_name = #{ywbm}
+        <if test=" ywzdmc != null and ywzdmc != '' ">
+            and pct.column_name like concat('%',#{ywzdmc},'%')
+        </if>
+    </select>
+
+    <!-- 根据共享层查询表的详情信息 使用-->
+    <select id="queryTableListByGXCXTYForDetails" parameterType="pd" resultType="pd">
+        select
+            dst.table_ename,
+            dst.negative_type as sffmqd,
+            '-' as sfmgzd,
+            '-' as sfwk,
+            '-' as sfzj,
+            IFNULL(dmt.dept_name,'数据中台') as ssbm,
+            '国网黑龙江省电力有限公司' as ssbm1,
+            '暂无' as xtyh,
+            dst.table_ename as ywbm,
+            dst.table_ename as ywbm1,
+            pct.column_name as ywzdmc,
+            pct.column_cn_name as zwzdmc,
+            pct.column_cn_name as zdjs,
+            pct.table_cn_name as zwbm,
+            pct.column_type as zdlx
+        from dict_sjzt_tables dst
+        left join pull_column_dict pct
+        on dst.table_ename = pct.table_name
+        left join zt_zjb zjb
+        on dst.table_ename LIKE LOWER(concat(zjb.front_connect,concat(LOWER(zjb.xt_code), '%' )))
+        left join pmsn_code_gxc g
+        on g.table_name_zt = dst.table_ename and g.table_type = '共享层'
+        left join dict_system_dept dmt
+        on dmt.system_code = ifnull(zjb.id,g.system_code)
+        where dst.table_ename = #{ywbm}
+        and pct.table_name = #{ywbm}
+        <if test=" ywzdmc != null and ywzdmc != '' ">
+            and pct.column_name like concat('%',#{ywzdmc},'%')
+        </if>
+    </select>
+
+    <!-- 根据分析层查询表的详情信息 使用-->
+    <select id="queryTableListByFXCXTYForDetails" parameterType="pd" resultType="pd">
+        select
+            dst.table_ename,
+            dst.negative_type as sffmqd,
+            '-' as sfmgzd,
+            '-' as sfwk,
+            '-' as sfzj,
+            IFNULL(dmt.dept_name,'数据中台') as ssbm,
+            '国网黑龙江省电力有限公司' as ssbm1,
+            '-' as xtyh,
+            dst.table_ename as ywbm,
+            dst.table_ename as ywbm1,
+            pct.column_name as ywzdmc,
+            pct.column_cn_name as zwzdmc,
+            pct.column_cn_name as zdjs,
+            pct.table_cn_name as zwbm,
+            pct.column_type as zdlx
+        from dict_sjzt_tables dst
+        left join pull_column_dict pct
+        on dst.table_ename = pct.table_name
+        left join zt_zjb zjb
+        on dst.table_ename LIKE LOWER(concat(zjb.front_connect,concat(LOWER(zjb.xt_code), '%' )))
+        left join pmsn_code_gxc g
+        on g.table_name_zt = dst.table_ename and g.table_type = '分析层'
+        left join dict_system_dept dmt
+        on dmt.system_code = ifnull(zjb.id,g.system_code)
+        where dst.table_ename = #{ywbm}
+        and pct.table_name = #{ywbm}
+        <if test=" ywzdmc != null and ywzdmc != '' ">
+            and pct.column_name like concat('%',#{ywzdmc},'%')
+        </if>
+    </select>
+
+
+    <!-- 根据共享层查询表信息-->
+    <select id="queryTableListByGXCXTY111" parameterType="pd" resultType="pd">
+        SELECT
+        ( @rowNum := @rowNum + 1 ) AS rownum,
+        e.sqbm AS table_ename,
+        REPLACE( e.sqbm,"sjzt_hlj_dwd_pro.","") AS sqbywbm,
+        e.zwbm AS zwbm,
+        e.sffmqd,
+--         e.sqrd,
+        '0' as sqrd,
+        CASE
+        WHEN zjb_id is not null and zjb_xt_zw is not null THEN zjb_xt_zw
+        WHEN gxc_table_name_zt is not null and gxc_system_name is not null  THEN gxc_system_name
+        ELSE  "" end as xtmc,
+        CASE
+        WHEN zjb_id is not null THEN zjb_id
+        WHEN gxc_table_name_zt is not null and gxc_system_code is not null THEN gxc_system_code
+        ELSE  "" end system_code,
+        '数据中台' as ssbm
+        FROM
+        (
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        REPLACE(t.table_ename,"odps.","") AS sqbm,
+        ifnull(t.table_cname,"") AS zwbm,
+        t.negative_type as sffmqd,
+        CASE
+--         WHEN zjb.id is not null THEN zjb.xt_zw
+        WHEN t.table_ename LIKE "%dwd_itg%" THEN
+        "综合域"
+        WHEN t.table_ename LIKE "%dwd_ast%" THEN
+        "资产域"
+        WHEN t.table_ename LIKE "%dwd_prj%" THEN
+        "项目域"
+        WHEN t.table_ename LIKE "%dwd_mat%" THEN
+        "物资域"
+        WHEN t.table_ename LIKE "%dwd_mrt%" THEN
+        "市场域"
+        WHEN t.table_ename LIKE "%dwd_cst%" THEN
+        "客户域"
+        WHEN t.table_ename LIKE "%dwd_grid%" THEN
+        "电网域"
+        WHEN t.table_ename LIKE "%dwd_fin%" THEN
+        "财务域"
+        WHEN t.table_ename LIKE "%dwd_saf%" THEN
+        "安全域"
+--         WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.UN03_03_HZ_FCM_%" THEN
+--         "财务管控系统"
+--         WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.un15_02_amr_%" THEN
+--         "用电信息采集系统"
+        ELSE "其他"
+        END "xtmc",
+        (
+        CASE
+        WHEN t.table_ename  = #{ywbm} THEN
+        1
+        WHEN t.table_ename  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN t.table_ename  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) AS pxzd
+        ,zjb.id as zjb_id
+        ,zjb.xt_zw as zjb_xt_zw
+        ,g.table_name_zt as gxc_table_name_zt
+        ,g.system_name	as gxc_system_name
+        ,g.system_code as gxc_system_code
+        FROM
+        dict_sjzt_tables t
+        left join zt_zjb zjb
+        on t.table_ename LIKE LOWER(concat(zjb.front_connect,concat(LOWER(zjb.xt_code), '%' )))
+        left join pmsn_code_gxc g
+        on g.table_name_zt = t.table_ename and g.table_type = '共享层'
+        WHERE
+        1 = 1
+        AND t.table_type = "共享层生产"
+        <if test=" ywbm != null and ywbm != '' ">
+            and  t.table_ename like concat('%',#{ywbm},'%')
+        </if>
+        ) j
+--         LEFT JOIN (
+--         SELECT
+--         a.sqbsqbm,
+--         ifnull(a.sqbzwbm,"") as sqbzwbm,
+--         count( a.sqbywbm ) sqrd
+--         FROM
+--         (
+--         SELECT DISTINCT
+--         t.lcpch,
+--         t.sqrmc,
+--         t.sqrlxfs,
+--         t.sqbssxt,
+--         t.sqbssbm,
+--         t.sqbywbm,
+--         t.sqbzwbm,
+--         t.sqsj,
+--         t.sqyh,
+--         t.xqsm,
+--         t.sqbsqbm
+--         FROM
+--         flow_lczxjdb t
+--         WHERE
+--         t.sqrid IS NOT NULL
+--         AND t.sjlc IS NULL
+--         AND t.spzt != '-1'
+--         --         AND t.bz != '共享层'
+--         ) a
+--         GROUP BY
+--         a.sqbsqbm
+--         ) d ON d.sqbsqbm = j.sqbm
+--         AND d.sqbzwbm = j.zwbm
+--         ORDER BY
+--         sqrd DESC
+        ) e,(select (@rowNum:=#{beginNum})) f
+        where xtmc = #{xtmc}
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and e.sffmqd = #{sffmqd}
+        </if>
+--  ORDER BY pxzd
+    </select>
+<!--  limit #{beginNum},#{pageRows}-->
+
+    <!-- 根据共享层查询表信息 求和-->
+    <select id="queryTableListByGXCXTYCount" parameterType="pd" resultType="java.lang.Integer">
+        select count(1) FROM
+        (
+                SELECT
+                ( @rowNum := @rowNum + 1 ) AS rownum,
+                REPLACE( e.sqbm,"odps.","") as table_ename,
+                REPLACE( REPLACE( e.sqbm,"odps.sjzt_hlj_dwd_pro.",""), "sjzt_hlj_dwd_pro.","") sqbywbm,
+                IFNULL(e.zwbm,"") as zwbm,
+                e.sffmqd,
+                e.sqrd,
+                CASE
+                WHEN zjb_id is not null and zjb_xt_zw is not null THEN zjb_xt_zw
+                WHEN gxc_table_name_zt is not null and gxc_system_name is not null  THEN gxc_system_name
+                ELSE  "" end as xtmc,
+                CASE
+                WHEN zjb_id is not null THEN zjb_id
+                WHEN gxc_table_name_zt is not null and gxc_system_code is not null THEN gxc_system_code
+                ELSE  "" end system_code,
+                '数据中台' as ssbm
+                FROM
+                (
+                SELECT
+                *
+                FROM
+                (
+                SELECT
+                REPLACE(t.table_ename,"odps.","") AS sqbm,
+                ifnull(t.table_cname,"") AS zwbm,
+                t.negative_type as sffmqd,
+                CASE
+                --         WHEN zjb.id is not null THEN zjb.xt_zw
+                WHEN t.table_ename LIKE "%dwd_itg%" THEN
+                "综合域"
+                WHEN t.table_ename LIKE "%dwd_ast%" THEN
+                "资产域"
+                WHEN t.table_ename LIKE "%dwd_prj%" THEN
+                "项目域"
+                WHEN t.table_ename LIKE "%dwd_mat%" THEN
+                "物资域"
+                WHEN t.table_ename LIKE "%dwd_mrt%" THEN
+                "市场域"
+                WHEN t.table_ename LIKE "%dwd_cst%" THEN
+                "客户域"
+                WHEN t.table_ename LIKE "%dwd_grid%" THEN
+                "电网域"
+                WHEN t.table_ename LIKE "%dwd_fin%" THEN
+                "财务域"
+                WHEN t.table_ename LIKE "%dwd_saf%" THEN
+                "安全域"
+                WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.UN03_03_HZ_FCM_%" THEN
+                "财务管控系统"
+                WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.un15_02_amr_%" THEN
+                "用电信息采集系统" ELSE "其他"
+                END "xtmc",
+                CASE
+                --         WHEN zjb.id is not null THEN zjb.id
+                WHEN t.table_ename LIKE "%dwd_itg%" THEN
+                "dwd_itg"
+                WHEN t.table_ename LIKE "%dwd_ast%" THEN
+                "dwd_ast"
+                WHEN t.table_ename LIKE "%dwd_prj%" THEN
+                "dwd_prj"
+                WHEN t.table_ename LIKE "%dwd_mat%" THEN
+                "dwd_mat"
+                WHEN t.table_ename LIKE "%dwd_mrt%" THEN
+                "dwd_mrt"
+                WHEN t.table_ename LIKE "%dwd_cst%" THEN
+                "dwd_cst"
+                WHEN t.table_ename LIKE "%dwd_grid%" THEN
+                "dwd_grid"
+                WHEN t.table_ename LIKE "%dwd_fin%" THEN
+                "dwd_fin"
+                WHEN t.table_ename LIKE "%dwd_saf%" THEN
+                "dwd_saf"
+                WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.UN03_03_HZ_FCM_%" THEN
+                "UN03_03"
+                WHEN t.table_ename LIKE "odps.sjzt_hlj_dwd_pro.un15_02_amr_%" THEN
+                "un15_02" ELSE "qtxt"
+                END "system_code"
+                ,(
+                CASE
+                WHEN t.table_ename  = #{ywbm} THEN
+                1
+                WHEN t.table_ename  LIKE concat( #{ywbm}, '%' ) THEN
+                2
+                WHEN t.table_ename  LIKE concat( '%', #{ywbm} ) THEN
+                3
+                WHEN t.table_ename  LIKE concat( '%', #{ywbm}, '%' ) THEN
+                4 ELSE 10
+                END
+                ) AS pxzd
+                ,zjb.id as zjb_id
+                ,zjb.xt_zw as zjb_xt_zw
+                ,g.table_name_zt as gxc_table_name_zt
+                ,g.system_name	as gxc_system_name
+                ,g.system_code as gxc_system_code
+                FROM
+                dict_sjzt_tables t
+                left join zt_zjb zjb
+                on t.table_ename LIKE LOWER(concat(zjb.front_connect,concat(LOWER(zjb.xt_code), '%' )))
+                left join pmsn_code_gxc g
+                on g.table_name_zt = t.table_ename and g.table_type = '共享层'
+                WHERE
+                1 = 1
+                AND t.table_type = "共享层生产"
+                <if test=" ywbm != null and ywbm != '' ">
+                    and  t.table_ename like concat('%',#{ywbm},'%')
+                </if>
+                ) j
+                LEFT JOIN (
+                SELECT
+                a.sqbsqbm,
+                ifnull(a.sqbzwbm,"") as sqbzwbm,
+                count( a.sqbywbm ) sqrd
+                FROM
+                (
+                SELECT DISTINCT
+                t.lcpch,
+                t.sqrmc,
+                t.sqrlxfs,
+                t.sqbssxt,
+                t.sqbssbm,
+                t.sqbywbm,
+                t.sqbzwbm,
+                t.sqsj,
+                t.sqyh,
+                t.xqsm,
+                t.sqbsqbm
+                FROM
+                flow_lczxjdb t
+                WHERE
+                t.sqrid IS NOT NULL
+                AND t.sjlc IS NULL
+                AND t.spzt != '-1'
+                --         AND t.bz != '共享层'
+                ) a
+                GROUP BY
+                a.sqbsqbm
+                ) d ON d.sqbsqbm = j.sqbm
+                AND d.sqbzwbm = j.zwbm
+                ORDER BY
+                sqrd DESC
+                ) e,(select (@rowNum:=#{beginNum})) f
+                where xtmc = #{xtmc}
+                <if test=" sffmqd != null and sffmqd != '' ">
+                    and e.sffmqd = #{sffmqd}
+                </if>
+                ORDER BY
+                pxzd
+        ) abc
+    </select>
+
+    <!-- 查询 共享层的表是否已经收藏 0：未加入购物车 1：已申请  其他：已加入购物车-->
+    <select id="queryIsCollectionByGXCXTY" parameterType="pd" resultType="java.lang.Integer">
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+        when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 2
+        when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from flow_shoppingcart t
+        where t.sqbssxt = #{xtmc}
+        and t.sqrid = #{sqrid}
+        and t.sqbsqbm = #{sqbsqbm} and t.zt != -2
+    </select>
+
+    <!-- 查询 分析层的表是否已经收藏 -->
+    <select id="queryIsCollectionByFXCXTY" parameterType="pd" resultType="java.lang.Integer">
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+        when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 2
+        when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from flow_shoppingcart t
+        where t.sqbssxt = #{xtmc}
+        and t.sqrid = #{sqrid}
+        and t.sqbsqbm = #{sqbsqbm} and t.zt != -2
+    </select>
+
+    <!-- 查询一级目录是否已经收藏 count(*)  <![CDATA[<=]]>-->
+    <select id="queryIsCollectionForOneSys" parameterType="pd" resultType="java.lang.Integer">
+        select
+        case when gwc=0 or gwc is null then ddl else gwc end  as num
+        from
+        (
+        select
+        (
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+        when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 2
+        when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from flow_shoppingcart t
+        where t.sqbssxt = #{xtmc} and t.sqbssbm = #{ssbm}
+        and t.sqbxtyh = #{xtyh} and t.sqbywbm = #{ywbm}
+        and t.sqrid like concat('%',#{sqrid},'%')
+        <if test=" sqbsqbm != null and sqbsqbm != '' ">
+            and t.sqbsqbm = #{sqbsqbm}
+        </if>
+        ) as gwc,
+        (
+        select
+        case when IFNULL(sum(t.zt),-1) <![CDATA[>]]> 0 then 1
+        when IFNULL(sum(t.zt),-1) <![CDATA[=]]> 0 then 4
+        when IFNULL(sum(t.zt),-1) <![CDATA[<]]> 0 then 0
+        end as num
+        from pmsn_onesys_work_shoppingcart t
+        where t.sqbssxt = #{xtmc} and t.sqbssbm = #{ssbm}
+        and t.sqbxtyh = #{xtyh} and t.sqbywbm = #{ywbm}
+        and t.sqrid like concat('%',#{sqrid},'%')
+        <if test=" sqbsqbm != null and sqbsqbm != '' ">
+            and t.sqbsqbm = #{sqbsqbm}
+        </if>
+        ) as ddl
+        from  dual
+        ) t
+    </select>
+
+
+    <!-- 根据贴源层查询表信息 -->
+    <select id="queryTableListByTYCSystem111" parameterType="pd" resultType="pd">
+        select ls.* from  (
+        select  (@rowNum:=@rowNum+1) as rownum,e.* from (
+        select distinct j.*,d.* from (
+        select zb.*, concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm) sqbm,
+        REPLACE( IFNULL(dst.table_ename,dst1.table_ename),"odps.","") as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+        (
+        CASE
+        WHEN ywbm  = #{ywbm} THEN
+        1
+        WHEN ywbm  LIKE concat( #{ywbm}, '%' ) THEN
+        2
+        WHEN ywbm  LIKE concat( '%', #{ywbm} ) THEN
+        3
+        WHEN ywbm  LIKE concat( '%', #{ywbm}, '%' ) THEN
+        4 ELSE 10
+        END
+        ) as pxzd
+        from
+        (
+        select distinct t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t left join dict_system_dept t2 on t2.system_name = t.simple_name
+        where t.table_type = '有效表' and t.simple_name = #{xtmc}
+        <if test=" ywbm != null and ywbm != '' ">
+            and (t.table_ename like concat('%',#{ywbm},'%')
+            or t.table_cname like concat('%',#{ywbm},'%')
+            or t.table_desc like concat('%',#{ywbm},'%')
+            )
+        </if>
+        ) zb
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r on zb.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.zt_qz),zb.xtyh,'_',zb.ywbm)
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(upper(r.zt_qz),r.xt_slm,zb.xtyh,'_',zb.ywbm)
+        <where>
+            (dst.table_type = "贴源层生产" or dst1.table_type = "贴源层生产")
+            <if test=" ssbm != null and ssbm != '' ">
+                and ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and (ywbm like concat('%',#{ywbm},'%')
+                or zwbm like concat('%',#{ywbm},'%')
+                or bjs like concat('%',#{ywbm},'%')
+                )
+            </if>
+            <if test=" sffmqd != null and sffmqd != '' ">
+                and sffmqd = #{sffmqd}
+            </if>
+            <if test=" sffmqd == null or sffmqd == '' ">
+                and sffmqd is null
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" is_zt != null and is_zt != '' ">
+                <choose>
+                    <when test="is_zt=='是'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is not null
+                    </when>
+                    <when test="is_zt=='否'.toString()">
+                        and    IFNULL(dst.table_ename,dst1.table_ename) is null
+                    </when>
+                </choose>
+            </if>
+        </where>
+        ) j
+        left join
+        ( select a.sqbywbm,a.sqbzwbm,count(a.sqbywbm) sqrd from (
+        select distinct t.lcpch,t.sqrmc,t.sqrlxfs,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,t.sqsj,t.sqyh,t.xqsm
+        from flow_lczxjdb t
+        where t.sqrid is not null and t.sjlc is null and t.spzt != '-1' and t.bz != '共享层') a
+        group by a.sqbywbm,a.sqbzwbm
+        ) d on d.sqbywbm = j.ywbm and d.sqbzwbm = j.zwbm
+        order by d.sqrd desc,j.ssbm,j.xtmc,j.ywbm asc
+
+        ) e,(select (@rowNum:=#{beginNum})) f
+        order by e.sqrd desc,e.ywbm asc,e.ssbm,e.xtmc
+        )  ls
+        order by pxzd
+    </select>
+
+
+</mapper>

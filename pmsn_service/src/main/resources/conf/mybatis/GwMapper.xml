@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.gwDao">
+    <!-- 总部同步省侧数据上传需求申请接口-->
+    <insert id="insert" parameterType="java.util.Map">
+        insert into jk_one (
+        Ticketid,
+        Title,
+        Description,
+        projectname,
+        SLAcompletetime,
+        transfertype,
+        source_sysname,
+        tablename,
+        fieldnum,
+        target_tablename,
+        target_fieldnum,
+        trigger_method,
+        trigger_time,
+        identification_field,
+        datanum,
+        frequency,
+        split_logic,
+        deal_paramater,
+        note,
+        priorty
+        )
+        VALUES
+        (
+       #{Ticketid},
+        #{Title},
+        #{Description},
+        #{projectname},
+        #{SLAcompletetime},
+        #{transfertype},
+        #{source_sysname},
+        #{tablename},
+        #{fieldnum},
+        #{target_tablename},
+        #{target_fieldnum},
+        #{trigger_method},
+        #{trigger_time},
+        #{identification_field},
+        #{datanum},
+        #{frequency},
+        #{split_logic},
+        #{deal_paramater},
+        #{note},
+        #{priorty}
+        )
+    </insert>
+    <!-- 总部同步省侧附件接口-->
+    <insert id="insertfile" parameterType="java.util.Map">
+        insert into jk_file_two (
+        fileId,
+        Ticketid,
+        createTime,
+        fileName,
+        fileContent
+        )
+        VALUES
+        (
+        #{fileId},
+        #{Ticketid},
+        #{createTime},
+        #{fileName},
+        #{fileContent}
+        )
+    </insert>
+    <!-- 接收省侧数据上传处理日志接口-->
+    <select  id="selectdate" parameterType="java.util.Map" resultType="java.util.Map">
+        select * from jk_three where createTime = (select MAX(createTime) from jk_three)
+    </select>
+    <!-- 接收省侧数据上传处理附件信息-->
+    <select  id="selectfile" parameterType="java.util.Map" resultType="java.util.Map">
+        select * from jk_four where createTime = (select MAX(createTime) from jk_three)
+    </select>
+</mapper>

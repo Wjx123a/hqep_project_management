@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.PersonDao">
+
+
+    <!--    创建账号信息-->
+    <insert id="saveLoginInfo" parameterType="pd">
+        INSERT INTO PMSN_LOGIN_ROLE
+            ( ID, LOGIN_NUM, PASSWORD, ROLE_ID, ROLE_NAME, STATUS, CREATE_TIME, MODIFY_TIME, VISIABLE,iscflag )
+        VALUES
+            (
+            #{id},
+            #{loginNum},
+            #{password},
+            #{roleId},
+            #{roleName},
+            '1',
+            NOW(),
+            NOW(),
+            '1',
+             #{iscflag})
+    </insert>
+
+    <!--    创建人员信息-->
+    <insert id="savePersonInfo" parameterType="pd">
+        INSERT INTO PMSN_PERSON (
+            ID,
+            LOGIN_ID,
+            NAME,
+            PERSON_ID,
+            SEX,
+            IDENTITY_NUM,
+            PHONE,
+            PHOTO,
+            ORG_NAME,
+            ORG_CODE,
+            DEP_NAME,
+            DEP_CODE,
+            CREATE_TIME,
+            MODIFY_TIME,
+            VISIABLE )
+        VALUES
+            (
+            UUID(),
+            #{id},
+            #{name},
+            #{personId},
+            #{sex},
+            #{IdentityNum},
+            #{phone},
+            #{photo},
+            #{orgName},
+            #{orgCode},
+            #{depName},
+            #{depCode},
+            NOW(),
+            NOW(),
+            '1' )
+    </insert>
+
+    <select id="queryLoginNum" parameterType="String" resultType="boolean">
+        SELECT COUNT(LOGIN_NUM) FROM PMSN_LOGIN_ROLE WHERE LOGIN_NUM = #{loginNum} AND VISIABLE =1
+    </select>
+
+    <!-- 查询用户管理列表-->
+    <select id="queryUserInfo" parameterType="pd" resultType="pd">
+        SELECT
+            LOGIN_NUM AS "userName",
+            ROLE_ID AS "roleId",
+            ROLE_NAME AS "roleName",
+            STATUS AS "status",
+            TO_CHAR("CREATE_TIME",'yyyy-mm-dd hh24:mi:ss') as "createTime",
+            TO_CHAR("MODIFY_TIME",'yyyy-mm-dd hh24:mi:ss') as "modifyTime"
+        FROM PMSN_LOGIN_ROLE
+        WHERE 1=1
+        <if test="userName != null and userName != '' ">
+            AND LOGIN_NUM like concat('%',#{userName},'%')
+        </if>
+    </select>
+
+    <!-- 修改用户状态-->
+    <update id="updateUserStatus" parameterType="pd">
+        update PMSN_LOGIN_ROLE
+        set STATUS = #{status}
+        where LOGIN_NUM = #{userName}
+    </update>
+
+    <!-- 重置密码-->
+    <update id="resetPassword" parameterType="pd">
+            UPDATE
+                PMSN_LOGIN_ROLE
+            SET
+                PASSWORD = #{newPassword},
+                OPT_ID = #{optId},
+                OPT_NAME = #{optName},
+                OPT_EXPLAIN = #{optExplain},
+                OPT_TIME = NOW(),
+                MODIFY_TIME = NOW()
+            WHERE
+                LOGIN_NUM = #{loginNum}
+                and VISIABLE =1
+    </update>
+
+    <!-- 新建角色 -->
+    <insert id="insertRole" parameterType="pd">
+        insert into flow_jsb
+        (
+            id,
+            jsmc,
+            qyzt,
+            cjr,
+            cjrmc,
+            cjsj,
+            bz
+        )
+        values
+        (
+            UUID(),
+            #{jsmc},
+            #{qyzt},
+            #{cjr},
+            #{cjrmc},
+            #{cjsj},
+            #{bz}
+        )
+    </insert>
+
+    <!-- 修改角色 -->
+    <update id="updateRole" parameterType="pd">
+        update flow_jsb set
+        jsmc = #{jsmc},
+        qyzt = #{qyzt},
+        bz = #{bz}
+        where id = #{id}
+    </update>
+
+    <!-- 查询角色-->
+    <select id="queryRole" parameterType="pd" resultType="pd">
+        select
+        t.id,t.jsmc,t.qyzt,t.cjr,t.cjrmc,t.cjsj,t.bz
+        from flow_jsb t
+        where t.qyzt !=0 and t.jsmc is not null and t.jsmc != ''
+        <if test=" jsmc != null and jsmc != '' ">
+            and jsmc like concat('%',#{jsmc},'%')
+        </if>
+    </select>
+
+    <!-- 查询单位-->
+    <select id="queryCompany" parameterType="pd" resultType="pd">
+        select
+        t.id,t.dwbm,t.dwmc,t.dwszd,t.bz
+        from flow_company t
+        <where>
+            <if test=" dwmc != null and dwmc != '' ">
+                and dwmc like concat('%',#{dwmc},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

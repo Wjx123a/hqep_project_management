@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="sjfwgj_web:war">
+    <output-path>$PROJECT_DIR$/sjfwgj_web/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>sjfwgj_web</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="sjyyzx.war">
+      <element id="artifact" artifact-name="sjfwgj_web:war exploded" />
+    </root>
+  </artifact>
+</component>

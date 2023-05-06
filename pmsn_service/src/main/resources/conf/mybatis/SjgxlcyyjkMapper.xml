@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.SjgxlcyyjkDao">
+    <!-- 数据共享流程运营监测_环节总览_环节工单情况  -->
+    <select id="queryLinkOverview" parameterType="pd" resultType="java.util.Map">
+        select
+        left(zz.sqdate,7)
+        ,count(1) ordernum
+        ,count(case when ordernum = sp1Finsh then 1 else null end ) as sp1Finsh
+        ,count(case when sp1Go > 0 then 1 else null end ) as sp1Go
+        ,count(case when ordernum = sp2Finsh then 1 else null end ) as sp2Finsh
+        ,count(case when sp2Go > 0 then 1 else null end ) as sp2Go
+        ,count(case when sp3Total = sp3Finsh and sp3Finsh !=0 then 1 else null end ) as sp3Finsh
+        ,count(case when sp3Go > 0 then 1 else null end ) as sp3Go
+        ,count(case when ordernum = sp4Finsh then 1 else null end ) as sp4Finsh
+        ,count(case when sp4Go > 0 then 1 else null end ) as sp4Go
+        ,count(case when sp1Overdue > 0 then 1 else null end ) as sp1Overdue
+        ,count(case when sp1Warning > 0 then 1 else null end ) as sp1Warning
+        ,count(case when sp2Overdue > 0 then 1 else null end ) as sp2Overdue
+        ,count(case when sp2Warning > 0 then 1 else null end ) as sp2Warning
+        ,count(case when sp3Overdue > 0 then 1 else null end ) as sp3Overdue
+        ,count(case when sp3Warning > 0 then 1 else null end ) as sp3Warning
+        ,count(case when sp4Overdue > 0 then 1 else null end ) as sp4Overdue
+        ,count(case when sp4Warning > 0 then 1 else null end ) as sp4Warning
+        from
+        (
+        select
+        left(fxb.sqdate,7) as sqdate,
+        fxb.numId,
+        count(1) ordernum,
+        count(case when fxb.1sp is not null then 1  when fxb.1sp is null and fxb.spztfinsh =2 then 1 else null end) as sp1Finsh,
+        count(case when fxb.1sp is null and fxb.spztfinsh !=2 then 1 else null end) as sp1Go,
+        count(case when fxb.1sp is not null and fxb.2sp is not null then 1
+        when fxb.1sp is not null and fxb.2sp is null and fxb.spztfinsh =2 then 1
+        else null end) as sp2Finsh,
+        count(case when fxb.1sp is not null and fxb.2sp is null and fxb.spztfinsh !=2 then 1 else null end) as sp2Go,
+        count(case when fxb.isFmqd != '非负面清单' then 1 else null end) as sp3Total,
+        count(case when fxb.isFmqd != '非负面清单' and fxb.1sp is not null and fxb.2sp is not null
+        and fxb.3sp is not null then 1
+        when fxb.isFmqd != '非负面清单' and fxb.1sp is not null and fxb.2sp is not null
+        and fxb.3sp is null and fxb.spztfinsh =2 then 1
+        else null end) as sp3Finsh,
+        count(case when fxb.isFmqd = '非负面清单' then null
+        when fxb.isFmqd != '非负面清单' and  fxb.1sp is not null
+        and fxb.2sp is not null and fxb.3sp is null  and fxb.spztfinsh !=2 then 1 else null end) as sp3Go,
+        count(case when fxb.1sp is not null and fxb.2sp is not null and fxb.4sp is not null then 1
+        when fxb.1sp is not null and fxb.2sp is not null and fxb.4sp is null and fxb.spztfinsh =2 and fxb.isFmqd = '非负面清单' then 1
+        when fxb.1sp is not null and fxb.2sp is not null and fxb.3sp is not null and fxb.4sp is null and fxb.spztfinsh =2 and fxb.isFmqd != '非负面清单' then 1
+        else null end) as sp4Finsh,
+        count(case when fxb.1sp is not null and fxb.2sp is not null and fxb.4sp is null  and fxb.isFmqd = '非负面清单' and fxb.spztfinsh !=2 then 1
+        when fxb.1sp is not null and fxb.2sp is not null and fxb.3sp is not null and fxb.4sp is null and fxb.spztfinsh !=2 and fxb.isFmqd != '非负面清单' then 1
+        else null end) as sp4Go,
+        count(case when sp1time >= 24 then 1 else null end) as sp1Overdue,
+        count(case when 24 > sp1time and sp1time >= 16 then 1 else null end) as sp1Warning,
+        count(case when sp2time >= 24 then 1 else null end) as sp2Overdue,
+        count(case when 24 > sp2time and sp2time >= 16 then 1 else null end) as sp2Warning,
+        count(case when sp3time >= 24 then 1 else null end) as sp3Overdue,
+        count(case when 24 > sp3time and sp3time >= 16 then 1 else null end) as sp3Warning,
+        count(case when sp4time >= 24 then 1 else null end) as sp4Overdue,
+        count(case when 24 > sp4time and sp4time >= 16 then 1 else null end) as sp4Warning
+        from
+        (select
+        t.numId AS numId,t.lcspid AS lcspid,t.person AS person,t.phone AS phone,t.sqdate AS sqdate,t.tableName AS tableName
+        ,t.tableSystem AS tableSystem,t.tableDept AS tableDept,t.ztOwner AS ztOwner,t.description AS description,t.isFmqd AS isFmqd
+        ,t.spjd AS spjd,t.spzt AS spzt,t.sqrid AS sqrid,t.sqperson AS sqperson,t.sqrssdw AS sqrssdw,t.sqrssbm AS sqrssbm
+        ,t.1sp AS 1sp,t.2sp AS 2sp,IFNULL(t.3sp,t3.3sp) AS 3sp,t.4sp AS 4sp,t.bh AS bh,t.bhjb AS bhjb,t.3bh AS 3bh,t.4bh AS 4bh
+        ,t.YesNoBh AS YesNoBh,t.spsj AS spsj,t.spjb AS spjb,t.sqbzwbm AS sqbzwbm,t.xtbm AS xtbm,t.syncBj AS syncBj
+        ,t.bsskj AS bsskj
+        ,t.bbzxflag AS bbzxflag,t.yymc AS yymc
+        ,calculate_work_time_sum(t.sqdate,IFNULL(t.1sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s'))) as sp1time
+        ,calculate_work_time_sum(t.1sp,IFNULL(t.2sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s'))) as sp2time
+        -- ,calculate_work_time_sum(t.2sp,IFNULL(t.3sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s'))) as sp3time
+        -- ,calculate_work_time_sum(t.3sp,IFNULL(t.4sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s'))) as sp4time
+        ,case
+        when t.isFmqd = '非负面清单' then  0
+        else calculate_work_time_sum(t.2sp,IFNULL(t.3sp,IFNULL(t3.3sp,IFNULL(t.4sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s')))))
+        end as sp3time
+        ,case when t.isFmqd = '非负面清单'
+        then  calculate_work_time_sum(t.2sp,IFNULL(t.4sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s')))
+        else calculate_work_time_sum(IFNULL(t.3sp,IFNULL(t3.3sp,IFNULL(t.2sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s')))),IFNULL(t.4sp,DATE_FORMAT(now(), '%Y-%m-%d %H:%i:%s')))
+        end as sp4time
+        ,t4.spzt as spztfinsh
+        from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        left join flow_lczxjdb t4
+        on t4.lcpch = t.lcspid and t4.spzt != '-1'
+        -- where t.parent_lcspid is null and t.3sp is null and t.isFmqd is not null
+        where ((t.parent_lcspid is null and t.3sp is null and t.isFmqd is not null)
+        or (t.1sp is not null and t.2sp is not null and IFNULL(t.3sp,t3.3sp) is not null and t.4sp is not null))
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        ) fxb
+        group by left(fxb.sqdate,7),fxb.numId
+        ) zz
+        group by left(zz.sqdate,7)
+    </select>
+
+    <!-- 数据共享流程运营监测_规模分析_需求受理情况and工单受理情况  -->
+    <select id="queryScaleAnalysisOrderNum" parameterType="pd" resultType="java.util.Map">
+        select
+        left(zz.sqdate,#{queryTimeFormat}),
+        -- zz.gdid,
+        count(1) as order_num , -- 工单数量
+        count(case when zz.province_order_num > 0 then 1 else null end) as province_order_num , -- 省公司
+        count(case when zz.city_order_num > 0 then 1 else null end) as city_order_num , -- 地市公司
+
+        count(case when zz.order_num_total = zz.no_fmqdNum then 1 else null end) as no_fmqdNum , -- 非负面清单工单
+        count(case when zz.order_num_total = zz.no_fmqdNum and zz.province_no_fmqdNum > 0 then 1 else null end) as province_no_fmqdNum ,-- 非负面清单工单 省公司
+        count(case when zz.order_num_total = zz.no_fmqdNum and zz.city_no_fmqdNum > 0 then 1 else null end) as city_no_fmqdNum ,-- 非负面清单工单 地市公司
+        count(case when zz.order_num_total = rate_no_fmqdNum_finish then 1 else null end) as rate_no_fmqdNum_finish , -- 非负面清单工单
+        round((count(case when zz.order_num_total = zz.rate_no_fmqdNum_wc then 1 else null end) /
+        count(case when zz.order_num_total > 0 then 1 else null end))*100,2)  as rate_no_fmqdNum ,  -- 完成数量等于总数 / 订单表总数大于0 * 100%
+        count(case when zz.yes_fmqdNum > 0 then 1 else null end) as yes_fmqdNum , -- 负面清单工单
+        count(case when zz.yes_fmqdNum > 0 and zz.province_yes_fmqdNum > 0 then 1 else null end) as province_yes_fmqdNum , -- 负面清单工单 省公司
+        count(case when zz.yes_fmqdNum > 0 and zz.city_yes_fmqdNum > 0 then 1 else null end) as city_yes_fmqdNum , -- 负面清单工单 地市公司
+        count(case when zz.rate_yes_fmqdNum_finish > 0 then 1 else null end) as rate_yes_fmqdNum_finish , -- 负面清单工单
+        round((count(case when zz.order_num_total = (zz.rate_yes_fmqdNum_wc + zz.rate_no_fmqdNum_wc) and zz.rate_yes_fmqdNum_finish > 0 then 1 else null end) /
+        count(case when zz.order_num_total > 0 then 1 else null end))*100,2)  as rate_yes_fmqdNum , --  负面+非负面完成数量等于总数 / 订单表总数大于0 * 100%
+        count(case when zz.order_num_total = (zz.order_finish_num)  then 1 else null end) as order_finish_num , -- 已办结 +zz.order_over_num
+        count(case when zz.order_over_num > 0 then 1 else null end) as order_over_num  -- 已终止
+        from
+        (select
+        left(p.sqdate,#{queryTimeFormat}) as sqdate,
+        t.gdid as gdid,
+        count(case when p.sqdate is not null then 1 else null end) as order_num ,
+        count(case when p.sqdate is not null and p.sqrssdw = '国网黑龙江省电力本部' then 1 else null end) as province_order_num,
+        count(case when p.sqdate is not null and p.sqrssdw != '国网黑龙江省电力本部' then 1 else null end) as city_order_num,
+        count(1) as order_num_total,
+        count(case when p.isFmqd = '非负面清单' then 1 else null end) as no_fmqdNum ,
+        count(case when p.isFmqd = '非负面清单' and p.sqrssdw = '国网黑龙江省电力本部' then 1 else null end) as province_no_fmqdNum,
+        count(case when p.isFmqd = '非负面清单' and p.sqrssdw != '国网黑龙江省电力本部' then 1 else null end) as city_no_fmqdNum,
+
+        sum(case when p.isFmqd = '非负面清单' and  p.sqdate is not null and t.spzt = 3  then 1 else 0 end ) as rate_no_fmqdNum_wc,
+        sum(case when p.isFmqd = '非负面清单' then 1 else 0 end ) as rate_no_fmqdNum_finish,
+
+        count(case when p.isFmqd != '非负面清单' then 1 else null end) as yes_fmqdNum,
+        count(case when p.isFmqd != '非负面清单' and p.sqrssdw = '国网黑龙江省电力本部' then 1 else null end) as province_yes_fmqdNum,
+        count(case when p.isFmqd != '非负面清单' and p.sqrssdw != '国网黑龙江省电力本部' then 1 else null end) as city_yes_fmqdNum,
+
+        sum(case when p.isFmqd != '非负面清单' and  p.sqdate is not null and t.spzt = 3  then 1 else 0 end )  as rate_yes_fmqdNum_wc,
+        sum(case when p.isFmqd != '非负面清单' then 1 else 0 end ) as rate_yes_fmqdNum_finish,
+
+        count(case when p.sqdate is not null and t.spzt = 3 then 1 else null end) as order_finish_num ,
+        count(case when p.sqdate is not null and t.spzt = 2 then 1 else null end) as order_over_num
+        from flow_lczxjdb t
+        inner join pull_work_order p
+        on t.lcpch = p.lcspid
+        where p.isFmqd is not null and p.parent_lcspid is null
+        <if test="queryTimeNew != null and queryTimeNew!='' ">
+            and left(p.sqdate,#{queryTimeFormat}) = #{queryTimeNew}
+        </if>
+        group by left(p.sqdate,#{queryTimeFormat}), t.gdid
+        ) zz
+        group by left(zz.sqdate,#{queryTimeFormat})
+    </select>
+    <!-- 数据共享流程运营监测_规模分析_省公司工单申请情况统计   -->
+    <select id="queryScaleAnalysisOrderTypeForProvince" parameterType="pd" resultType="java.util.Map">
+        select REPLACE( d.dept_name,'部','') as dept_name, ifnull(o.orderNum,0) orderNum
+        from (
+        select distinct dept_name from dict_system_dept
+        ) d
+        left join (
+        select zz.sqrssbm, count(case when orderNum > 0 then 1 else 0 end ) as orderNum from (
+        select p.sqrssbm, t.gdid, count(1) as orderNum
+        from flow_lczxjdb t
+        inner join pull_work_order p
+        on t.lcpch = p.lcspid
+        where p.isFmqd is not null and p.parent_lcspid is null
+        and p.sqrssdw = '国网黑龙江省电力本部'
+        <if test="queryTimeNew != null and queryTimeNew!='' ">
+            and left(p.sqdate,#{queryTimeFormat}) = #{queryTimeNew}
+        </if>
+        GROUP BY p.sqrssbm, t.gdid
+        ) zz
+        group by zz.sqrssbm
+        ) o
+        on d.dept_name = o.sqrssbm
+        order by ifnull(o.orderNum,0) desc
+    </select>
+    <!-- 数据共享流程运营监测_规模分析_地市工单申请情况统计 -->
+    <select id="queryScaleAnalysisOrderTypeForCity" parameterType="pd" resultType="java.util.Map">
+        select d.dwszd, ifnull(o.orderNum,0) orderNum
+        from (
+        select distinct f.dwmc,f.dwszd from flow_company f
+        where f.dwmc != '国网黑龙江省电力本部'
+        ORDER BY f.dwszd
+        ) d
+        left join (
+        select zz.sqrssdw, count(case when orderNum > 0 then 1 else 0 end ) as orderNum from (
+        select p.sqrssdw, count(1) as orderNum
+        from flow_lczxjdb t
+        inner join pull_work_order p
+        on t.lcpch = p.lcspid
+        where p.isFmqd is not null and p.parent_lcspid is null
+        and p.sqrssdw != '国网黑龙江省电力本部'
+        <if test="queryTimeNew != null and queryTimeNew!='' ">
+            and left(p.sqdate,#{queryTimeFormat}) = #{queryTimeNew}
+        </if>
+        GROUP BY p.sqrssdw, t.gdid
+        ) zz
+        GROUP BY zz.sqrssdw
+        ) o
+        on d.dwmc = o.sqrssdw
+        order by ifnull(o.orderNum,0) desc
+
+    </select>
+    <!-- 数据共享流程运营监测_规模分析_需求受理情况统计 -->
+    <select id="queryScaleAnalysisOrderMonth" parameterType="pd" resultType="java.util.Map">
+        select
+            sqdate,
+            sqny,
+            count(case when zz.order_num > 0 then 1 else null end) as order_num,
+            count(case when zz.order_num = zz.order_finish_num then 1 else null end) as order_finish_num,
+            case
+            when count(case when zz.order_num = order_finish_num then 1 else null end) = 0
+            or count(case when zz.order_num > 0 then 1 else null end) = 0 then 0
+            else round(count(case when zz.order_num = order_finish_num then 1 else null end) /count(case when zz.order_num > 0 then 1 else null end),2)*100
+            end as endRate
+            from  (select
+                DATE_FORMAT(p.sqdate,'%Y-%m') as sqdate,
+                DATE_FORMAT(p.sqdate,'%m') as sqny,
+                t.gdid as gdid,
+                count(case when p.sqdate is not null then 1 else null end) as order_num ,
+                count(case when p.sqdate is not null and t.spzt = 3 then 1 else null end) as order_finish_num ,
+                count(case when p.sqdate is not null and t.spzt = 3 then 1 else null end) as endRate_finish
+                from flow_lczxjdb t
+                inner join pull_work_order p
+                on t.lcpch = p.lcspid
+            where p.isFmqd is not null and p.parent_lcspid is null
+                and timestampdiff(YEAR,p.sqdate,concat(#{queryTime},'-01 08:30:00')) = 0
+                and left(p.sqdate,4) = left(#{queryTime},4)
+                GROUP BY DATE_FORMAT(p.sqdate,'%Y-%m'),t.gdid
+        ) zz
+        GROUP BY sqdate,sqny
+        order by sqdate,sqny
+    </select>
+
+    <!-- 数据共享流程运营监测_效率分析_全流程流转办理时长-->
+    <select id="queryFlowTimeForType" parameterType="pd" resultType="java.util.Map">
+        select
+            IFNULL(round(sum(finish_time) /8,2),0) as finish_time,
+            IFNULL(round(sum(finish_no_time)/8,2),0) as finish_no_time,
+            IFNULL(round(sum(finish_yes_time)/8,2),0) as finish_yes_time
+        from (
+        select
+            t.numId,
+            calculate_work_time_sum(min(t.sqdate), max(t.4sp)) as finish_time,
+            case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t.sqdate), max(t.4sp)) else 0 end as finish_no_time,
+            case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t.sqdate), max(t.4sp)) else 0 end as finish_yes_time from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null and t.4sp is not null
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        group by t.numId
+        ) zz
+    </select>
+
+    <!-- 数据共享流程运营监测_效率分析_各流转环节办理时长情况-->
+    <select id="queryFlowTimeForNode" parameterType="pd" resultType="java.util.Map">
+        select
+        zz.nodeName,
+        round(sum(sp1_finish_time) /8,2) as sp1_finish_time,
+        round(sum(sp1_finish_no_time)/8,2) as sp1_finish_no_time,
+        round(sum(sp1_finish_yes_time)/8,2) as sp1_finish_yes_time
+        from (
+        select
+        '一级' as nodeName,
+        '1' as ordernum,
+        t.numId,
+        calculate_work_time_sum(min(t.sqdate),max(t.1sp)) as sp1_finish_time,
+        case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t.sqdate),max(t.1sp)) else 0 end as sp1_finish_no_time,
+        case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t.sqdate),max(t.1sp)) else 0 end as sp1_finish_yes_time
+        from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null and t.4sp is not null
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        GROUP BY t.numId
+        union all
+        select
+        '二级' as nodeName,
+        '2' as ordernum,
+        t.numId,
+        calculate_work_time_sum(min(t.1sp),max(t.2sp)) as sp2_finish_time,
+        case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t.1sp),max(t.2sp)) else 0 end as sp2_finish_no_time,
+        case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t.1sp),max(t.2sp)) else 0 end as sp2_finish_yes_time
+        from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null and t.4sp is not null
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        GROUP BY t.numId
+        union all
+        select
+        '三级' as nodeName,
+        '3' as ordernum,
+        t.numId,
+        calculate_work_time_sum(min(t.2sp),max(t3.3sp)) as sp3_finish_time,
+        case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t.2sp),max(t3.3sp)) else 0 end as sp3_finish_no_time,
+        case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t.2sp),max(t3.3sp)) else 0 end as sp3_finish_yes_time
+        from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null and t.4sp is not null
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        GROUP BY t.numId
+        union all
+        select
+        '四级' as nodeName,
+        '4' as ordernum,
+        t.numId,
+        calculate_work_time_sum(min(t3.3sp),max(t.4sp)) as sp4_finish_time,
+        case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t3.3sp),max(t.4sp)) else 0 end as sp4_finish_no_time,
+        case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t3.3sp),max(t.4sp)) else 0 end as sp4_finish_yes_time
+        from pull_work_order t
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null and t.4sp is not null
+        <if test="queryTime != null and queryTime!='' ">
+            and left(t.sqdate,7) = #{queryTime}
+        </if>
+        GROUP BY t.numId
+        ) zz
+        group by zz.nodeName
+        order by zz.ordernum
+    </select>
+    <!-- 数据共享流程运营监测_效率分析_工单全流程流转时长月度趋势情况-->
+    <select id="queryFlowTimeForMonth" parameterType="pd" resultType="java.util.Map">
+        select
+            zz.yearm,
+            zz.xData,
+            round(sum(zz.finish_time) /8,2) as finish_time,
+            round(sum(zz.finish_no_time)/8,2) as finish_no_time,
+            round(sum(zz.finish_yes_time)/8,2) as finish_yes_time
+        from (
+            select
+                t.numId,
+                left(t.sqdate,7)  as yearm,
+                concat(MONTH(t.sqdate),'月') as xData,
+                calculate_work_time_sum(min(t.sqdate), max(t.4sp)) as finish_time,
+                case when t.isFmqd = '非负面清单' then calculate_work_time_sum(min(t.sqdate), max(t.4sp)) else 0 end as finish_no_time,
+                case when t.isFmqd != '非负面清单' then calculate_work_time_sum(min(t.sqdate), max(t.4sp)) else 0 end as finish_yes_time
+            from pull_work_order t
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+            where t.parent_lcspid is null
+            and t.isFmqd is not null
+            and t.4sp is not null
+            and timestampdiff(YEAR,t.sqdate,concat(#{queryTime},'-01 08:30:00')) = 0
+            and left(t.sqdate,4) = left(#{queryTime},4)
+            GROUP BY left(t.sqdate,7),t.numId
+            order by left(t.sqdate,7)
+        ) zz
+        GROUP BY zz.yearm,zz.xData
+    </select>
+    <!-- 数据共享流程运营监测_效率分析_工单全流程流转时长按单位统计-->
+    <select id="queryFlowTimeForCity" parameterType="pd" resultType="java.util.Map">
+        select d.dwszd, ifnull(sum(o.finish_time),0) finish_time
+        from (
+        select distinct f.dwmc,f.dwszd from flow_company f
+        -- 	where f.dwmc != '国网黑龙江省电力本部'
+        ORDER BY f.dwszd
+        ) d
+        left join (
+            select zz.sqrssdw, round(sum(finish_time) /8,2) as finish_time
+            from (select
+                p.sqrssdw,
+                p.numId,
+                calculate_work_time_sum(min(p.sqdate), max(p.4sp)) as finish_time
+                from flow_lczxjdb t
+                inner join pull_work_order p
+                on t.lcpch = p.lcspid
+                where p.isFmqd is not null and p.4sp is not null and p.parent_lcspid is null
+                    and left(p.sqdate,7) = #{queryTime}
+                --      and p.sqrssdw != '国网黑龙江省电力本部'
+                GROUP BY p.sqrssdw,p.numId
+        ) zz
+        GROUP BY zz.sqrssdw
+        ) o
+        on d.dwmc = o.sqrssdw
+        group by d.dwszd
+        order by ifnull(sum(o.finish_time),0) desc
+    </select>
+
+    <!-- 数据共享流程运营监测_效率分析_业务审核环节审批时长分布-->
+    <select id="queryFlowTimeForBusiness" parameterType="pd" resultType="java.util.Map">
+        select REPLACE( d.dept_name,'部','') as dept_name, ifnull(o.orderNum,0) orderNum, ifnull(o.finish_time,0) finish_time
+        from (
+            select distinct dept_name from dict_system_dept
+            ) d
+            left join (
+            select zz.sqrssbm,round(sum(finish_time) /8,2) as finish_time,
+            count(case when zz.orderNum> 0 then 1 else null end) as orderNum from (
+            select
+            t.sqrssbm,t.numId,
+            calculate_work_time_sum(min(t.2sp),max(ifnull(t3.3sp,t.4sp))) as finish_time,
+            count(1) as orderNum
+            from pull_work_order t
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+            where t.parent_lcspid is null
+            and left(t.sqdate,7) = #{queryTime}
+            and t.isFmqd is not null
+            and (t.4sp is not null or t3.3sp is not null)
+            GROUP BY t.sqrssbm,t.numId
+            ) zz
+            group by zz.sqrssbm
+        ) o
+        on d.dept_name = o.sqrssbm
+        order by ifnull(o.orderNum,0) desc
+    </select>
+
+    <!-- 数据共享流程运营监测_热度分析_热点系统-->
+    <select id="queryDegreeHeatForSystem" parameterType="pd" resultType="java.util.Map">
+      select * from (
+        select
+            t.tableSystem,
+            count(1) as orderNum
+            from pull_work_order t
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null
+        and t.4sp is not null
+        and t.isFmqd is not null
+        and left(t.sqdate,4) != #{queryTime}
+        GROUP BY t.tableSystem
+        ORDER BY COUNT(1) DESC
+        limit 0,10
+        ) zz
+        ORDER BY orderNum
+    </select>
+    <!-- 数据共享流程运营监测_热度分析_负面清单热点数据表-->
+    <select id="queryDegreeHeatForFmqdTable" parameterType="pd" resultType="java.util.Map">
+       select * from (
+       select
+            t.tableName as sqbzwbm,
+            count(1) as orderNum
+            from pull_work_order t
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null
+        and t.4sp is not null
+        and t.isFmqd is not null
+		and t.isFmqd != '非负面清单'
+        and left(t.sqdate,4) != #{queryTime}
+        GROUP BY t.tableName
+        ORDER BY COUNT(1) DESC
+        limit 0,10
+        ) zz
+        ORDER BY orderNum
+    </select>
+
+    <!-- 数据共享流程运营监测_热度分析_非负面清单热点数据表-->
+    <select id="queryDegreeHeatForNotFmqdTable" parameterType="pd" resultType="java.util.Map">
+       select * from (
+       select
+            t.tableName as sqbzwbm,
+            count(1) as orderNum
+            from pull_work_order t
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null
+        and t.isFmqd is not null
+		and t.isFmqd = '非负面清单'
+		and t.tableName is not null
+		and t.4sp is not null
+        and left(t.sqdate,4) != #{queryTime}
+        GROUP BY t.sqbzwbm
+        ORDER BY COUNT(1) DESC
+        limit 0,10
+        ) zz
+        ORDER BY orderNum
+    </select>
+
+    <!-- 数据共享流程运营监测_质量分析_省公司被驳回（终止）工单分布情况-->
+    <select id="queryQualityForProvince" parameterType="pd" resultType="java.util.Map">
+        select REPLACE( d.dept_name,'部','') as dept_name, ifnull(o.orderNum,0) orderNum, 0 as orderAgainNum
+        from (
+            select distinct dept_name from dict_system_dept
+        ) d
+        left join (
+			select zz.sqrssbm ,count(1) as orderNum from (
+                select
+                    t.sqrssbm,t.numId,
+                    count(1) as orderNum
+                    from pull_work_order t
+                    inner join flow_lczxjdb l
+                    on l.lcpch = t.lcspid
+                    left join pull_work_order t3
+                    on t.lcspid = t3.parent_lcspid
+            where t.parent_lcspid is null
+            and t.3sp is null
+            and t.isFmqd is not null
+            and l.spzt = '2'
+            and left(t.sqdate,4) != #{queryTime}
+        GROUP BY t.sqrssbm,t.numId
+				) zz
+				 GROUP BY zz.sqrssbm
+                ) o
+        on d.dept_name = o.sqrssbm
+    </select>
+    <!-- 数据共享流程运营监测_质量分析_地市公司被驳回（终止）工单分布情况-->
+    <select id="queryQualityForCity" parameterType="pd" resultType="java.util.Map">
+        select
+         d.dwszd,
+         ifnull(o.orderNum,0) orderNum,
+         0 orderAgainNum
+        from (
+            select distinct f.dwmc,f.dwszd from flow_company f
+						where f.dwmc != '国网黑龙江省电力本部'
+						ORDER BY f.dwszd
+        ) d
+        left join (
+         		select zz.sqrssdw,count(1) as orderNum from (
+				   select p.sqrssdw,p.numId, count(1) as orderNum
+            from flow_lczxjdb t
+            inner join pull_work_order p
+            on t.lcpch = p.lcspid
+            where p.isFmqd is not null and p.parent_lcspid is null
+                and t.spzt = '2'
+                and p.sqrssdw != '国网黑龙江省电力本部'
+                and left(p.sqdate,4) != #{queryTime}
+            GROUP BY p.sqrssdw ,p.numId
+            ) zz
+            group by zz.sqrssdw
+        ) o
+        on d.dwmc = o.sqrssdw
+    </select>
+
+    <!-- 数据共享流程运营监测_预警异动_预警工单数据统计-->
+    <select id="queryWarningForWarning" parameterType="pd" resultType="java.util.Map">
+        select
+            demand_name, -- 需求名称
+            demand_code, -- 工单名称
+            deptType, -- 申请单位类别
+            deptName, -- 部门、地市
+            sqdate as startTime, -- 开始时间
+            sp1, -- 数据申请-开始时间
+            sp1day,-- 数据申请-耗时
+            sp2,-- 需求受理-开始时间
+            sp2day,-- 需求受理-耗时
+            sp3,-- 业务审核-开始时间
+            sp3day,-- 业务审核-耗时
+            sp4,-- 方案审批-开始时间
+            sp4day,-- 方案审批-耗时
+            sp5, -- 授权配置-开始时间
+            sp5day,-- 授权配置-耗时
+            case
+            when sp1day >= 2 and 3 > sp1day then '数据申请'
+            when sp2day >= 2 and 3 > sp2day then '需求受理'
+            when sp3day >= 2 and 3 > sp3day then '业务审核'
+            when sp4day >= 2 and 3 > sp4day then '方案审批'
+            when sp5day >= 2 and 3 > sp5day then '授权配置'
+            else '' end as warningNode  -- 预警节点
+            from
+            (
+            select
+            concat (t.sqrssdw, t.description, t.sqdate) demand_name,
+            t.numId demand_code,
+            case
+            when t.sqrssdw = '国网黑龙江省电力本部' then '本部'
+            else '地市' end as deptType ,
+            case
+            when t.sqrssdw = '国网黑龙江省电力本部' then t.sqrssbm
+            else t.sqrssdw end as deptName,
+            t.sqdate,
+            t.1sp as sp1,
+            round(calculate_work_time_sum(t.sqdate,t.1sp) /8,2) as sp1day,
+            t.2sp as sp2,
+            round(calculate_work_time_sum(t.1sp,t.2sp) /8,2) as sp2day,
+            t3.3sp as sp3,
+            round(calculate_work_time_sum(t.2sp,t3.3sp) /8,2) as sp3day,
+            t.4sp as sp4,
+            round(calculate_work_time_sum(t.2sp,t3.3sp) /8,2) as sp4day,
+            t.4sp as sp5,
+            round(calculate_work_time_sum(t.2sp,t3.3sp) /8,2) as sp5day
+            from pull_work_order t
+            inner join flow_lczxjdb l
+            on l.lcpch = t.lcspid
+            left join pull_work_order t3
+            on t.lcspid = t3.parent_lcspid
+            where t.parent_lcspid is null
+            and t.3sp is null
+            and t.isFmqd is not null
+            ) tt
+            where ((sp1day >= 2 and 3 > sp1day) or (sp2day >= 2 and 3 > sp2day) or (sp3day >= 2 and 3 > sp3day) or (sp4day >= 2 and 3 > sp4day))
+    </select>
+    <!-- 数据共享流程运营监测_预警异动_异动工单数据统计-->
+    <select id="queryWarningForException" parameterType="pd" resultType="java.util.Map">
+        select
+            demand_name,
+            demand_code,
+            deptType,
+            deptName,
+            sqdate as startTime,
+            sp1,
+            sp1day,
+            sp2,
+            sp2day,
+            sp3,
+            sp3day,
+            sp4,
+            sp4day,
+            sp5,
+            sp5day,
+            case
+            when spzt = 2 then '退回'
+            when sp4 is null then '流转'
+            when sp4 is not null then '办结'
+            else '' end as orderState,
+            case
+            when sp1day >= 3 or sp2day >= 3 or sp3day >= 3 or sp4day >= 3 or sp5day >= 3  then '超期'
+            when spzt = 2 then '驳回'
+            else '' end as excType
+        from
+        (
+        select
+        concat (t.sqrssdw, t.description, t.sqdate) demand_name,
+        t.numId demand_code,
+        case
+        when t.sqrssdw = '国网黑龙江省电力本部' then '本部'
+        else '地市' end as deptType ,
+        case
+        when t.sqrssdw = '国网黑龙江省电力本部' then t.sqrssbm
+        else t.sqrssdw end as deptName,
+        t.sqdate,
+        t.1sp as sp1,
+        round(calculate_work_time_sum(t.sqdate,t.1sp) /8,2) as sp1day,
+        t.2sp as sp2,
+        round(calculate_work_time_sum(t.1sp,t.2sp) /8,2) as sp2day,
+        t3.3sp as sp3,
+        round(calculate_work_time_sum(t.2sp,t3.3sp) /8,2) as sp3day,
+        t.4sp as sp4,
+        round(calculate_work_time_sum(t.2sp,t3.3sp) /8,2) as sp4day,
+        t.4sp as sp5,
+        round(calculate_work_time_sum(t3.3sp,t.4sp) /8,2) as sp5day,
+        l.spzt
+        from pull_work_order t
+        inner join flow_lczxjdb l
+        on l.lcpch = t.lcspid
+        left join pull_work_order t3
+        on t.lcspid = t3.parent_lcspid
+        where t.parent_lcspid is null
+        and t.3sp is null
+        and t.isFmqd is not null
+        ) tt
+        where ((sp1day >= 3 ) or (sp2day >= 3  ) or (sp3day >= 3 ) or (sp4day >= 3 ))  or  spzt = 2
+     </select>
+
+</mapper>

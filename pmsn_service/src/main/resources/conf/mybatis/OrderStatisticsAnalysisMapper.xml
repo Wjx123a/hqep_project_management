@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.OrderStatisticsAnalysisDao">
+
+    <!--全量工单统计分析 柱状图的数据查询-->
+    <select id="queryBarData" parameterType="pd" resultType="pd">
+        select
+        t1.BUKRS,
+        t1.BUTXT,
+        t1.BUTXT2,
+        IFNULL(t2.total,0) as total,
+        IFNULL(sum(t2.table_num),0) as table_num
+        from
+        zt_dept_code t1
+        left join
+        (select
+        t.real_use_org as dept
+        ,count(1) as total
+        ,sum(t.table_num) as table_num
+        from ods_sjml_internal_up_demand_application t
+        <where>
+            <if test="demand_start_time != null and demand_start_time != ''">
+                and DATE_FORMAT(demand_start_time, '%Y-%m-%d %H:%i:%s') <![CDATA[>=]]> #{demand_start_time,jdbcType=VARCHAR}
+            </if>
+            <if test="demand_end_time != null and demand_end_time != ''">
+                and DATE_FORMAT(demand_end_time, '%Y-%m-%d %H:%i:%s') <![CDATA[<=]]> #{demand_end_time,jdbcType=VARCHAR}
+            </if>
+        </where>
+        group by real_use_org) t2
+        on t1.BUTXT2 = t2.dept
+        group by t1.BUKRS, t1.BUTXT, t1.BUTXT2,t2.total
+        order by t1.sortnum
+    </select>
+
+    <select id="queryTableListData" parameterType="pd" resultType="pd">
+        select
+        t2.demand_name,
+        t2.demand_code,
+        t2.demand_applicant,
+        t2.demand_app_org,
+        t2.demand_app_dept,
+        t2.real_use_org,
+        t2.real_use_dept,
+        t2.demand_start_time,
+        t2.demand_end_time,
+        t2.demand_desc,
+        t2.table_num
+        from
+        zt_dept_code t1
+        inner join ods_sjml_internal_up_demand_application t2
+        on t1.BUTXT2 = t2.real_use_org
+        <where>
+            <if test="real_use_org != null and real_use_org != ''">
+                and t2.real_use_org = #{real_use_org,jdbcType=VARCHAR}
+            </if>
+            <if test="demand_start_time != null and demand_start_time != ''">
+                and DATE_FORMAT(t2.demand_start_time, '%Y-%m-%d %H:%i:%s') <![CDATA[>=]]> #{demand_start_time,jdbcType=VARCHAR}
+            </if>
+            <if test="demand_end_time != null and demand_end_time != ''">
+                and DATE_FORMAT(t2.demand_end_time, '%Y-%m-%d %H:%i:%s') <![CDATA[<=]]> #{demand_end_time,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+
+
+    <select id="queryTableListDataForDetails" parameterType="pd" resultType="pd">
+       select
+           t1.demand_name AS demand_name,
+           t1.demand_code AS demand_code,
+           t1.is_negative AS is_negative,
+           t1.table_ename AS table_ename,
+           t1.table_cname AS table_cname,
+           t1.simple_name AS simple_name,
+           t1.system_code AS system_code,
+           t1.modify_type AS modify_type,
+           t1.batch_time AS batch_time
+       from ods_sjml_internal_up_demand_table t1
+       where demand_code = #{demand_code}
+    </select>
+
+</mapper>
+

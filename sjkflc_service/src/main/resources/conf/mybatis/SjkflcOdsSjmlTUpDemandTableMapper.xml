@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcOdsSjmlTUpDemandTableDao">
+    <sql id="tableName">
+        pmsn.sjkflc_ods_sjml_t_up_demand_table
+    </sql>
+    <sql id="baseColumnList">
+        id, org_name, org_code, demand_name, demand_code, table_ename, table_cname, table_desc, simple_name, system_code, modify_type, batch_time
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpDemandTable" id="baseResultMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="orgName" column="org_name" jdbcType="VARCHAR"/>
+        <result property="orgCode" column="org_code" jdbcType="VARCHAR"/>
+        <result property="demandName" column="demand_name" jdbcType="VARCHAR"/>
+        <result property="demandCode" column="demand_code" jdbcType="VARCHAR"/>
+        <result property="tableEname" column="table_ename" jdbcType="VARCHAR"/>
+        <result property="tableCname" column="table_cname" jdbcType="VARCHAR"/>
+        <result property="tableDesc" column="table_desc" jdbcType="VARCHAR"/>
+        <result property="simpleName" column="simple_name" jdbcType="VARCHAR"/>
+        <result property="systemCode" column="system_code" jdbcType="VARCHAR"/>
+        <result property="modifyType" column="modify_type" jdbcType="VARCHAR"/>
+        <result property="batchTime" column="batch_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        <include refid="baseColumnList"/>
+        from
+        <include refid="tableName"/>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpDemandTable"
+            resultMap="baseResultMap">
+        select
+        id, org_name, org_code, demand_name, demand_code, table_ename, table_cname, table_desc, simple_name, system_code, modify_type, batch_time
+        ,case when batch_time is null then '1' else '0' end as sb
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="orgName != null and orgName != ''">
+                and org_name like concat('%', #{orgName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                and org_code like concat('%', #{orgCode,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="demandName != null and demandName != ''">
+                and demand_name like concat('%', #{demandName,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and demand_code like concat('%', #{demandCode,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="tableEname != null and tableEname != ''">
+                and table_ename = #{tableEname,jdbcType=VARCHAR}
+            </if>
+            <if test="tableCname != null and tableCname != ''">
+                and table_cname = #{tableCname,jdbcType=VARCHAR}
+            </if>
+            <if test="tableDesc != null and tableDesc != ''">
+                and table_desc = #{tableDesc,jdbcType=VARCHAR}
+            </if>
+            <if test="simpleName != null and simpleName != ''">
+                and simple_name = #{simpleName,jdbcType=VARCHAR}
+            </if>
+            <if test="systemCode != null and systemCode != ''">
+                and system_code = #{systemCode,jdbcType=VARCHAR}
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                and modify_type = #{modifyType,jdbcType=VARCHAR}
+            </if>
+            <if test="batchTime != null">
+                and batch_time = #{batchTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpDemandTable">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR},
+        #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+        #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+        #{systemCode,jdbcType=VARCHAR}, #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR} )
+    </insert>
+
+
+    <!--新增所有列-->
+    <insert id="insertForModel" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpDemandTable">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        (
+        #{id,jdbcType=VARCHAR}, #{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR},
+        #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+        #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+        #{systemCode,jdbcType=VARCHAR}, #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{id,jdbcType=VARCHAR}, #{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR},
+            #{demandName,jdbcType=VARCHAR}, #{demandCode,jdbcType=VARCHAR}, #{tableEname,jdbcType=VARCHAR},
+            #{tableCname,jdbcType=VARCHAR}, #{tableDesc,jdbcType=VARCHAR}, #{simpleName,jdbcType=VARCHAR},
+            #{systemCode,jdbcType=VARCHAR}, #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpDemandTable">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="orgName != null and orgName != ''">
+                org_name = #{orgName,jdbcType=VARCHAR},
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                org_code = #{orgCode,jdbcType=VARCHAR},
+            </if>
+            <if test="demandName != null and demandName != ''">
+                demand_name = #{demandName,jdbcType=VARCHAR},
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                demand_code = #{demandCode,jdbcType=VARCHAR},
+            </if>
+            <if test="tableEname != null and tableEname != ''">
+                table_ename = #{tableEname,jdbcType=VARCHAR},
+            </if>
+            <if test="tableCname != null and tableCname != ''">
+                table_cname = #{tableCname,jdbcType=VARCHAR},
+            </if>
+            <if test="tableDesc != null and tableDesc != ''">
+                table_desc = #{tableDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="simpleName != null and simpleName != ''">
+                simple_name = #{simpleName,jdbcType=VARCHAR},
+            </if>
+            <if test="systemCode != null and systemCode != ''">
+                system_code = #{systemCode,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                modify_type = #{modifyType,jdbcType=VARCHAR},
+            </if>
+            <if test="batchTime != null">
+                batch_time = #{batchTime,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </delete>
+
+    <select id="noExistence"  resultMap="baseResultMap">
+        select
+            t.id,'国网黑龙江省电力有限公司' as  org_name,'01020' as org_code,
+            t.demand_name, t.demand_code, table_ename, table_cname, table_desc, simple_name, system_code
+        from sjkflc_out_demand_application t
+        where t.demand_code not in (select demand_code from sjkflc_ods_sjml_t_up_demand_table)
+            and t.demand_end_time is not null
+    </select>
+
+</mapper>
+

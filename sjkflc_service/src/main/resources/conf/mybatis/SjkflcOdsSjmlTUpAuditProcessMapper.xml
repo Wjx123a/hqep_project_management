@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.sjkflc.dao.SjkflcOdsSjmlTUpAuditProcessDao">
+    <sql id="tableName">
+        pmsn.sjkflc_ods_sjml_t_up_audit_process
+    </sql>
+    <sql id="baseColumnList">
+        id, org_name, org_code, demand_name, demand_code, audit_link, Audit_org, Audit_dept, audit_start_time, audit_end_time, modify_type, batch_time
+    </sql>
+    <sql id="apiBaseColumnList">
+        org_name, org_code, demand_name, demand_code, audit_link, Audit_org, Audit_dept, audit_start_time, audit_end_time, modify_type, batch_time
+    </sql>
+    <resultMap type="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess" id="baseResultMap">
+        <result property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="orgName" column="org_name" jdbcType="VARCHAR"/>
+        <result property="orgCode" column="org_code" jdbcType="VARCHAR"/>
+        <result property="demandName" column="demand_name" jdbcType="VARCHAR"/>
+        <result property="demandCode" column="demand_code" jdbcType="VARCHAR"/>
+        <result property="auditLink" column="audit_link" jdbcType="VARCHAR"/>
+        <result property="auditOrg" column="Audit_org" jdbcType="VARCHAR"/>
+        <result property="auditDept" column="Audit_dept" jdbcType="VARCHAR"/>
+        <result property="auditStartTime" column="audit_start_time" jdbcType="TIMESTAMP"/>
+        <result property="auditEndTime" column="audit_end_time" jdbcType="TIMESTAMP"/>
+        <result property="modifyType" column="modify_type" jdbcType="VARCHAR"/>
+        <result property="batchTime" column="batch_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="java.lang.String" resultMap="baseResultMap">
+        select
+        <include refid="baseColumnList"/>
+        from
+        <include refid="tableName"/>
+        where
+        id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryList" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess"
+            resultMap="baseResultMap">
+        select
+        id, org_name, org_code, demand_name, demand_code, audit_link, Audit_org, Audit_dept, audit_start_time, audit_end_time, modify_type, batch_time
+        ,case when batch_time is null then '1' else '0' end as sb
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="id != null and id != ''">
+                and id = #{id,jdbcType=VARCHAR}
+            </if>
+            <if test="orgName != null and orgName != ''">
+                and org_name = #{orgName,jdbcType=VARCHAR}
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                and org_code = #{orgCode,jdbcType=VARCHAR}
+            </if>
+            <if test="demandName != null and demandName != ''">
+                and demand_name = #{demandName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and demand_code = #{demandCode,jdbcType=VARCHAR}
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                and audit_link = #{auditLink,jdbcType=VARCHAR}
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                and Audit_org = #{auditOrg,jdbcType=VARCHAR}
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                and Audit_dept = #{auditDept,jdbcType=VARCHAR}
+            </if>
+            <if test="auditStartTime != null">
+                and audit_start_time = #{auditStartTime,jdbcType=VARCHAR}
+            </if>
+            <if test="auditEndTime != null">
+                and audit_end_time = #{auditEndTime,jdbcType=VARCHAR}
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                and modify_type = #{modifyType,jdbcType=VARCHAR}
+            </if>
+            <if test="batchTime != null">
+                and batch_time = #{batchTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--通过实体作为筛选条件查询-->
+    <select id="queryListForApi" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess"
+            resultMap="baseResultMap">
+        select
+        org_name, org_code, demand_name, demand_code, audit_link, Audit_org, Audit_dept, audit_start_time, audit_end_time, modify_type, batch_time
+        ,case when batch_time is null then '1' else '0' end as sb
+        from
+        <include refid="tableName"/>
+        <where>
+            <if test="orgName != null and orgName != ''">
+                and org_name = #{orgName,jdbcType=VARCHAR}
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                and org_code = #{orgCode,jdbcType=VARCHAR}
+            </if>
+            <if test="demandName != null and demandName != ''">
+                and demand_name = #{demandName,jdbcType=VARCHAR}
+            </if>
+            <if test="demandCode != null and demandCode != ''">
+                and demand_code = #{demandCode,jdbcType=VARCHAR}
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                and audit_link = #{auditLink,jdbcType=VARCHAR}
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                and Audit_org = #{auditOrg,jdbcType=VARCHAR}
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                and Audit_dept = #{auditDept,jdbcType=VARCHAR}
+            </if>
+            <if test="auditStartTime != null">
+                and audit_start_time = #{auditStartTime,jdbcType=VARCHAR}
+            </if>
+            <if test="auditEndTime != null">
+                and audit_end_time = #{auditEndTime,jdbcType=VARCHAR}
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                and modify_type = #{modifyType,jdbcType=VARCHAR}
+            </if>
+            <if test="batchTime != null">
+                and batch_time = #{batchTime,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        ( #{id,jdbcType=VARCHAR},
+        #{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR},
+        #{demandCode,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR}, #{auditOrg,jdbcType=VARCHAR},
+        #{auditDept,jdbcType=VARCHAR}, #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR},
+        #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR} )
+    </insert>
+
+    <!--新增所有列-->
+    <insert id="insertForApi" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="apiBaseColumnList"/>
+        )
+        values
+        (
+        #{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR},
+        #{demandCode,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR}, #{auditOrg,jdbcType=VARCHAR},
+        #{auditDept,jdbcType=VARCHAR}, #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR},
+        #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into
+        <include refid="tableName"/>
+        (
+        <include refid="baseColumnList"/>
+        )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{orgName,jdbcType=VARCHAR}, #{orgCode,jdbcType=VARCHAR}, #{demandName,jdbcType=VARCHAR},
+            #{demandCode,jdbcType=VARCHAR}, #{auditLink,jdbcType=VARCHAR}, #{auditOrg,jdbcType=VARCHAR},
+            #{auditDept,jdbcType=VARCHAR}, #{auditStartTime,jdbcType=VARCHAR}, #{auditEndTime,jdbcType=VARCHAR},
+            #{modifyType,jdbcType=VARCHAR}, #{batchTime,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="orgName != null and orgName != ''">
+                org_name = #{orgName,jdbcType=VARCHAR},
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                org_code = #{orgCode,jdbcType=VARCHAR},
+            </if>
+            <if test="demandName != null and demandName != ''">
+                demand_name = #{demandName,jdbcType=VARCHAR},
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                audit_link = #{auditLink,jdbcType=VARCHAR},
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                Audit_org = #{auditOrg,jdbcType=VARCHAR},
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                Audit_dept = #{auditDept,jdbcType=VARCHAR},
+            </if>
+            <if test="auditStartTime != null">
+                audit_start_time = #{auditStartTime,jdbcType=VARCHAR},
+            </if>
+            <if test="auditEndTime != null">
+                audit_end_time = #{auditEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                modify_type = #{modifyType,jdbcType=VARCHAR},
+            </if>
+            <if test="batchTime != null">
+                batch_time = #{batchTime,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        demand_code = #{demandCode,jdbcType=VARCHAR}
+        and org_code = #{orgCode,jdbcType=VARCHAR}
+        and audit_link = #{auditLink,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键修改数据-->
+    <update id="updateForApi" parameterType="com.hqep.dataSharingPlatform.sjkflc.model.SjkflcOdsSjmlTUpAuditProcess">
+        update
+        <include refid="tableName"/>
+        <set>
+            <if test="orgName != null and orgName != ''">
+                org_name = #{orgName,jdbcType=VARCHAR},
+            </if>
+            <if test="orgCode != null and orgCode != ''">
+                org_code = #{orgCode,jdbcType=VARCHAR},
+            </if>
+            <if test="demandName != null and demandName != ''">
+                demand_name = #{demandName,jdbcType=VARCHAR},
+            </if>
+            <if test="auditLink != null and auditLink != ''">
+                audit_link = #{auditLink,jdbcType=VARCHAR},
+            </if>
+            <if test="auditOrg != null and auditOrg != ''">
+                Audit_org = #{auditOrg,jdbcType=VARCHAR},
+            </if>
+            <if test="auditDept != null and auditDept != ''">
+                Audit_dept = #{auditDept,jdbcType=VARCHAR},
+            </if>
+            <if test="auditStartTime != null">
+                audit_start_time = #{auditStartTime,jdbcType=VARCHAR},
+            </if>
+            <if test="auditEndTime != null">
+                audit_end_time = #{auditEndTime,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyType != null and modifyType != ''">
+                modify_type = #{modifyType,jdbcType=VARCHAR},
+            </if>
+            <if test="batchTime != null">
+                batch_time = #{batchTime,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where
+        demand_code = #{demandCode,jdbcType=VARCHAR}
+        and org_code = #{orgCode,jdbcType=VARCHAR}
+        and audit_link = #{auditLink,jdbcType=VARCHAR}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        demand_code = #{demandCode,jdbcType=VARCHAR}
+        and org_code = #{orgCode,jdbcType=VARCHAR}
+        and audit_link = #{auditLink,jdbcType=VARCHAR}
+    </delete>
+
+    <!--通过主键删除-->
+    <delete id="deleteByIdForApi" parameterType="java.lang.String">
+        delete from
+        <include refid="tableName"/>
+        where
+        demand_code = #{demandCode,jdbcType=VARCHAR}
+        and org_code = #{orgCode,jdbcType=VARCHAR}
+        and audit_link = #{auditLink,jdbcType=VARCHAR}
+    </delete>
+
+
+    <select id="noExistence"  resultMap="baseResultMap">
+        select
+            t2.id,'国网黑龙江省电力有限公司' as  org_name,'01020' as org_code
+            , t2.demand_name, t2.demand_code, t2.audit_link  , t2.Audit_dept as Audit_org
+            , t2.Audit_dept, t2.audit_start_time , t2.audit_end_time
+        from sjkflc_ods_sjml_t_up_demand_application t1
+        inner join sjkflc_process_audit t2
+        on t1.DEMAND_CODE = t2.DEMAND_CODE
+        where t1.DEMAND_CODE not in (select DISTINCT demand_code from sjkflc_ods_sjml_t_up_audit_process)
+    </select>
+
+</mapper>
+

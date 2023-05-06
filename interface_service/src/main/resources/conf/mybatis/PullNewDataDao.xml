@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.interface_serv.dao.PullNewDataDao">
+    <!--根据主键自动选择插入还是更新用户数据-->
+    <update id="replaceMoreUsers" parameterType="list">
+        REPLACE INTO pull_user(
+        user_id,
+        user_name,
+        display_name,
+        mobile_phone,
+        email,
+        comments,
+        create_date,
+        update_date,
+        pull_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.userId,jdbcType=VARCHAR},
+            #{item.userName,jdbcType=VARCHAR},
+            #{item.displayName,jdbcType=VARCHAR},
+            #{item.mobilePhone,jdbcType=VARCHAR},
+            #{item.email,jdbcType=VARCHAR},
+            #{item.comments,jdbcType=VARCHAR},
+            SUBSTRING(#{item.createDate,jdbcType=VARCHAR},1,19),
+            SUBSTRING(#{item.updateDate,jdbcType=VARCHAR},1,19),
+            CURTIME()
+            )
+        </foreach>
+    </update>
+
+    <!--根据主键自动选择插入还是更新字典数据-->
+    <update id="replaceMoreColumns" parameterType="list">
+        REPLACE INTO pull_column_dict(
+        table_name,
+        table_cn_name,
+        table_type,
+        column_name,
+        column_cn_name,
+        column_type,
+        column_length,
+        column_nullable,
+        pull_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.tableName,jdbcType=VARCHAR},
+            #{item.tableCnName,jdbcType=VARCHAR},
+            #{item.tableType,jdbcType=VARCHAR},
+            #{item.columnName,jdbcType=VARCHAR},
+            #{item.columnCnName,jdbcType=VARCHAR},
+            #{item.columnType,jdbcType=VARCHAR},
+            #{item.columnLength,jdbcType=VARCHAR},
+            #{item.columnNullable,jdbcType=VARCHAR},
+            CURTIME()
+            )
+        </foreach>
+    </update>
+</mapper>

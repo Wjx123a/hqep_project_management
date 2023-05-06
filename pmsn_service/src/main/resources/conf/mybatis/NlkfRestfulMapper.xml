@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.NlkfRestfulApiDao">
+
+    <!--    查询登陆人信息-->
+    <select id="queryUserListDao" parameterType="pd" resultType="pd">
+            SELECT
+                plr.id AS "id",
+                plr.LOGIN_NUM AS "loginNum",
+                plr.PASSWORD AS "password",
+                plr.ROLE_ID AS "roleId",
+                plr.ROLE_NAME AS "roleName",
+                plr.STATUS AS "status",
+                pp.NAME AS "name",
+                pp.PERSON_ID AS "personId",
+                pp.SEX AS "sex",
+                pp.IDENTITY_NUM AS "identityNum",
+                pp.PHONE AS "phone",
+                pp.PHOTO AS "photo",
+                pp.ORG_CODE AS "orgCode",
+                pp.ORG_NAME AS "orgName",
+                pp.DEP_CODE AS "depCode",
+                pp.DEP_NAME AS "depName",
+                plr.OPT_ID as "optId",
+	            plr.OPT_NAME as "optName",
+	            plr.OPT_EXPLAIN as "optExplain",
+                CASE
+                    WHEN plr.ROLE_ID = '1101' THEN '1'
+                    ELSE '0'
+                END "isAdmin"
+            FROM
+                PMSN_LOGIN_ROLE plr
+                LEFT JOIN PMSN_PERSON pp ON plr.ID = pp.LOGIN_ID
+                AND pp.VISIABLE = 1
+            WHERE
+                1=1
+                AND plr.VISIABLE = 1
+                AND plr.LOGIN_NUM = #{loginNum}
+                <if test="password != null and password != '' ">
+                    AND PASSWORD = #{password}
+                </if>
+    </select>
+
+    <update id="updateUserInfoService" parameterType="pd">
+        update
+        PMSN_LOGIN_ROLE
+        set
+        PASSWORD = 'c33367701511b4f6020ec61ded352059'
+        , VISIABLE = "1"
+        , STATUS = "1"
+        where
+        login_num = #{loginNum}
+
+    </update>
+
+    <select id="getStatistics" parameterType="pd" resultType="pd">
+        select
+        t.id,
+        t.ywxt,
+        t.sjb,
+        t.sjbqxsqd,
+        t.zxsq,
+        t.sjmlb,
+        date_format(t.tjny, '%Y-%m-%d') as tjny
+        from pmsn_api_statistics t
+        <if test="tjny != null and tjny != '' ">
+            where date_format(tjny, '%Y-%m-%d') <![CDATA[<=]]> #{tjny}
+        </if>
+        order by tjny desc
+        limit 1
+    </select>
+
+    <select id="getSjglyyybList" parameterType="pd" resultType="pd">
+        select
+        ts.tjny
+        ,IFNULL(rmxt.total, '0') as byfzymlsyl -- 本月份资源目录使用量
+        ,IFNULL(login.total, '0') as byfyhs  -- 本月份用户数(当月登录人数去重)
+        ,IFNULL(login.totalall, '0') as zymlyhs -- 资源目录用户数 (当前月累计登录人数)
+        ,ROUND(IF(IFNULL(login.total,0)=0,0,(login.total-tb.total)/login.total*100),4) as tbzzl -- 数据资源目录访问人数同比增长率(%)
+        ,IFNULL(rmxt1.xtnc, '营销应用') as rmjsxt1,  IFNULL(rmxt1.total, '0') as srl1  -- 热门检索系统1 及 使用量1
+        ,IFNULL(rmxt2.xtnc, '营销应用') as rmjsxt2,  IFNULL(rmxt2.total, '0') as srl2  -- 热门检索系统2 及 使用量2
+        ,IFNULL(rmxt3.xtnc, '营销应用') as rmjsxt3,  IFNULL(rmxt3.total, '0') as srl3   -- 热门检索系统3 及 使用量3
+        ,IFNULL(rmxt4.xtnc, '营销应用') as rmjsxt4,  IFNULL(rmxt4.total, '0') as srl4  -- 热门检索系统4 及 使用量4
+        ,IFNULL(rmxt5.xtnc, '营销应用') as rmjsxt5,  IFNULL(rmxt5.total, '0') as srl5  -- 热门检索系统5 及 使用量5
+        ,IFNULL(rmxt6.xtnc, '营销应用') as rmjsxt6,  IFNULL(rmxt6.total, '0') as srl6  -- 热门检索系统6 及 使用量6
+        ,IFNULL(rmxt7.xtnc, '营销应用') as rmjsxt7,  IFNULL(rmxt7.total, '0') as srl7  -- 热门检索系统7 及 使用量7
+        ,IFNULL(rmxt8.xtnc, '营销应用') as rmjsxt8,  IFNULL(rmxt8.total, '0') as srl8  -- 热门检索系统8 及 使用量8
+        ,IFNULL(rmxt9.xtnc, '营销应用') as rmjsxt9,  IFNULL(rmxt9.total, '0') as srl9  -- 热门检索系统9 及 使用量9
+        ,IFNULL(rmxt10.xtnc,'营销应用') as rmjsxt10, IFNULL(rmxt10.total,'0') as srl10 -- 热门检索系统10 及 使用量10
+        ,IFNULL(rc1.sscmc,"c_cons")  as rpjsch1,  IFNULL(rc1.total, "0") as rcjxcs1  -- 热频检索词汇1 及 热词检索次数1
+        ,IFNULL(rc2.sscmc,"c_cons")  as rpjsch2,  IFNULL(rc2.total, "0") as rcjxcs2  -- 热频检索词汇2 及 热词检索次数2
+        ,IFNULL(rc3.sscmc,"c_cons")  as rpjsch3,  IFNULL(rc3.total, "0") as rcjxcs3  -- 热频检索词汇3 及 热词检索次数3
+        ,IFNULL(rc4.sscmc,"c_cons")  as rpjsch4,  IFNULL(rc4.total, "0") as rcjxcs4  -- 热频检索词汇4 及 热词检索次数4
+        ,IFNULL(rc5.sscmc,"c_cons")  as rpjsch5,  IFNULL(rc5.total, "0") as rcjxcs5  -- 热频检索词汇5 及 热词检索次数5
+        ,IFNULL(rc6.sscmc,"c_cons")  as rpjsch6,  IFNULL(rc6.total, "0") as rcjxcs6  -- 热频检索词汇6 及 热词检索次数6
+        ,IFNULL(rc7.sscmc,"c_cons")  as rpjsch7,  IFNULL(rc7.total, "0") as rcjxcs7  -- 热频检索词汇7 及 热词检索次数7
+        ,IFNULL(rc8.sscmc,"c_cons")  as rpjsch8,  IFNULL(rc8.total, "0") as rcjxcs8  -- 热频检索词汇8 及 热词检索次数8
+        ,IFNULL(rc9.sscmc,"c_cons")  as rpjsch9,  IFNULL(rc9.total, "0") as rcjxcs9  -- 热频检索词汇9 及 热词检索次数9
+        ,IFNULL(rc10.sscmc,"c_cons") as rpjsch10, IFNULL(rc10.total,"0") as rcjxcs10 -- 热频检索词汇10 及 热词检索次数10
+        ,gdbl.gdslsl  -- 工单受理数量(张)
+        ,gdbl.sqsjbsl -- 申请数据表数量(张)
+        ,gdbl.sqjzgdsl -- 上期结转工单数量(张)
+        ,gdbl.gdbjsl -- 工单办结数量(张)
+        ,ROUND(IF((gdbl.gdslsl+gdbl.sqjzgdsl)=0,0,(gdbl.gdbjsl /(gdbl.gdslsl+gdbl.sqjzgdsl)*100)),4) as gdbjl -- 工单办结率(%)
+        ,gdbl.sjfmqdslgdsl  -- 涉及负面清单受理工单数量(张)
+        ,gdbl.sjfmqdbjgdsl -- 涉及负面清单办结工单数量(张)
+        ,ROUND(IF(gdbl.sjfmqdslgdsl=0,0,(gdbl.sjfmqdbjgdsl/gdbl.sjfmqdslgdsl)*100),4) as sjfmqdbjl -- 涉及负面清单办结率(%)
+        ,ROUND(IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl)),4) as gdqlcpjsc -- 工单全流程平均时长(天)
+        , case when ts.tjny = '2021-07' then ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-4)/ 4)*100,4)
+        when	ts.tjny = '2021-08' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-3.5)/3.5)*100,4)
+        when	ts.tjny = '2021-09' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.13)/0.13)*100,4)
+        when	ts.tjny = '2021-10' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.15)/0.15)*100,4)
+        when	ts.tjny = '2021-11' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.1)/0.1)*100,4)
+        when	ts.tjny = '2021-12' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.23)/0.23)*100,4)
+        when	ts.tjny = '2022-01' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.6)/ 0.6)*100,4)
+        when	ts.tjny = '2022-02' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.05)/0.05)*100,4)
+        when	ts.tjny = '2022-03' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.01)/0.01)*100,4)
+        when	ts.tjny = '2022-04' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.01)/0.01)*100,4)
+        when	ts.tjny = '2022-05' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.01)/0.01)*100,4)
+        when	ts.tjny = '2022-06' then  ROUND(((IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl))-0.01)/0.01)*100,4)
+        else
+        ROUND(IF(IF(gdbl.syzslsl=0,0,(gdbl.syzslsc/gdbl.syzslsl))=0,0,
+        ((IF(gdbl.syzslsl=0,0,(gdbl.syzslsc/gdbl.syzslsl))-
+        IF(gdbl.zslsl=0,0,(gdbl.zslsc/gdbl.zslsl)))/
+        IF(gdbl.syzslsl=0,0,(gdbl.syzslsc/gdbl.syzslsl)))*100),4)
+        end as gdqlcpjschb -- 工单全流程平均时长环比(%)
+        ,ROUND(IF(gdbl.fmqdzslsl=0,0,(gdbl.fmqdzslsc/gdbl.fmqdzslsl)),4) as fmqdgdqlcpjsc -- 涉及负面清单工单全流程平均时长(天)
+        ,ROUND(IF(gdbl.gdbjsl=0,0,(gdbl.ffmqdzslsc/gdbl.gdbjsl)),4) as ffmqdgdqlcpjsc -- 非负面清单工单全流程平均时长(天)
+        ,ywbm.sqrssbm as gdtbslzdbm -- 工单提报数量最多业务部门
+        ,ywbm.total  as gdtbslzdbmgdsl -- 工单提报数量最多业务部门工单数量(张)
+        ,ROUND(IF(gdbl.gdbjsl=0,0,((gdbl.xqslzsc1+gdbl.xqslzsc2)/gdbl.gdbjsl)),4) as xqslzscpjsc  -- 需求受理环节平均时长(天)
+        ,ROUND(IF(gdbl.gdbjsl=0,0,((gdbl.ywshhjzsc1+gdbl.ywshhjzsc2)/gdbl.gdbjsl)),4) as ywshhjzscpjsc  -- 业务审核环节平均时长(天)
+        ,ROUND(IF(gdbl.gdbjsl=0,0,((gdbl.sqpzhjzsc1+gdbl.sqpzhjzsc2)/gdbl.gdbjsl)),4) as sqpzhjzscpjsc -- 授权配置环节平均时长(天)
+        ,rmxqxt1.tableSystem as tableSystem1 -- 热门需求系统名称1
+        ,rmxqxt1.sqbzwbm as sqbzwbm1 -- 表中文名称1
+        ,rmxqxt1.tableName as tableName1 -- 表英文名称1
+        ,rmxqxt1.total as xqcs1 --  需求次数1
+        ,rmxqxt2.tableSystem as tableSystem2 -- 热门需求系统名称2
+        ,rmxqxt2.sqbzwbm as sqbzwbm2   -- 表中文名称2
+        ,rmxqxt2.tableName as tableName2  -- 	表英文名称2
+        ,rmxqxt2.total as xqcs2 -- 需求次数2
+        ,rmxqxt3.tableSystem as tableSystem3 -- 热门需求系统名称3
+        ,rmxqxt3.sqbzwbm as sqbzwbm3  -- 表中文名称3
+        ,rmxqxt3.tableName as tableName3 -- 表英文名称3
+        ,rmxqxt3.total as xqcs3 -- 需求次数3
+        ,'' as bz -- 备注
+        ,'曲直' as tjr	-- 提交人
+        ,'18201507928' as lxdh -- 联系电话
+        from
+        (select
+        DISTINCT DATE_FORMAT(t.created_time,"%Y-%m") as tjny
+        from sys_logs t
+        union
+        select DISTINCT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny from pull_work_order t
+        ) ts
+        left join
+        (
+        select '2021-06' as tjny, 25 as  total FROM dual
+        union all
+        select '2021-07' as tjny, 6 as  total FROM dual
+        union all
+        select '2021-08' as tjny, 12 as  total FROM dual
+        union all
+        select '2021-09' as tjny, 13 as  total FROM dual
+        union all
+        select '2021-10' as tjny, 10 as  total FROM dual
+        union all
+        select '2021-11' as tjny, 19 as  total FROM dual
+        union all
+        select '2021-12' as tjny, 11 as  total FROM dual
+        union all
+        SELECT
+        t.tjny ,
+        count(1)  as  total
+        from
+        (SELECT
+        DISTINCT t.manager_name,
+        DATE_FORMAT(t.created_time,"%Y-%m") as tjny ,
+        t.operation as operation
+        -- count(1) total
+        from  sys_logs t
+        where t.operation = '登陆系统' and DATE_FORMAT(t.created_time,"%Y-%m") > '2021-12'
+        GROUP BY  DATE_FORMAT(t.created_time,"%Y-%m") ,t.operation,t.manager_name
+        ) t  -- 该层为去重的登录用户
+        where t.operation = '登陆系统'
+        GROUP BY  t.tjny ,t.operation
+        ) tb on DATE_FORMAT(date_sub(str_to_date(concat(tb.tjny,"-1"),'%Y-%m-%d- %H:%i'),interval -1 year) ,'%Y-%m') = ts.tjny
+        left join
+        (SELECT
+        t.tjny ,
+        t.operation as operation,
+        count(1) total ,
+        (SELECT
+        count(DISTINCT l.manager_name) total
+        from
+        (SELECT
+        DISTINCT t.manager_name,
+        DATE_FORMAT(t.created_time,"%Y-%m") as tjny ,
+        t.operation as operation
+        -- count(1) total
+        from  sys_logs t
+        where t.operation = '登陆系统'
+        GROUP BY  DATE_FORMAT(t.created_time,"%Y-%m") ,t.operation,t.manager_name
+        ) l -- 该层为去重的登录用户
+        where l.tjny <![CDATA[<=]]> t.tjny -- 当前月之前的去重的登录记录
+        ) as totalall   -- 累计当前月之前的去重的登录人数的和
+        from
+        (SELECT
+        DISTINCT t.manager_name,
+        DATE_FORMAT(t.created_time,"%Y-%m") as tjny ,
+        t.operation as operation
+        -- count(1) total
+        from  sys_logs t
+        where t.operation = '登陆系统'
+        GROUP BY  DATE_FORMAT(t.created_time,"%Y-%m") ,t.operation,t.manager_name
+        ) t  -- 该层为去重的登录用户
+        where t.operation = '登陆系统'
+        GROUP BY  t.tjny ,t.operation
+        ) login
+        on  login.tjny = ts.tjny  -- 关联用户登录统计表
+        left join
+        (
+        SELECT
+        a.tjny, a.total
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny,count(1) total from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ) rmxt on rmxt.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny1 = a.tjny, @rank1 := @rank1 + 1, @rank1 := 1 ) AS rank
+        , ( @tjny1 := a.tjny ) temp ,
+        @rownum1 :=@rownum1 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank1 := 0, @rownum1 := 0 ,@tjny1 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 1
+        ) rmxt1 on rmxt1.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny2 = a.tjny, @rank2 := @rank2 + 1, @rank2 := 1 ) AS rank
+        , ( @tjny2 := a.tjny ) temp ,
+        @rownum2 :=@rownum2 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank2 := 0, @rownum2 := 0 ,@tjny2 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 2
+        ) rmxt2 on rmxt2.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny3 = a.tjny, @rank3 := @rank3 + 1, @rank3 := 1 ) AS rank
+        , ( @tjny3 := a.tjny ) temp ,
+        @rownum3 :=@rownum3 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank3 := 0, @rownum3 := 0 ,@tjny3 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 3
+        ) rmxt3 on rmxt3.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny4 = a.tjny, @rank4 := @rank4 + 1, @rank4 := 1 ) AS rank
+        , ( @tjny4 := a.tjny ) temp ,
+        @rownum4 :=@rownum4 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank4 := 0, @rownum4 := 0 ,@tjny4 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 4
+        ) rmxt4 on rmxt4.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny5 = a.tjny, @rank5 := @rank5 + 1, @rank5 := 1 ) AS rank
+        , ( @tjny5 := a.tjny ) temp ,
+        @rownum5 :=@rownum5 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank5 := 0, @rownum5 := 0 ,@tjny5 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 5
+        ) rmxt5 on rmxt5.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny6 = a.tjny, @rank6 := @rank6 + 1, @rank6 := 1 ) AS rank
+        , ( @tjny6 := a.tjny ) temp ,
+        @rownum6 :=@rownum6 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank6 := 0, @rownum6 := 0 ,@tjny6 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 6
+        ) rmxt6 on rmxt6.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny7 = a.tjny, @rank7 := @rank7 + 1, @rank7 := 1 ) AS rank
+        , ( @tjny7 := a.tjny ) temp ,
+        @rownum7 :=@rownum7 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank7 := 0, @rownum7 := 0 ,@tjny7 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 7
+        ) rmxt7 on rmxt7.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny8 = a.tjny, @rank8 := @rank8 + 1, @rank8 := 1 ) AS rank
+        , ( @tjny8 := a.tjny ) temp ,
+        @rownum8 :=@rownum8 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank8 := 0, @rownum8 := 0 ,@tjny8 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 8
+        ) rmxt8 on rmxt8.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny9 = a.tjny, @rank9 := @rank9 + 1, @rank9 := 1 ) AS rank
+        , ( @tjny9 := a.tjny ) temp ,
+        @rownum9 :=@rownum9 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank9 := 0, @rownum9 := 0 ,@tjny9 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 9
+        ) rmxt9 on rmxt9.tjny = ts.tjny
+        left join
+        (select rmxt.tjny
+        ,rmxt.xtnc,rmxt.total ,rmxt.rank
+        from (
+        SELECT
+        a.tjny,
+        a.xtnc,
+        a.total,
+        IF( @tjny10 = a.tjny, @rank10 := @rank10 + 1, @rank10 := 1 ) AS rank
+        , ( @tjny10 := a.tjny ) temp ,
+        @rownum10 :=@rownum10 + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.created_time,"%Y-%m") as tjny, SUBSTRING_INDEX( t.operation, ':' , -1) xtnc ,count(1) total ,t.operation from  sys_logs t
+        where t.params like '%ONE_CATALOG_NAME":"数据目录%' and  t.operation != '数据目录'
+        GROUP BY t.operation ,DATE_FORMAT(t.created_time,"%Y-%m") ) a
+        ,( SELECT @rank10 := 0, @rownum10 := 0 ,@tjny10 := NULL ) b
+        ORDER BY a.tjny, a.total  DESC,a.operation DESC
+        ) rmxt  -- 对热词表分组排序
+        where rmxt.rank = 10
+        ) rmxt10 on rmxt10.tjny = ts.tjny   -- 关联热门系统统计表（得到热门检索系统+使用量+本月使用量）
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny01 = a.tjny, @rank01 := @rank01 + 1, @rank01 := 1 ) AS rank
+        , ( @tjny01 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank01 := 0, @rownum01 := 0 ,@tjny01 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 1
+        ) rc1 on  rc1.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny02 = a.tjny, @rank02 := @rank02 + 1, @rank02 := 1 ) AS rank
+        , ( @tjny02 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank02 := 0, @rownum02 := 0 ,@tjny02 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 2
+        ) rc2 on  rc2.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny03 = a.tjny, @rank03 := @rank03 + 1, @rank03 := 1 ) AS rank
+        , ( @tjny03 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank03 := 0, @rownum03 := 0 ,@tjny03 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 3
+        ) rc3 on  rc3.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny04 = a.tjny, @rank04 := @rank04 + 1, @rank04 := 1 ) AS rank
+        , ( @tjny04 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank04 := 0, @rownum04 := 0 ,@tjny04 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 4
+        ) rc4 on  rc4.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny05 = a.tjny, @rank05 := @rank05 + 1, @rank05 := 1 ) AS rank
+        , ( @tjny05 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank05 := 0, @rownum05 := 0 ,@tjny05 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 5
+        ) rc5 on  rc5.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny06 = a.tjny, @rank06 := @rank06 + 1, @rank06 := 1 ) AS rank
+        , ( @tjny06 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank06 := 0, @rownum06 := 0 ,@tjny06 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 6
+        ) rc6 on  rc6.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny07 = a.tjny, @rank07 := @rank07 + 1, @rank07 := 1 ) AS rank
+        , ( @tjny07 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank07 := 0, @rownum07 := 0 ,@tjny07 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 7
+        ) rc7 on  rc7.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny08 = a.tjny, @rank08 := @rank08 + 1, @rank08 := 1 ) AS rank
+        , ( @tjny08 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank08 := 0, @rownum08 := 0 ,@tjny08 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 8
+        ) rc8 on  rc8.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny09 = a.tjny, @rank09 := @rank09 + 1, @rank09 := 1 ) AS rank
+        , ( @tjny09 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank09 := 0, @rownum09 := 0 ,@tjny09 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 9
+        ) rc9 on  rc9.tjny =ts.tjny
+        left join
+        (select rc.tjny,rc.sscmc,rc.total from
+        (select
+        a.tjny,a.sscmc,a.total,
+        IF( @tjny010 = a.tjny, @rank010 := @rank010 + 1, @rank010 := 1 ) AS rank
+        , ( @tjny010 := a.tjny ) temp
+        from
+        (select DATE_FORMAT(t.cxdate,"%Y-%m")  as tjny,t.sscmc ,count(1) as total from dict_rc t
+        group by  DATE_FORMAT(t.cxdate,"%Y-%m"),t.sscmc
+        ) a, ( SELECT @rank010 := 0, @rownum010 := 0 ,@tjny010 := NULL ) b
+        order by a.tjny,a.total DESC,a.sscmc desc
+        ) rc where rc.rank = 10
+        ) rc10 on  rc10.tjny =ts.tjny  -- 关联热词统计表（热频检索词汇 及 热词检索次数）
+        left join
+        (
+        select
+        t_date.tjny,
+
+        (select count(DISTINCT numId) from
+        (select numId ,t.sqdate as demand_start_time from pull_work_order t where 3sp is null) t
+        where DATE_FORMAT(t.demand_start_time,"%Y-%m") = t_date.tjny
+        ) as gdslsl   -- 工单受理数量(张)
+        ,(select count(1) from pull_work_order t
+        where t.3sp is null and DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny
+        ) as sqsjbsl  -- 申请数据表数量(张)
+        ,(select count(1) from pull_work_order t
+        where t.3sp is null and DATE_FORMAT(t.sqdate,"%Y-%m") != DATE_FORMAT(now(),"%Y-%m")
+        AND (DATE_FORMAT(t.sqdate,"%Y-%m") <![CDATA[<]]> t_date.tjny and t_date.tjny <![CDATA[<=]]> DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m"))
+        ) as sqjzgdsl   -- 上期结转工单数量(张)
+        ,(select count(1) from ods_sjml_internal_up_demand_application t
+        where DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny
+        ) as gdbjsl   -- 工单办结数量(张)
+        ,(select count(DISTINCT numId ) from (select numId,t.sqdate from pull_work_order t
+        where t.isFmqd != '非负面清单' and  t.3sp is null ) t
+        where  DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny
+        ) as sjfmqdslgdsl -- 涉及负面清单受理工单数量(张)
+        ,(select count(DISTINCT numId ) from (select numId,t.sqdate,4sp from pull_work_order t
+        where t.isFmqd != '非负面清单' and  t.3sp is null ) t
+        where  DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") = t_date.tjny
+        ) as sjfmqdbjgdsl -- 涉及负面清单办结工单数量(张)
+        ,(select count(1) from pull_work_order t
+        where t.isFmqd != '非负面清单'
+        and DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny
+        ) as byfmqdsl -- 本月负面清单数量
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.sqdate,'%Y-%m-%d %H:%i:%s'),str_to_date(t.4sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select
+        max(t.sqdate) as sqdate,max(t.4sp) as 4sp
+        from pull_work_order t where t.4sp is not null
+        group by  t.numId,DATE_FORMAT(t.sqdate,"%Y-%m")
+        ) t
+        where DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny) as zslsc -- 本月内工单全流程总时长
+        ,(select count(1) from ods_sjml_internal_up_demand_application t
+        where DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny) as zslsl -- 本月内完成工单数量
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.demand_start_time,'%Y-%m-%d %H:%i:%s'),
+        str_to_date(t.demand_end_time,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from ods_sjml_internal_up_demand_application t
+        where DATE_FORMAT(date_sub(t.demand_end_time,interval -1 MONTH) ,'%Y-%m') = t_date.tjny) as syzslsc  -- 上月内工单全流程总时长
+        ,(select count(1) from ods_sjml_internal_up_demand_application t
+        where DATE_FORMAT(date_sub(t.demand_end_time,interval -1 MONTH) ,'%Y-%m')  = t_date.tjny) as syzslsl  -- 上月内完成工单数量
+
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.demand_start_time,'%Y-%m-%d %H:%i:%s'),
+        str_to_date(t.demand_end_time,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from ods_sjml_internal_up_demand_application t
+        where t.negative_list_num > 0 and DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny) as fmqdzslsc -- 涉及负面清单-本月内工单全流程总时长
+        ,(select count(1) from ods_sjml_internal_up_demand_application t
+        where t.negative_list_num > 0 and DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny) as fmqdzslsl -- 涉及负面清单-本月内完成工单数量
+
+
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.demand_start_time,'%Y-%m-%d %H:%i:%s'),
+        str_to_date(t.demand_end_time,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from ods_sjml_internal_up_demand_application t
+        where t.negative_list_num = 0 and DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny) as ffmqdzslsc -- 涉及非负面清单-本月内工单全流程总时长
+        ,(select count(1) from ods_sjml_internal_up_demand_application t
+        where t.negative_list_num = 0 and DATE_FORMAT(t.demand_end_time,"%Y-%m") = t_date.tjny) as ffmqdzslsl -- 涉及非负面清单-本月内完成工单数量
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.sqdate,'%Y-%m-%d %H:%i:%s'),str_to_date(t.1sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select o.demand_code ,max(t.sqdate)  as sqdate,max(t.1sp) as 1sp
+        from pull_work_order t
+        left join ods_sjml_internal_up_demand_application o
+        on t.numId = o.demand_code
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and o.negative_list_num =0 and t.isFmqd = '非负面清单'
+        group by  o.demand_code ,DATE_FORMAT(t.sqdate,"%Y-%m")) t
+        where DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny ) as xqslzsc1  -- 需求受理环节总时长(非负面清单)
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.sqdate,'%Y-%m-%d %H:%i:%s'),str_to_date(t.1sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select
+        t.numId, max(t.sqdate) as sqdate,max(t.1sp) as 1sp
+        from pull_work_order t
+        left join pull_work_order p
+        on p.3sp is not null and p.sqrid = t.sqrid and p.tableName = t.tableName and p.tableSystem = t.tableSystem and p.ztOwner = t.ztOwner
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and t.isFmqd != '非负面清单' and t.3sp is null
+        group by t.numId, DATE_FORMAT(t.sqdate,"%Y-%m") ) t
+        where DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny) as xqslzsc2  -- 需求受理环节总时长(负面清单)
+
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.1sp,'%Y-%m-%d %H:%i:%s'),str_to_date(t.2sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select o.demand_code ,max(t.sqdate) as sqdate,max(t.1sp) as 1sp,max(t.2sp) as 2sp
+        from pull_work_order t
+        left join ods_sjml_internal_up_demand_application o
+        on t.numId = o.demand_code
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and o.negative_list_num =0 and t.isFmqd = '非负面清单'
+        group by  o.demand_code ,DATE_FORMAT(t.sqdate,"%Y-%m")) t
+        where  DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny )  as ywshhjzsc1  -- 业务审核环节总时长(非负面清单)
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.1sp,'%Y-%m-%d %H:%i:%s'),str_to_date(t.3sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select
+        t.numId, max(t.sqdate) as sqdate,max(t.1sp) as 1sp,max(p.3sp) as 3sp
+        from pull_work_order t
+        left join pull_work_order p
+        on p.3sp is not null and p.sqrid = t.sqrid and p.tableName = t.tableName and p.tableSystem = t.tableSystem and p.ztOwner = t.ztOwner
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and t.isFmqd != '非负面清单' and t.3sp is null
+        group by t.numId, DATE_FORMAT(t.sqdate,"%Y-%m") ) t
+        where DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny) as ywshhjzsc2   -- 业务审核环节总时长(负面清单)
+
+
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.2sp,'%Y-%m-%d %H:%i:%s'),str_to_date(t.4sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select o.demand_code ,max(t.sqdate) as sqdate,max(t.4sp) as 4sp,max(t.2sp) as 2sp
+        from pull_work_order t
+        left join ods_sjml_internal_up_demand_application o
+        on t.numId = o.demand_code
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and o.negative_list_num =0 and t.isFmqd = '非负面清单'
+        group by  o.demand_code ,DATE_FORMAT(t.sqdate,"%Y-%m")) t
+        where DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny) as sqpzhjzsc1  -- 授权配置环节总时长(非负面清单)
+        ,(select sum(timestampdiff(SECOND,str_to_date(t.3sp,'%Y-%m-%d %H:%i:%s'),str_to_date(t.4sp,'%Y-%m-%d %H:%i:%s')) /60/60/8)
+        from (select
+        t.numId, max(t.sqdate) as sqdate,max(t.4sp) as 4sp,max(p.3sp) as 3sp
+        from pull_work_order t
+        left join pull_work_order p
+        on p.3sp is not null and p.sqrid = t.sqrid and p.tableName = t.tableName and p.tableSystem = t.tableSystem and p.ztOwner = t.ztOwner
+        where DATE_FORMAT(IFNULL(t.4sp,"9999-12-24 16:03:42"),"%Y-%m") != '9999-12'
+        and t.isFmqd != '非负面清单' and t.3sp is null
+        group by t.numId, DATE_FORMAT(t.sqdate,"%Y-%m") ) t
+        where  DATE_FORMAT(t.sqdate,"%Y-%m") = t_date.tjny) as sqpzhjzsc2  -- 授权配置环节总时长(负面清单)
+        from
+        (select
+        DISTINCT DATE_FORMAT(t.created_time,"%Y-%m") as tjny
+        from sys_logs t
+        union
+        select DISTINCT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny from pull_work_order t
+        ) t_date
+        order  by t_date.tjny desc
+        ) gdbl on gdbl.tjny = ts.tjny
+        left join
+        (select tjny,sqrssbm ,total from
+        (SELECT
+        a.tjny,
+        a.sqrssbm,
+        a.total,
+        IF( @tjny11 = a.tjny, @rank11 := @rank11 + 1, @rank11 := 1 ) AS rank
+        , ( @tjny11 := a.tjny ) temp ,
+        @rownum :=@rownum + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny ,t.sqrssbm,count(DISTINCT numId) total from  pull_work_order t where t.3sp is null
+        GROUP BY t.sqrssbm ,DATE_FORMAT(t.sqdate,"%Y-%m") ) a
+        ,( SELECT @rank11 := 0, @rownum11 := 0 ,@tjny11 := NULL ) b
+        ORDER BY a.tjny, a.total DESC
+        ) ywbm  -- 工单提报数量最多业务部门
+        where ywbm.rank = 1) ywbm
+        on ywbm.tjny = ts.tjny
+        left join
+        (select tjny,tableSystem ,sqbzwbm,tableName,total ,ywbm.rank from
+        (SELECT
+        a.tjny,
+        a.tableSystem,
+        a.tableName,
+        a.sqbzwbm,
+        a.total,
+        IF( @tjny12 = a.tjny, @rank12 := @rank12 + 1, @rank12 := 1 ) AS rank
+        , ( @tjny12 := a.tjny ) temp ,
+        @rownum :=@rownum + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny,t.tableSystem ,t.tableName, t.sqbzwbm,count(1) total from  pull_work_order t
+        GROUP BY t.tableSystem, t.tableName , t.sqbzwbm ,DATE_FORMAT(t.sqdate,"%Y-%m") ) a
+        ,( SELECT @rank12 := 0, @rownum12 := 0 ,@tjny12 := NULL ) b
+        ORDER BY a.tjny, a.total DESC,a.tableSystem, a.sqbzwbm, a.tableName
+        ) ywbm  -- 热门需求系统名称
+        where ywbm.rank = 1) rmxqxt1
+        on rmxqxt1.tjny = ts.tjny
+        left join
+        (select tjny,tableSystem ,sqbzwbm,tableName,total ,ywbm.rank from
+        (SELECT
+        a.tjny,
+        a.tableSystem,
+        a.tableName,
+        a.sqbzwbm,
+        a.total,
+        IF( @tjny13 = a.tjny, @rank13 := @rank13 + 1, @rank13 := 1 ) AS rank
+        , ( @tjny13 := a.tjny ) temp ,
+        @rownum :=@rownum + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny,t.tableSystem ,t.tableName, t.sqbzwbm,count(1) total from  pull_work_order t
+        GROUP BY t.tableSystem, t.tableName , t.sqbzwbm ,DATE_FORMAT(t.sqdate,"%Y-%m") ) a
+        ,( SELECT @rank13 := 0, @rownum13 := 0 ,@tjny13 := NULL ) b
+        ORDER BY a.tjny, a.total DESC,a.tableSystem, a.sqbzwbm, a.tableName
+        ) ywbm  -- 热门需求系统名称
+        where ywbm.rank = 2) rmxqxt2
+        on rmxqxt2.tjny = ts.tjny
+        left join
+        (select tjny,tableSystem ,sqbzwbm,tableName,total ,ywbm.rank from
+        (SELECT
+        a.tjny,
+        a.tableSystem,
+        a.tableName,
+        a.sqbzwbm,
+        a.total,
+        IF( @tjny14 = a.tjny, @rank14 := @rank14 + 1, @rank14 := 1 ) AS rank
+        , ( @tjny14 := a.tjny ) temp ,
+        @rownum :=@rownum + 1 as rownum
+        FROM
+        (SELECT DATE_FORMAT(t.sqdate,"%Y-%m") as tjny,t.tableSystem ,t.tableName, t.sqbzwbm,count(1) total from  pull_work_order t
+        GROUP BY t.tableSystem, t.tableName , t.sqbzwbm ,DATE_FORMAT(t.sqdate,"%Y-%m") ) a
+        ,( SELECT @rank14 := 0, @rownum14 := 0 ,@tjny14 := NULL ) b
+        ORDER BY a.tjny, a.total DESC,a.tableSystem, a.sqbzwbm, a.tableName
+        ) ywbm  -- 热门需求系统名称
+        where ywbm.rank = 3) rmxqxt3
+        on rmxqxt3.tjny = ts.tjny
+        <if test="tjny != null and tjny != '' ">
+            where ts.tjny = #{tjny}
+        </if>
+        order by ts.tjny desc
+    </select>
+
+</mapper>

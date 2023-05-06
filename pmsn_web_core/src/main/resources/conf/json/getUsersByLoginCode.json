@@ -1,0 +1,23 @@
+[
+  {
+    "resExt": {
+      "provinceid": "hl",
+      "namecode": "xialc",
+      "saphrid": "11496572",
+      "status": "1"
+    },
+    "id": "EA0850F3643DC5BAE040007F0100203D",
+    "baseOrgId": "0A5EE26309BE75E0E0530100007FD2BA",
+    "name": "夏连成",
+    "userName": "00070977",
+    "state": "1",
+    "unicode": "1000070977",
+    "isCached": "null",
+    "dispOrder": "null",
+    "startUsefulLife": "2010-10-31",
+    "endUsefulLife": "2042-10-31",
+    "isSyncToSap": "null",
+    "sapHrCode": "11496572",
+    "password": "828C7A53F9849145705DC5B6EA6CD22B20D4E79A89A9502022F89B78"
+  }
+]

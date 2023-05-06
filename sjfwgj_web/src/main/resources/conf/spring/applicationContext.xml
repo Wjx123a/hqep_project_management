@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+    <context:component-scan base-package="com.hqep.*"/>
+    <context:annotation-config/>
+    <!-- 配置数据库连接池 -->
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="order" value="1"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:conf/config/jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="dataSourcewjx" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+
+        <property name="driverClassName" value="${driverClassName}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+        <property name="filters" value="stat,config"/>
+        <property name="maxActive" value="300"/>
+        <property name="minIdle" value="50"/>
+        <property name="maxWait" value="1800000"/>
+        <property name="validationQuery" value="select 1 from dual"/>
+    </bean>
+
+
+
+    <!-- 动态配置数据源 -->
+    <bean id="dataSource" class="com.hqep.dataSharingPlatform.common.multipleData.sssjlDynamicDataSource">
+        <property name ="targetDataSources">
+            <map key-type ="java.lang.String">
+                <entry value-ref ="dataSourcewjx" key= "dataSourcewjx"></entry>
+
+            </map>
+        </property>
+        <!-- 默认使用cebdb的数据源 -->
+        <property name ="defaultTargetDataSource" ref= "dataSourcewjx"></property>
+    </bean>
+
+    <!-- spring和mybatis结合配置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSourcewjx"/>
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath*:conf/mybatis/mapping/*.xml"/>
+        <!-- 配置mybatis 空值及分页 WXD-->
+        <property name="configLocation" value="classpath:conf/config/configuration.xml"/>
+        <property name="plugins">
+            <list>
+                <bean class="com.github.pagehelper.PageHelper">
+                    <property name="properties">
+                        <props>
+                            <prop key="dialect">mysql</prop>
+                        </props>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+    <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property value="com.hqep.*.*.dao" name="basePackage"/>
+        <property value="sqlSessionFactory" name="sqlSessionFactoryBeanName"/>
+    </bean>
+
+    <!-- (事务管理)transaction manager, use JtaTransactionManager for global tx -->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="txManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 事务策略  -->
+    <tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="save*" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="del*" no-rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" rollback-for="com.hqep.dataSharingPlatform.common.utils.MyException"/>
+        </tx:attributes>
+    </tx:advice>
+    <tx:annotation-driven proxy-target-class="true" transaction-manager="txManager"/>
+    <!--<task:annotation-driven scheduler="dataScheduler"/>
+    <task:scheduler id="dataScheduler" pool-size="5"/>-->
+
+    <!-- spring线程池 -->
+    <bean id="shareThreadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!-- 线程池维护线程的最少数量 -->
+        <property name="corePoolSize" value="2"></property>
+        <!-- 允许空闲时间 -->
+        <property name="keepAliveSeconds" value="200"></property>
+        <!-- 线程池维护线程的最大数量 -->
+        <property name="maxPoolSize" value="8"></property>
+        <!-- 缓存队列 -->
+        <property name="queueCapacity" value="5"></property>
+        <!-- 对拒绝task的处理策略 -->
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
+        </property>
+    </bean>
+    <!--    activiti 配置文件信息 创建ProcessEngineConfiguration 可以指定数据源 dataSource 指定策略 进行异常回滚-->
+<!--    <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">-->
+<!--        &lt;!&ndash;        数据源&ndash;&gt;-->
+<!--        <property name="dataSource" ref="dataSource"/>-->
+<!--        &lt;!&ndash;        策略&ndash;&gt;-->
+<!--        <property name="transactionManager" ref="txManager"/>-->
+<!--        &lt;!&ndash;        flase： 默认值。activiti在启动时，会对比数据库表中保存的版本，如果没有表或者版本不匹配，将抛出异常。&ndash;&gt;-->
+<!--        &lt;!&ndash;        true： activiti会对数据库中所有表进行更新操作。如果表不存在，则自动创建。&ndash;&gt;-->
+<!--        &lt;!&ndash;        create_drop： 在activiti启动时创建表，在关闭时删除表（必须手动关闭引擎，才能删除表）。&ndash;&gt;-->
+<!--        &lt;!&ndash;        drop-create： 在activiti启动时删除原来的旧表，然后在创建新表（不需要手动关闭引擎）。&ndash;&gt;-->
+<!--        <property name="databaseSchemaUpdate" value="true"/>-->
+<!--        &lt;!&ndash;        asyncExecutorActivate是指示activiti在流程引擎启动就激活AsyncExecutor,异步&ndash;&gt;-->
+<!--        <property name="asyncExecutorActivate" value="false"/>-->
+<!--        <property name="activityFontName" value="宋体"/>-->
+<!--        <property name="labelFontName" value="宋体"/>-->
+<!--        &lt;!&ndash;自动部署 项目启动时由spring根据 配置目录下 bpmn ，png 文件自动部署流程&ndash;&gt;-->
+<!--        &lt;!&ndash;        <property name="deploymentResources">&ndash;&gt;-->
+<!--        &lt;!&ndash;            <list>&ndash;&gt;-->
+<!--        &lt;!&ndash;                <value>classpath*:/activiti-deploymentResources/*</value>&ndash;&gt;-->
+<!--        &lt;!&ndash;            </list>&ndash;&gt;-->
+<!--        &lt;!&ndash;        </property>&ndash;&gt;-->
+<!--    </bean>-->
+<!--    <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">-->
+<!--        <property name="processEngineConfiguration" ref="processEngineConfiguration"/>-->
+<!--    </bean>-->
+<!--    &lt;!&ndash; 创建activiti提供的各种服务 &ndash;&gt;-->
+<!--    &lt;!&ndash; 工作流仓储服务 &ndash;&gt;-->
+<!--    <bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService"/>-->
+<!--    &lt;!&ndash; 工作流运行服务 &ndash;&gt;-->
+<!--    <bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService"/>-->
+<!--    &lt;!&ndash;  工作流任务服务&ndash;&gt;-->
+<!--    <bean id="taskService" factory-bean="processEngine" factory-method="getTaskService"/>-->
+<!--    &lt;!&ndash;  工作流历史数据服务&ndash;&gt;-->
+<!--    <bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService"/>-->
+<!--    &lt;!&ndash;  工作流管理服务&ndash;&gt;-->
+<!--    <bean id="managementService" factory-bean="processEngine" factory-method="getManagementService"/>-->
+<!--    &lt;!&ndash; 工作流唯一服务 &ndash;&gt;-->
+<!--    &lt;!&ndash; 用来进行身份管理和认证，其功能依托于IdentityService接口。&ndash;&gt;-->
+<!--    <bean id="IdentityService" factory-bean="processEngine" factory-method="getIdentityService"/>-->
+<!--    &lt;!&ndash;    <context:component-scan base-package="com.hqep.dataSharingPlatform.*.*"/>&ndash;&gt;-->
+<!--    <aop:aspectj-autoproxy proxy-target-class="true" />-->
+</beans>

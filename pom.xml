@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.hqep</groupId>
+    <artifactId>hqep_project_management</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>pmsn_service</module>
+        <module>pmsn_web_core</module>
+        <module>interface_service</module>
+        <module>common</module>
+        <module>sjkflc_service</module>
+        <module>sjkflc_redis_servce</module>
+        <module>pmsn_check_service</module>
+        <module>sjwfgj_serve</module>
+        <module>sjfwgj_web</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <name>hqep_project_management Maven Webapp</name>
+    <!-- FIXME change it to the project's website -->
+    <url>http://www.example.com</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+
+        <slf4j.version>1.7.21</slf4j.version>
+        <aspectjrt.version>1.7.0</aspectjrt.version>
+        <aspectjweaver.version>1.7.0</aspectjweaver.version>
+        <commons-codec.version>1.5</commons-codec.version>
+        <commons-collections.version>3.2.2</commons-collections.version>
+        <!--文件上传-->
+        <commons-fileupload.version>1.3.2</commons-fileupload.version>
+        <commons-httpclient.version>3.0-alpha1</commons-httpclient.version>
+        <commons-io.version>2.2</commons-io.version>
+        <commons-pool2.version>2.4.2</commons-pool2.version>
+        <commons-lang.version>3.7</commons-lang.version>
+        <cxf.version>3.1.10</cxf.version>
+        <dom4j.version>1.6.1</dom4j.version>
+        <druid.version>1.0.28</druid.version>
+        <freemarker.version>2.3.23</freemarker.version>
+        <gson.version>2.2.2</gson.version>
+        <guava.version>19.0</guava.version>
+        <jackson.version>2.9.6</jackson.version>
+        <log4j.version>2.8.2</log4j.version>
+        <fastjson.version>1.2.44</fastjson.version>
+        <jedis.version>2.9.0</jedis.version>
+        <lombok.version>1.18.20</lombok.version>
+        <jsqlparser.version>0.9.1</jsqlparser.version>
+        <jstl.version>1.2</jstl.version>
+        <jackson-mapper-asl.version>1.9.13</jackson-mapper-asl.version>
+
+        <mybatis.version>3.4.1</mybatis.version>
+        <mybatis-spring.version>1.3.1</mybatis-spring.version>
+        <servlet-api.version>2.4</servlet-api.version>
+        <jsp-api.version>2.0</jsp-api.version>
+        <mysql.version>8.0.25</mysql.version>
+        <ojdbc.version>12.1.0.2</ojdbc.version>
+        <neethi.version>3.0.3</neethi.version>
+        <pagehelper.version>4.0.0</pagehelper.version>
+
+        <poi.version>3.10-FINAL</poi.version>
+        <spring.version>5.0.7.RELEASE</spring.version>
+        <stax2-api.version>3.1.4</stax2-api.version>
+        <stax-api.version>1.0.1</stax-api.version>
+        <wsdl4j.version>1.6.3</wsdl4j.version>
+        <xalan.version>2.7.2</xalan.version>
+        <lucene-xercesImpl.version>3.5.0</lucene-xercesImpl.version>
+        <xml-apis.version>1.0.b2</xml-apis.version>
+        <xmlbeans.version>2.3.0</xmlbeans.version>
+        <xmlschema-core.version>2.2.1</xmlschema-core.version>
+
+        <taglibs-standard-impl.version>1.2.5</taglibs-standard-impl.version>
+        <jxl.version>2.6.12</jxl.version>
+        <!--定时器-->
+        <quartz.version>2.3.0</quartz.version>
+        <json-lib-ext-spring.version>1.0.2</json-lib-ext-spring.version>
+        <spring-rabbit.version>2.0.4.RELEASE</spring-rabbit.version>
+        <spring-amqp.version>2.0.4.RELEASE</spring-amqp.version>
+        <junit.version>4.12</junit.version>
+        <activiti.version>6.0.0</activiti.version>
+
+        <!--mail -->
+        <javax.mail.version>1.6.1</javax.mail.version>
+        <axis.version>1.4</axis.version>
+        <fastdfs-client-java.version>1.27.0.0</fastdfs-client-java.version>
+        <java-jwt.version>3.4.1</java-jwt.version>
+        <jjwt.version>0.6.0</jjwt.version>
+        <fastjson.version>1.2.35</fastjson.version>
+        <joda-time.version>2.9.9</joda-time.version>
+        <javaee-api.version>7.0</javaee-api.version>
+        <springfox-swagger-ui.version>2.7.0</springfox-swagger-ui.version>
+        <swagger-annotations.version>1.5.20</swagger-annotations.version>
+        <cglib.version>2.2.2</cglib.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>pmsn</finalName>
+        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>8</source>
+                        <target>8</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>3.2.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

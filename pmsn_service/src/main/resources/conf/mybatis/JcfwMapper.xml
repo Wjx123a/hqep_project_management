@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.JcfwDao">
+
+    <select id="queryJcfw" parameterType="pd" resultType="pd">
+        select distinct
+        b.table_name AS ywbm,
+        b.table_cn_name AS zwbm,
+        b.table_type,
+        a.yxtmc AS xtmcqc,
+        a.sszy AS ssbm from pull_column_dict b , jcsjfw a
+        where a.ztbm=b.table_name
+        <if test=" xtmc != null and xtmc != '' ">
+            and a.sjjmc = #{xtmc}
+        </if>
+    </select>
+
+    <select id="queryJcfwmx" parameterType="pd" resultType="pd">
+        select distinct table_name as ywbm,table_cn_name as zwbm,column_name as ywzdmc,column_cn_name as zwzdmc ,column_type zdlx
+        from pull_column_dict b
+        <where>
+            <if test=" ywbm != null and ywbm != '' ">
+                and b.table_name = #{ywbm}
+            </if>
+        </where>
+    </select>
+
+</mapper>

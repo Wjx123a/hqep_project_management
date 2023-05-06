@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.FmqdDao">
+
+    <!-- 查询是否主键重复-->
+    <select id="queryCount" parameterType="String" resultType="Integer">
+        select count(*) from flow_fmqd_mgzd t where concat(t.xtyh,t.sjbywmc,t.zdywmc) = #{param}
+    </select>
+
+    <!-- 查询负面清单信息(上一版本) -->
+    <select id="queryParmList_bak" parameterType="pd" resultType="pd">
+        select
+          t.xtmc,t.mgxx,t.xtyh,t.sjbywmc,t.sjbzs,t.sjbzwmc,t.zdywmc,t.zdzwmc,t.zdzs,t.mgzdlx
+        from flow_fmqd_mgzd t
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and xtmc like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and xtyh like concat('%',#{xtyh},'%')
+            </if>
+            <if test=" sjbywmc != null and sjbywmc != '' ">
+                and sjbywmc like concat('%',#{sjbywmc},'%')
+            </if>
+            <if test=" sjbzwmc != null and sjbzwmc != '' ">
+                and sjbzwmc like concat('%',#{sjbzwmc},'%')
+            </if>
+            <if test=" zdywmc != null and zdywmc != '' ">
+                and zdywmc like concat('%',#{zdywmc},'%')
+            </if>
+            <if test=" zdzwmc != null and zdzwmc != '' ">
+                and zdzwmc like concat('%',#{zdzwmc},'%')
+            </if>
+        </where>
+        order by t.xtmc,t.xtyh,t.sjbywmc
+    </select>
+    <!-- 负面清单页面查询条件系统名称-->
+    <select id="queryParmSystemName" parameterType="pd" resultType="pd">
+        select
+            distinct tus.system_name as systemName,t.system_code as systemCode
+        from t_up_table_zs t
+        left join t_up_system_zs tus
+        on tus.system_code = t.system_code
+        where t.negative_type != '非负面清单'
+        and tus.system_name is not null
+    </select>
+
+    <!-- 查询负面清单信息 -->
+    <select id="queryParmList" parameterType="pd" resultType="pd">
+        select distinct tus.system_name as xtmc,t.system_code as xtbm,t.simple_name ,t.db_user xtyh,t.table_ename ywbm,t.table_cname zwbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+        left join t_up_system_zs tus
+        on tus.system_code = t.system_code
+        where t.negative_type != '非负面清单'
+        <if test=" xtmc != null and xtmc != '' ">
+            and tus.system_name = #{xtmc}
+        </if>
+        <if test=" xtbm != null and xtbm != '' ">
+            and t.system_code = #{xtbm}
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and t.db_user like concat('%',#{xtyh},'%')
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and t.table_ename like concat('%',#{ywbm},'%')
+        </if>
+        <if test=" sjbzwmc != null and sjbzwmc != '' ">
+            and t.table_cname like concat('%',#{sjbzwmc},'%')
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and t.negative_type = #{sffmqd}
+        </if>
+        order by xtmc,xtyh,ywbm
+    </select>
+
+    <!-- 负面清单页面表格查询 导出数据 -->
+    <select id="queryParmListForExcel" parameterType="pd" resultType="pd">
+        select distinct tus.system_name as xtmc,t.system_code as xtbm,t.simple_name ,
+        t.db_user xtyh,t.table_ename ywbm,t.table_cname zwbm,
+        t.table_desc bjs,t.negative_type sffmqd,
+        tuc.column_ename ywzd,tuc.column_cname zwzd,
+        tuc.column_desc zdjs,tuc.is_pk sfzj,tuc.is_required sfbt
+        from t_up_table_zs t
+        left join t_up_system_zs tus
+        on tus.system_code = t.system_code
+        left join t_up_column_zs tuc
+        on tuc.system_code = t.system_code and t.db_user = tuc.db_user and t.table_ename = tuc.table_ename
+        where t.negative_type != '非负面清单'
+        <if test=" xtmc != null and xtmc != '' ">
+            and tus.system_name = #{xtmc}
+        </if>
+        <if test=" xtbm != null and xtbm != '' ">
+            and t.system_code = #{xtbm}
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and t.db_user = #{xtyh}
+        </if>
+        <if test=" ywbm != null and ywbm != '' ">
+            and t.table_ename = #{ywbm}
+        </if>
+        <if test=" sjbzwmc != null and sjbzwmc != '' ">
+            and t.table_cname like concat('%',#{sjbzwmc},'%')
+        </if>
+        <if test=" sffmqd != null and sffmqd != '' ">
+            and t.negative_type = #{sffmqd}
+        </if>
+        order by xtmc,xtyh,ywbm
+    </select>
+
+    <!-- 查询负面清单信息-字段级信息 -->
+    <select id="queryParmList_column" parameterType="pd" resultType="pd">
+        select tus.system_name as xtmc,t.simple_name,t.db_user xtyh,t.table_ename ywbm,t.column_ename ywzd,t.column_cname zwzd,
+        t.column_desc zdjs,t.is_pk sfzj,t.is_required sfbt,t.is_sensitive sffmzd
+        from t_up_column_zs t
+        INNER join t_up_system_zs tus
+        on tus.system_code = t.system_code
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and tus.system_name = #{xtmc}
+            </if>
+            <if test=" xtbm != null and xtbm != '' ">
+                and t.system_code = #{xtbm}
+            </if>
+            <if test=" xtyh != null and xtyh != '' ">
+                and t.db_user = #{xtyh}
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.table_ename = #{ywbm}
+            </if>
+        </where>
+    </select>
+
+    <!-- 修改负面清单信息-->
+    <update id="updateParm" parameterType="pd">
+        update flow_fmqd_mgzd
+        set
+        <if test=" column != null and column != '' ">
+            column = #{column},
+        </if>
+        <if test=" column != null and column != '' ">
+            column = #{column},
+        </if>
+        where column = #{column} and column = #{column}
+    </update>
+
+    <!-- 逐条新增(暂时没用) -->
+    <insert id="insertPerCon" parameterType="java.util.Map">
+        insert into flow_fmqd_mgzd (
+          id,xtmc,mgxx,xtyh,sjbywmc,sjbzs,sjbzwmc,zdywmc,zdzwmc,zdzs,mgzdlx
+        )
+        VALUES
+        (
+        UUID(),
+        #{xtmc},
+        #{mgxx},
+        #{xtyh},
+        #{sjbywmc},
+        #{sjbzs},
+        #{sjbzwmc},
+        #{zdywmc},
+        #{zdzwmc},
+        #{zdzs},
+        #{mgzdlx}
+        )
+    </insert>
+
+    <!-- 批量新增 -->
+    <insert id="insertPlan" parameterType="list">
+        insert into flow_fmqd_mgzd (
+          id,xtmc,mgxx,xtyh,sjbywmc,sjbzs,sjbzwmc,zdywmc,zdzwmc,zdzs,mgzdlx
+        )
+        <foreach collection="list" item="item" index="index" separator="union all">
+            (SELECT
+            UUID(),
+            #{item.xtmc},
+            #{item.mgxx},
+            #{item.xtyh},
+            #{item.sjbywmc},
+            #{item.sjbzs},
+            #{item.sjbzwmc},
+            #{item.zdywmc},
+            #{item.zdzwmc},
+            #{item.zdzs},
+            #{item.mgzdlx}
+            FROM dual)
+        </foreach>
+    </insert>
+</mapper>

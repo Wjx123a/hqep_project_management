@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.ProcessManageDao">
+
+    <!-- 判断流程编码是否存在-->
+    <select id="queryCount" parameterType="pd" resultType="Integer">
+        select count(*) from flow_lcb t where t.lcbm = #{lcbm}
+    </select>
+
+    <!-- 判断相同流程下的流程节点是否存在-->
+    <select id="queryCountLcjd" parameterType="pd" resultType="Integer">
+        select count(*) from flow_lcjdb t where t.sslcbm = #{sslcbm} and t.jdbm = #{jdbm}
+    </select>
+
+    <!-- 判断是否只有一条主流程或者子流程在启用 -->
+    <select id="queryProcessStatus" parameterType="pd" resultType="java.lang.Integer">
+        select count(*) from flow_lcb t
+         where t.qyzt = #{qyzt} and t.lclx = #{lclx}
+         and t.id != #{id}
+    </select>
+
+    <!-- 查询流程信息-->
+    <select id="queryProcessList" parameterType="pd" resultType="pd">
+        select t.id,t.lcbm,t.lcmc,t.qyzt,t.lclx,t.cjrmc,t.cjsj,t.bz from flow_lcb t
+        <where>
+            <if test=" lcmc != null and lcmc != '' ">
+                and lcmc like concat('%',#{lcmc},'%')
+            </if>
+            <if test=" qyzt != null and qyzt != '' ">
+                and qyzt like concat('%',#{qyzt},'%')
+            </if>
+            <if test=" lclx != null and lclx != '' ">
+                and lclx like concat('%',#{lclx},'%')
+            </if>
+            <if test=" lcbm != null and lcbm != '' ">
+                and lcbm =#{lcbm}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据流程查询节点信息-->
+    <select id="queryProcessNodeList" parameterType="pd" resultType="pd">
+        select
+         t.sslcbm,l.lcbm,t.id,t.jdbm,t.jdmc,t.jdpx,
+         t.sjjdbm,t.xjjdbm,t.jsr,t.jsjs,j.jsmc,t.jslx,t.jdlx,t.bz,
+         t.qyzt
+        from flow_lcjdb t
+        left join flow_lcb l on t.sslcbm = l.lcbm
+        left join flow_jsb j on t.jsjs = j.id
+        <where>
+            <if test=" sjjdbm != null and sjjdbm != '' ">
+                and t.sjjdbm like concat('%',#{sjjdbm},'%')
+            </if>
+            <if test=" sslcbm != null and sslcbm != '' ">
+                and t.sslcbm like concat('%',#{sslcbm},'%')
+            </if>
+            <if test=" lcbm != null and lcbm != '' ">
+                and l.lcbm like concat('%',#{lcbm},'%')
+            </if>
+            <if test=" jdbm != null and jdbm != '' ">
+                and t.jdbm = #{jdbm}
+            </if>
+            <if test=" id != null and id != '' ">
+                and t.id = #{id}
+            </if>
+            <if test=" jdpx != null and jdpx != '' ">
+                and t.jdpx = #{jdpx}
+            </if>
+        </where>
+        order by t.jdpx asc
+    </select>
+
+    <!-- 修改流程信息-->
+    <update id="updateProcess" parameterType="pd">
+        update flow_lcb
+        set
+        lcmc = #{lcmc},
+        qyzt = #{qyzt},
+        lclx = #{lclx},
+        bz = #{bz}
+        where id = #{id}
+    </update>
+
+    <!-- 修改流程节点信息-->
+    <update id="updateProcessNode" parameterType="pd">
+        update flow_lcjdb
+        <set>
+        <if test=" jdmc != null and jdmc != '' ">
+            jdmc = #{jdmc} ,
+        </if>
+        <if test=" sjjdbm != null and sjjdbm != '' ">
+             sjjdbm = #{sjjdbm},
+        </if>
+        <if test=" xjjdbm != null and xjjdbm != '' ">
+              xjjdbm = #{xjjdbm},
+        </if>
+        <if test=" jsr != null and jsr != '' ">
+              jsr = #{jsr},
+        </if>
+        <if test=" jsjs != null and jsjs != '' ">
+              jsjs = #{jsjs},
+        </if>
+        <if test=" jslx != null and jslx != '' ">
+            jslx = #{jslx},
+        </if>
+        <if test=" jdlx != null and jdlx != '' ">
+              jdlx = #{jdlx},
+        </if>
+        <if test=" bz != null and bz != '' ">
+              bz = #{bz},
+        </if>
+        <if test=" qyzt != null and qyzt != '' ">
+              qyzt = #{qyzt},
+        </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 修改流程节点排序-->
+    <update id="updateProcessNodeJdpx" parameterType="pd">
+        update flow_lcjdb
+        set
+        jdpx = #{jdpx}
+        where id = #{id}
+    </update>
+
+    <!-- 新增流程信息 -->
+    <insert id="insertProcess" parameterType="pd">
+        insert into flow_lcb
+        (
+        id,
+        lcbm,
+        lcmc,
+        qyzt,
+        cjr,
+        cjrmc,
+        cjsj,
+        bz
+        )
+        values
+        (
+        UUID(),
+        #{lcbm},
+        #{lcmc},
+        #{qyzt},
+        #{cjr},
+        #{cjrmc},
+        #{cjsj},
+        #{bz}
+        )
+    </insert>
+
+    <!-- 新增流程节点信息 -->
+    <insert id="insertProcessNode" parameterType="pd">
+        insert into flow_lcjdb
+        (
+        id,
+        sslcbm,
+        jdbm,
+        jdmc,
+        jdpx,
+        sjjdbm,
+        xjjdbm,
+        jsr,
+        jsjs,
+        jslx,
+        jdlx,
+        bz,
+        qyzt
+        )
+        values
+        (
+        UUID(),
+        #{sslcbm},
+        #{jdbm},
+        #{jdmc},
+        #{jdpx},
+        #{sjjdbm},
+        #{xjjdbm},
+        #{jsr},
+        #{jsjs},
+        #{jslx},
+        #{jdlx},
+        #{bz},
+        '0'
+        )
+    </insert>
+
+    <!-- 查询当前启用子流程的节点编码-->
+    <select id="queryEnableChildProcessNodeList" parameterType="pd" resultType="pd">
+        select t.jdbm from flow_lcjdb t left join flow_lcb l on t.sslcbm = l.lcbm
+        where l.qyzt = '1' and l.lclx = '1'
+        order by t.jdpx asc
+    </select>
+
+</mapper>

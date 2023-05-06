@@ -1,0 +1,1195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqep.dataSharingPlatform.pmsn.dao.ProcessApplyDao">
+
+    <!--查询标签信息-->
+    <select id="queryBq" parameterType="pd" resultType="pd">
+        SELECT DISTINCT
+        <choose>
+            <when test="menu_level == 2">
+                A.fenlei,A.bq_name AS name,'2' as level
+            </when>
+            <otherwise>
+                A.fenlei AS name,'1' as level
+            </otherwise>
+        </choose>
+        FROM
+        self_ads_sjglbq A
+        <where>
+            1=1
+            <if test="ONE_CATALOG_NAME != null and ONE_CATALOG_NAME != ''">
+                AND A.fenlei = #{ONE_CATALOG_NAME}
+            </if>
+        </where>
+
+    </select>
+
+    <!-- 查询有效表信息-->
+    <select id="queryTableList" parameterType="pd" resultType="pd">
+        select distinct t.xtmc,t.ssbm,t.yh,t.ywbm,t.zwbm,t.bjs,r.tycbm,
+        case m.sjbywmc is null when true then '否' else '是' end as sffmqd,m.mgzdlx
+        from flow_alltable t
+        left join flow_fmqd_mgzd m on t.ywbm = m.sjbywmc and t.ywzdmc = m.zdywmc
+        left join flow_relation_ydbm_tycbm r on t.ywbm = r.ydbm
+        <where>
+            t.ywbm not in (select j.sqbywbm from flow_lczxjdb j where (j.spzt = '0' or j.spzt = '1') and j.sqrid = #{sqrid})
+            <if test=" xtmc != null and xtmc != '' ">
+                and t.xtmc like concat('%',#{xtmc},'%')he
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and t.ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.ywbm like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+        limit #{pageIndex},#{pageSize}
+    </select>
+
+    <!-- 查询有效表信息总条数-->
+    <select id="queryTableListCount" parameterType="pd" resultType="java.lang.Integer">
+        select count(*) from flow_alltable t
+        <where>
+            <if test=" xtmc != null and xtmc != '' ">
+                and t.xtmc like concat('%',#{xtmc},'%')
+            </if>
+            <if test=" ssbm != null and ssbm != '' ">
+                and t.ssbm like concat('%',#{ssbm},'%')
+            </if>
+            <if test=" ywbm != null and ywbm != '' ">
+                and t.ywbm like concat('%',#{ywbm},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据表名查询所有字段信息-->
+    <select id="queryCloumnList" parameterType="pd" resultType="pd">
+        select distinct t.ywbm,t.xtmc,t.ywzdmc from flow_alltable t
+        where t.ywbm = #{ywbm}
+    </select>
+
+    <!-- 查询表名存在的流程ID及当前节点ID -->
+    <select id="queryZxStatus" parameterType="pd" resultType="pd">
+        select t.id,t.dqjdid,t.spzt from flow_lczxjdb t where t.sqbywbm = #{ywbm} and t.sqbssxt = #{xtmc}
+        and t.sqrid = #{sqrid}
+        <if test=" lcbm != null and lcbm != '' ">
+            and t.lcbm like concat('%',#{lcbm},'%')
+        </if>
+        <if test=" bz != null and bz != '' ">
+            and t.bz like concat('%',#{bz},'%')
+        </if>
+        order by t.id desc
+    </select>
+
+    <select id="querySpjb" parameterType="pd" resultType="pd">
+        select role_name from pmsn_login_role where id=#{loginId}
+    </select>
+
+    <!-- 查询申请去审批 -->
+    <select id="queryProgressToAudit" parameterType="pd" resultType="pd">
+        <choose>
+        <when test="spjd1 == '数据中心审批'.toString()">
+            SELECT
+            t.id,
+            s.numid,
+            t.lcpch,
+            t.lcbm,
+            t.lcmc,
+            t.dqjdid,
+            t.dqjdbm,
+            t.dqjdmc,
+            t.dqjdlx,
+            t.sqrid,
+            t.sqrmc,
+            t.sqrssdw,
+            t.sqrssbm,
+            t.sqrssxt,
+            t.sqsj,
+            t.sjlc,
+            t.sqqxid,
+            t.sqbssxt,
+            t.sqbssbm,
+            t.sqbywbm,
+            t.sqbzwbm,
+            t.spzt,
+            t.bz,
+            t.glbid,
+            t.sqyh,
+            t.xqsm,
+            t.sqrlxfs,
+            t.sqbxtyh,
+            t.sqbsqbm,
+            s.s1,
+            t.xtbm,
+            (select negative_type from t_up_table_zs where table_ename=t.sqbywbm
+            and t_up_table.db_user = t.sqbxtyh and t_up_table.system_code = t.xtbm
+            and t_up_table.table_type = '有效表'
+            LIMIT 1)
+             fmqdlx,
+            bbzxflag,
+            use_time
+            from
+            (select s.s1,s.numid,s.lcspid,bbzxflag,use_time from(SELECT ((((DAY (now()) - DAY (t.sqdate) - (
+            SELECT count(DISTINCT q.rq) FROM rq q,pull_work_order t
+            WHERE q.zt = '0'
+            AND DATE_FORMAT(q.rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(t.sqdate, '%Y-%m-%d')
+            AND DATE_FORMAT(now(), '%Y-%m-%d')
+            and t.spjb  is null
+            )) * 9)+ (HOUR(now()) - HOUR(t.sqdate)))
+            ) s1,numid,lcspid,bbzxflag,use_time from  pull_work_order t) s ) s
+            left join
+            flow_lczxjdb t
+            on  s.numid = t.gdid and t.lcpch = s.lcspid
+            left join
+            (select id,jsr,jsjs from flow_lcjdb jd
+            <where>
+                1=1
+                <!-- 搜索符合条件的节点 -->
+                <if test=" jsrid != null and jsrid != '' ">
+                    <![CDATA[and jd.jsr RLIKE '^${jsrid},.*|.*,${jsrid},.*|,${jsrid}$$|^${jsrid}$$']]>
+                </if>
+                <if test=" jsjs != null and jsjs != '' ">
+                    <![CDATA[and jd.jsjs RLIKE '^${jsjs},.*|.*,${jsjs},.*|,${jsjs}$$|^${jsjs}$$']]>
+                </if>
+            </where>
+            ) jd1
+            on jd1.id=t.dqjdid
+            where jd1.id is not null and t.spzt in ('0')
+            <if test=" jsjs == '13' ">
+                and t.sqbssbm = (select distinct dep_name from pmsn_person where login_id=#{loginId})
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != ''  ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != ''  ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != ''  ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>
+            <if test=" sqrid != null and sqrid != ''  ">
+                and t.sqrid = #{sqrid}
+            </if>
+            <if test=" sqridForZero != null and sqridForZero != ''  ">
+                and t.sqrid = #{sqridForZero}
+            </if>
+            <if test=" xtbmForZero != null and xtbmForZero != ''  ">
+                and t.xtbm = #{xtbmForZero}
+            </if>
+            <if test=" sqbsqbmForZero != null and sqbsqbmForZero != ''  ">
+                and t.sqbsqbm = #{sqbsqbmForZero}
+            </if>
+            <if test=" sqbywbmForZero != null and sqbywbmForZero != ''  ">
+                and t.sqbywbm = #{sqbywbmForZero}
+            </if>
+            <if test=" sqbxtyhForZero != null and sqbxtyhForZero != ''  ">
+                and t.sqbxtyh = #{sqbxtyhForZero}
+            </if>
+            <if test=" numidForZero != null and numidForZero != ''  ">
+                and s.numid = #{numidForZero}
+            </if>
+            order by t.sqsj desc,t.id desc
+        </when>
+        <when test="spjd1 == '互联网部审批'.toString()">
+            SELECT
+            t.id,
+            t.lcpch,
+            t.lcbm,
+            t.lcmc,
+            t.dqjdid,
+            t.dqjdbm,
+            t.dqjdmc,
+            t.dqjdlx,
+            t.sqrid,
+            t.sqrmc,
+            t.sqrssdw,
+            t.sqrssbm,
+            t.sqrssxt,
+            t.sqsj,
+            t.sjlc,
+            t.sqqxid,
+            t.sqbssxt,
+            t.sqbssbm,
+            t.sqbywbm,
+            t.sqbzwbm,
+            t.spzt,
+            t.bz,
+            t.glbid,
+            t.sqyh,
+            t.xqsm,
+            t.sqrlxfs,
+            t.sqbxtyh,
+            t.sqbsqbm,
+            s.s1,
+            t.xtbm,
+            (select negative_type from t_up_table_zs where table_ename=t.sqbywbm
+            and t_up_table.db_user = t.sqbxtyh and t_up_table.system_code = t.xtbm
+            and t_up_table.table_type = '有效表'
+            LIMIT 1) fmqdlx,
+            bbzxflag,
+            use_time
+            from
+            (select s.s1,s.numid,s.lcspid,bbzxflag,use_time from(SELECT ((((DAY (now()) - DAY (t.1sp) - (
+            SELECT count(DISTINCT q.rq) FROM rq q,pull_work_order t
+            WHERE q.zt = '0'
+            AND DATE_FORMAT(q.rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(t.1sp, '%Y-%m-%d')
+            AND DATE_FORMAT(now(), '%Y-%m-%d')
+            and t.spjb = '1'
+            )) * 9)+ (HOUR(now()) - HOUR(t.1sp)))
+            ) s1,numid,lcspid,bbzxflag,
+            use_time from  pull_work_order t) s ) s
+            left join
+            flow_lczxjdb t
+            on  s.numid = t.gdid and t.lcpch = s.lcspid
+            left join
+            (select id,jsr,jsjs from flow_lcjdb jd
+            <where>
+                1=1
+                <!-- 搜索符合条件的节点 -->
+                <if test=" jsrid != null and jsrid != '' ">
+                    <![CDATA[and jd.jsr RLIKE '^${jsrid},.*|.*,${jsrid},.*|,${jsrid}$$|^${jsrid}$$']]>
+                </if>
+                <if test=" jsjs != null and jsjs != '' ">
+                    <![CDATA[and jd.jsjs RLIKE '^${jsjs},.*|.*,${jsjs},.*|,${jsjs}$$|^${jsjs}$$']]>
+                </if>
+            </where>
+            ) jd1
+            on jd1.id=t.dqjdid
+            where jd1.id is not null and t.spzt in ('0')
+            <if test=" jsjs == '13' ">
+                and t.sqbssbm = (select distinct dep_name from pmsn_person where login_id=#{loginId})
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != ''  ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != ''  ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != ''  ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>
+            <if test=" sqrid != null and sqrid != ''  ">
+                and t.sqrid = #{sqrid}
+            </if>
+            order by t.sqsj desc,t.id desc
+        </when>
+
+        <when test="spjd1 == '业务部门审批'.toString()">
+            SELECT
+            t.id,
+            t.lcpch,
+            t.lcbm,
+            t.lcmc,
+            t.dqjdid,
+            t.dqjdbm,
+            t.dqjdmc,
+            t.dqjdlx,
+            t.sqrid,
+            t.sqrmc,
+            t.sqrssdw,
+            t.sqrssbm,
+            t.sqrssxt,
+            t.sqsj,
+            t.sjlc,
+            t.sqqxid,
+            t.sqbssxt,
+            t.sqbssbm,
+            t.sqbywbm,
+            t.sqbzwbm,
+            t.spzt,
+            t.bz,
+            t.glbid,
+            t.sqyh,
+            t.xqsm,
+            t.sqrlxfs,
+            t.sqbxtyh,
+            t.sqbsqbm,
+            s.s1,
+            t.xtbm,
+            (select negative_type from t_up_table_zs where table_ename=t.sqbywbm
+            and t_up_table.db_user = t.sqbxtyh and t_up_table.system_code = t.xtbm
+            and t_up_table.table_type = '有效表'
+            LIMIT 1) fmqdlx,
+            bbzxflag,
+            use_time
+            from
+            (select s.s1,s.numid,s.lcspid,bbzxflag,use_time from(SELECT ((((DAY (now()) - DAY (t.2sp) - (
+            SELECT count(DISTINCT q.rq) FROM rq q,pull_work_order t
+            WHERE q.zt = '0'
+            AND DATE_FORMAT(q.rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(t.2sp, '%Y-%m-%d')
+            AND DATE_FORMAT(now(), '%Y-%m-%d')
+            and t.spjb = '2'
+            )) * 9)+ (HOUR(now()) - HOUR(t.2sp)))
+            ) s1,numid,lcspid,bbzxflag,
+            use_time from  pull_work_order t) s ) s
+            left join
+            flow_lczxjdb t
+            on  s.numid = t.gdid and t.lcpch = s.lcspid
+            left join
+            (select id,jsr,jsjs from flow_lcjdb jd
+            <where>
+                1=1
+                <!-- 搜索符合条件的节点 -->
+                <if test=" jsrid != null and jsrid != '' ">
+                    <![CDATA[and jd.jsr RLIKE '^${jsrid},.*|.*,${jsrid},.*|,${jsrid}$$|^${jsrid}$$']]>
+                </if>
+                <if test=" jsjs != null and jsjs != '' ">
+                    <![CDATA[and jd.jsjs RLIKE '^${jsjs},.*|.*,${jsjs},.*|,${jsjs}$$|^${jsjs}$$']]>
+                </if>
+            </where>
+            ) jd1
+            on jd1.id=t.dqjdid
+            where jd1.id is not null and t.spzt in ('0')
+            <if test=" jsjs == '13' ">
+                and t.sqbssbm = (select distinct dep_name from pmsn_person where login_id=#{loginId})
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != ''  ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != ''  ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != ''  ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>
+            <if test=" sqrid != null and sqrid != ''  ">
+                and t.sqrid = #{sqrid}
+            </if>
+            order by t.id desc
+        </when>
+        <when test="spjd1 == '大数据中心审批'.toString()">
+            SELECT
+            t.id,
+            t.lcpch,
+            t.lcbm,
+            t.lcmc,
+            t.dqjdid,
+            t.dqjdbm,
+            t.dqjdmc,
+            t.dqjdlx,
+            t.sqrid,
+            t.sqrmc,
+            t.sqrssdw,
+            t.sqrssbm,
+            t.sqrssxt,
+            t.sqsj,
+            t.sjlc,
+            t.sqqxid,
+            t.sqbssxt,
+            t.sqbssbm,
+            t.sqbywbm,
+            t.sqbzwbm,
+            t.spzt,
+            t.bz,
+            t.glbid,
+            t.sqyh,
+            t.xqsm,
+            t.sqrlxfs,
+            t.sqbxtyh,
+            t.sqbsqbm,
+            s.s1,
+            t.xtbm,
+            (select negative_type from t_up_table_zs where table_ename=t.sqbywbm
+            and t_up_table.db_user = t.sqbxtyh and t_up_table.system_code = t.xtbm
+            and t_up_table.table_type = '有效表'
+            LIMIT 1) fmqdlx
+            ,bbzxflag,
+            use_time
+            from
+            (select s.s1,s.numid,s.lcspid,bbzxflag,use_time from(SELECT ((((DAY (now()) - DAY (t.3sp) - (
+            SELECT count(DISTINCT q.rq) FROM rq q,pull_work_order t
+            WHERE q.zt = '0'
+            AND DATE_FORMAT(q.rq, '%Y-%m-%d') BETWEEN DATE_FORMAT(t.3sp, '%Y-%m-%d')
+            AND DATE_FORMAT(now(), '%Y-%m-%d')
+            and t.spjb = '3'
+            )) * 9)+ (HOUR(now()) - HOUR(t.3sp)))
+            ) s1,numid,lcspid,bbzxflag,
+            use_time from  pull_work_order t) s ) s
+            left join
+            flow_lczxjdb t
+            on  s.numid = t.gdid and t.lcpch = s.lcspid
+            left join
+            (select id,jsr,jsjs from flow_lcjdb jd
+            <where>
+                1=1
+                <!-- 搜索符合条件的节点 -->
+                <if test=" jsrid != null and jsrid != '' ">
+                    <![CDATA[and jd.jsr RLIKE '^${jsrid},.*|.*,${jsrid},.*|,${jsrid}$$|^${jsrid}$$']]>
+                </if>
+                <if test=" jsjs != null and jsjs != '' ">
+                    <![CDATA[and jd.jsjs RLIKE '^${jsjs},.*|.*,${jsjs},.*|,${jsjs}$$|^${jsjs}$$']]>
+                </if>
+            </where>
+            ) jd1
+            on jd1.id=t.dqjdid
+            where jd1.id is not null and t.spzt in ('0')
+            <if test=" jsjs == '13' ">
+                and t.sqbssbm = (select distinct dep_name from pmsn_person where login_id=#{loginId})
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != ''  ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != ''  ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != ''  ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>
+            <if test=" sqrid != null and sqrid != ''  ">
+                and t.sqrid = #{sqrid}
+            </if>
+            order by t.id desc
+        </when>
+        </choose>
+
+    </select>
+
+    <!-- 查询表是否在负面清单(上一版本) -->
+    <select id="isInBadList_bak" parameterType="pd" resultType="pd">
+        select distinct t.xtmc,t.ssbm,t.yh,t.ywbm,t.zwbm,t.bjs,r.tycbm,m.mgzdlx from flow_alltable t
+        left join flow_fmqd_mgzd m on t.ywbm = m.sjbywmc and t.ywzdmc = m.zdywmc
+        left join flow_relation_ydbm_tycbm r on t.ywbm = r.ydbm where m.sjbywmc is not null
+        <if test=" sqbssxt != null and sqbssxt != '' ">
+            and t.xtmc = #{sqbssxt}
+        </if>
+        <if test=" sqbssbm != null and sqbssbm != '' ">
+            and t.ssbm = #{sqbssbm}
+        </if>
+        <if test=" sqbywbm != null and sqbywbm != '' ">
+            and t.ywbm = #{sqbywbm}
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and t.xtyh like concat('%',#{xtyh},'%')
+        </if>
+    </select>
+
+    <!-- 查询表是否在负面清单 -->
+    <select id="isInBadList" parameterType="pd" resultType="pd">
+        select distinct
+        t.org_code
+        ,t2.dept_name as org_name
+        ,t.simple_name
+        ,t.system_code
+        ,t.db_user
+        ,t.table_ename
+        ,t.table_cname
+        ,t.table_desc
+        ,t.data_num
+        ,t.column_num
+        ,t.table_type
+        ,t.table_type_code
+        ,t.negative_type
+        ,t.negative_type_code
+        ,t.is_zt
+        ,t.is_upload
+        ,t.create_time
+        ,t.update_time
+        ,t.db_type
+        ,t.data_label
+        ,t.business_label
+        ,t.modify_type
+        ,t.release_time
+        ,t.batch_time
+        ,t.batch_time
+        from t_up_table_zs t
+        left join dict_system_dept t2 on t2.system_name=t.simple_name
+        where t.negative_type != '非负面清单'
+        <if test=" sqbssxt != null and sqbssxt != '' ">
+            and t.simple_name = #{sqbssxt}
+        </if>
+        <if test=" sqbssbm != null and sqbssbm != '' ">
+            and t2.dept_name = #{sqbssbm}
+        </if>
+        <if test=" sqbywbm != null and sqbywbm != '' ">
+            and t.table_ename = #{sqbywbm}
+        </if>
+        <if test=" xtyh != null and xtyh != '' ">
+            and t.db_user = #{xtyh}
+        </if>
+    </select>
+
+    <!-- 查询当前启用流程的最后一级审批节点ID -->
+    <select id="queryLatestNode" resultType="java.lang.String">
+        select t.id from flow_lcjdb t where t.sslcbm = (select l.lcbm from flow_lcb l where l.qyzt = '1')
+    </select>
+
+    <!-- 查询最后一级流程 -->
+    <select id="queryLatestProgress" resultType="pd">
+        select t.id,
+        t.lcpch,
+        t.lcbm,
+        t.lcmc,
+        t.dqjdid,
+        t.dqjdbm,
+        t.dqjdmc,
+        t.dqjdlx,
+        t.sqrid,
+        t.sqrmc,
+        t.sqrssdw,
+        t.sqrssbm,
+        t.sqrssxt,
+        t.sqsj,
+        t.sjlc,
+        t.sqqxid,
+        t.sqbssxt,
+        t.sqbssbm,
+        t.sqbywbm,
+        t.sqbzwbm,
+        t.spzt,
+        t.bz,
+        t.glbid,
+        t.sqyh,
+        t.xqsm,
+        t.sqrlxfs,
+        t.sqbxtyh,
+        t.sqbsqbm
+        from flow_lczxjdb t
+        <where>
+        false
+            <trim prefix="or">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <if test=" lcbm != null and lcbm != '' ">
+                        and t.lcbm = #{lcbm}
+                    </if>
+                    <if test=" sqrid != null and sqrid != '' ">
+                        and t.sqrid = #{sqrid}
+                    </if>
+                    <if test=" sqbywbm != null and sqbywbm != '' ">
+                        and t.sqbywbm like concat('%',#{sqbywbm},'%')
+                    </if>
+                    <if test=" sqbzwbm != null and sqbzwbm != '' ">
+                        and t.sqbzwbm like concat('%',#{sqbzwbm},'%')
+                    </if>
+                    <if test=" sqbxtyh != null and sqbxtyh != '' ">
+                        and t.sqbxtyh like concat('%',#{sqbxtyh},'%')
+                    </if>
+                    <if test=" spzt != null and spzt != '' ">
+                        and t.spzt = #{spzt}
+                    </if>
+                    <if test=" lcpch != null and lcpch != '' ">
+                        and t.lcpch = #{lcpch}
+                    </if>
+                    <if test=" sjlc != null and sjlc != '' ">
+                        and t.sjlc = #{sjlc}
+                    </if>
+                    <if test=" bz != null and bz != '' ">
+                        and t.bz = #{bz}
+                    </if>
+                </trim>
+            </trim>
+        </where>
+    </select>
+
+
+    <!-- 查询负面清单零审批的流程是否启用 -->
+    <select id="queryZeroState" parameterType="pd" resultType="pd">
+             select
+				 t.id,t.lcbm,t.lcmc,t.lclx,t.cjrmc,t.cjsj,t.bz
+				 ,l.jdbm, l.jdmc, l.qyzt
+				 from flow_lcb t
+				 left join flow_lcjdb l
+				 on t.lcbm = l.sslcbm
+             where t.lcbm = 'LC-90'
+             and t.qyzt = '1'
+             and l.qyzt != '1'
+    </select>
+
+
+    <!-- 用户查询自己提交的申请 处理查询慢问题 去掉t_up_table关联 换成pull_work_order -->
+    <select id="queryProgressListForMe" parameterType="pd" resultType="pd">
+        select
+            distinct t.lcpch,t.sqrmc,t.sqbssxt,t.sqbssbm,t.sqbywbm,t.sqbzwbm,
+            t.sqsj,t.sqyh,t.xqsm,t.sqrlxfs,t.sqbxtyh,t.sqbsqbm,t.bz,t.dqjdmc,
+            pwo.isFmqd sffmqd,pwo.sqperson
+        from flow_lczxjdb t
+        inner join pull_work_order pwo
+        on pwo.lcspid = t.lcpch
+        where t.sqrid = #{sqrid} and t.sjlc is null and t.spzt != '-1'
+        <if test=" bz != null and bz != ''  ">
+        and t.bz like concat('%',#{bz},'%')
+        </if>
+        order by t.sqsj desc
+    </select>
+
+    <!-- 用户查询自己提交的申请的审批日志记录 -->
+    <select id="queryProgressListLogForMe" parameterType="pd" resultType="pd">
+        select a.* from (
+            select t.jdbm,t.jdmc,case t.jdzt when '1' then '通过' when '2' then '驳回' else '未知' end as jdzt,t.shjg,t.shsj
+            from flow_lcsprzb t
+            where t.lcpch = #{lcpch} and t.bz = #{bz}
+            union all
+            select t.jdbm,t.jdmc,case t.jdzt when '1' then '通过' when '2' then '驳回' else '未知' end as jdzt,t.shjg,t.shsj
+            from flow_lcsprzb t
+            where t.lcpch =
+            ( select t.lcpch from flow_lczxjdb t where t.sjlc is not null and t.sjlc = #{sjlc} and
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>)
+            and
+            <if test=" bz != null and bz != ''  ">
+                and t.bz like concat('%',#{bz},'%')
+            </if>
+        ) a
+        where a.shjg is not null
+        order by a.shsj
+    </select>
+
+    <!-- 审批角色查询自己审批过的申请 -->
+    <select id="queryProgressListForAudit" parameterType="pd" resultType="pd">
+        select distinct t.lcpch,l.sqbssbm,l.sqbssxt,l.sqbywbm,l.sqbzwbm,l.sqyh,l.xqsm,l.sqrlxfs,l.sqbxtyh,l.sqbsqbm,
+        m.negative_type sffmqd,t.jdmc,t.shjg,t.shsj,t.bz
+        from flow_lcsprzb t
+        left join flow_lczxjdb l on t.lcpch = l.lcpch
+        left join (select distinct u.db_user,u.table_ename,u.negative_type from t_up_table_zs u) m on l.sqbywbm = m.table_ename and l.sqbxtyh = m.db_user
+        where t.shrid = #{shrid}
+        order by t.shsj desc
+    </select>
+
+    <!-- 新增流程状态信息 -->
+    <insert id="insertLatestProgress" parameterType="pd">
+        insert into flow_lczxjdb
+        (
+        gdid,
+        id,
+        lcpch,
+        lcbm,
+        lcmc,
+        dqjdid,
+        dqjdbm,
+        dqjdmc,
+        dqjdlx,
+        sqrid,
+        sqrmc,
+        sqrssdw,
+        sqrssbm,
+        sqrssxt,
+        sqsj,
+        sjlc,
+        sqqxid,
+        sqbssxt,
+        sqbssbm,
+        sqbywbm,
+        sqbzwbm,
+        spzt,
+        bz,
+        glbid,
+        sqyh,
+        xqsm,
+        sqrlxfs,
+        sqbxtyh,
+        sqbsqbm,
+        xtbm
+        )
+        values
+        (
+        #{uuid},
+        UUID(),
+        #{lcpch},
+        #{lcbm},
+        #{lcmc},
+        #{dqjdid},
+        #{dqjdbm},
+        #{dqjdmc},
+        #{dqjdlx},
+        #{sqrid},
+        #{sqrmc},
+        #{sqrssdw},
+        #{sqrssbm},
+        #{sqrssxt},
+        date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{sjlc},
+        #{sqqxid},
+        #{sqbssxt},
+        #{sqbssbm},
+        #{sqbywbm},
+        #{sqbzwbm},
+        #{spzt},
+        #{bz},
+        #{glbid},
+        #{sqyh},
+        #{xqsm},
+        #{sqrlxfs},
+        #{sqbxtyh},
+        #{sqbsqbm},
+        #{xtbm}
+        )
+    </insert>
+
+    <!-- 新增流程审批日志 -->
+    <insert id="insertProcessLog" parameterType="pd">
+        insert into flow_lcsprzb
+        (
+        id,
+        lcpch,
+        lcbm,
+        lcmc,
+        jdbm,
+        jdmc,
+        jdlx,
+        jdzt,
+        shrid,
+        shrmc,
+        shrssdw,
+        shrssbm,
+        shsj,
+        shjg,
+        bz
+        )
+        values
+        (
+        UUID(),
+        #{lcpch},
+        #{lcbm},
+        #{lcmc},
+        #{jdbm},
+        #{jdmc},
+        #{jdlx},
+        #{jdzt},
+        #{shrid},
+        #{shrmc},
+        #{shrssdw},
+        #{shrssbm},
+        date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{shjg},
+        #{bz}
+        )
+    </insert>
+
+    <!-- 更新流程最新状态 -->
+    <update id="editLatestProgress" parameterType="pd">
+        update flow_lczxjdb
+        <trim suffixOverrides=",">
+            <set>
+                <if test="spzt != null">
+                    spzt = #{spzt},
+                </if>
+                <if test="dqjdid != null">
+                    dqjdid = #{dqjdid},
+                </if>
+                <if test="dqjdbm != null">
+                    dqjdbm = #{dqjdbm},
+                </if>
+                <if test="dqjdmc != null">
+                    dqjdmc = #{dqjdmc},
+                </if>
+                <if test="dqjdlx != null">
+                    dqjdlx = #{dqjdlx},
+                </if>
+            </set>
+        </trim>
+        <where>
+            false
+            <trim prefix="or">
+                <trim prefix="(" prefixOverrides="and" suffix=")">
+                    <if test="id != null">
+                        and id=#{id}
+                    </if>
+                    <if test="lcbm != null">
+                        and lcbm=#{lcbm}
+                    </if>
+                </trim>
+            </trim>
+        </where>
+    </update>
+
+
+    <!-- 20210302第二次修改 -->
+    <!-- 将待申请信息保存至购物车 -->
+    <insert id="insertDataToShoppingcat" parameterType="pd">
+        insert into flow_shoppingcart
+        (
+        id,
+        sqrid,
+        sqrmc,
+        sqrssdw,
+        sqrssbm,
+        sqrlxfs,
+        sqbssxt,
+        sqbssbm,
+        sqbywbm,
+        sqbzwbm,
+        sqbxtyh,
+        sqbbjs,
+        sffmqd,
+        createtime,
+        sqbsqbm,
+        bz,
+        zt,
+        xtbm,
+        bsskj
+        )
+        values
+        (
+        UUID(),
+        #{sqrid},
+        #{sqrmc},
+        #{sqrssdw},
+        #{sqrssbm},
+        #{sqrlxfs},
+        #{sqbssxt},
+        #{sqbssbm},
+        #{sqbywbm},
+        #{sqbzwbm},
+        #{sqbxtyh},
+        #{sqbbjs},
+        #{sffmqd},
+        date_format(NOW(),'%Y-%m-%d %H:%i:%s'),
+        #{sqbsqbm},
+        #{bz},
+        #{zt},
+        #{xtbm},
+        #{bsskj}
+        )
+    </insert>
+
+    <!-- 根据登录人ID查询购物车信息 -->
+    <select id="queryShoppingcat" parameterType="pd" resultType="pd">
+        select distinct t.* from flow_shoppingcart t
+        <where>
+            <if test=" sqrid != null and sqrid != '' ">
+                and t.sqrid = #{sqrid}
+            </if>
+            <if test=" sqbssxt != null and sqbssxt != '' ">
+                and t.sqbssxt like concat('%',#{sqbssxt},'%')
+            </if>
+            <if test=" sqbssbm != null and sqbssbm != '' ">
+                and t.sqbssbm like concat('%',#{sqbssbm},'%')
+            </if>
+            <if test=" sqbywbm != null and sqbywbm != '' ">
+                and t.sqbywbm like concat('%',#{sqbywbm},'%')
+            </if>
+            <if test=" sqbxtyh != null and sqbxtyh != '' ">
+                and t.sqbxtyh like concat('%',#{sqbxtyh},'%')
+            </if>
+            <if test=" startsqsj != null and startsqsj != '' ">
+                and t.createtime &gt;=  #{startsqsj}
+            </if>
+            <if test=" endsqsj != null and endsqsj != '' ">
+                and t.createtime &lt;=  #{endsqsj}
+            </if>
+                and t.zt =  '0'
+
+        </where>
+        order by t.createtime desc
+    </select>
+
+    <!-- 查询所有工单信息 -->
+    <select id="queryAllApplyDataList" parameterType="pd" resultType="pd">
+        select
+        pwo.numid
+        ,pwo.lcspid
+        ,fl.lcpch
+        ,pwo.person
+        ,pwo.phone
+        ,pwo.sqdate
+        ,pwo.sqrid
+        ,pwo.sqperson
+        ,pwo.sqrssdw
+        ,pwo.sqrssbm
+        ,case MIN(fl.spzt) when '0' then '待审批'
+        when '1' then '审批通过'
+        when '2' then '审批驳回'
+        when '3' then '审批结束'
+        else '未知' end spzt
+        ,MIN(fl.spzt) spztpx,
+        bbzxflag,
+        yymc,
+        description,
+        count(1) as tablenum,
+        count(case when pwo.isFmqd = '非负面清单' then 1 else null end ) as no_table_num,
+        count(case when pwo.isFmqd != '非负面清单' then 1 else null end ) as yes_table_num
+        from pull_work_order pwo
+        left join flow_lczxjdb fl
+        on fl.lcpch = pwo.lcspid
+        where fl.lcpch is not null
+        and pwo.parent_lcspid is null
+        and pwo.isFmqd is not null
+        <if test=" person != null and person != '' ">
+            and pwo.person  like concat('%',#{person},'%')
+        </if>
+        <if test=" sqrid != null and sqrid != '' ">
+            and fl.sqrid = #{sqrid}
+        </if>
+        <if test=" sqbssxt != null and sqbssxt != '' ">
+            and fl.sqbssxt like concat('%',#{sqbssxt},'%')
+        </if>
+        <if test=" sqperson != null and sqperson != '' ">
+            and pwo.sqperson like concat('%',#{sqperson},'%')
+        </if>
+        <if test=" sqbssbm != null and sqbssbm != '' ">
+            and fl.sqbssbm like concat('%',#{sqbssbm},'%')
+        </if>
+        <if test=" sqbywbm != null and sqbywbm != '' ">
+            and fl.sqbywbm like concat('%',#{sqbywbm},'%')
+        </if>
+        <if test=" startsqsj != null and startsqsj != '' ">
+            and pwo.sqdate &gt;=  #{startsqsj}
+        </if>
+        <if test=" endsqsj != null and endsqsj != '' ">
+            and pwo.sqdate &lt;=  #{endsqsj}
+        </if>
+        <if test=" spzt != null and spzt != '' ">
+            and fl.spzt =  #{spzt}
+        </if>
+        <if test=" bz != null and bz != '' ">
+            and fl.bz =  #{bz}
+        </if>
+        group by pwo.numid
+        order by pwo.sqdate desc
+    </select>
+
+    <!-- 查询工单信息下的申请子表 -->
+    <select id="queryAllApplyDataListForNext" parameterType="pd" resultType="pd">
+        select
+        pwo.numid
+        ,pwo.lcspid
+        ,fl.lcpch
+        ,pwo.person
+        ,pwo.phone
+        ,pwo.sqdate
+        ,pwo.sqrid
+        ,pwo.sqperson
+        ,pwo.sqrssdw
+        ,pwo.sqrssbm
+        ,pwo.tableName
+        ,fl.sqbsqbm
+        ,pwo.tableSystem
+        ,pwo.tableDept
+        ,pwo.ztOwner
+        ,pwo.isFmqd
+        ,pwo.sqbzwbm
+        ,case fl.spzt when '0' then '待审批'
+        when '1' then '审批通过'
+        when '2' then '审批驳回'
+        when '3' then '审批结束'
+        else '未知' end spzt
+        ,fl.spzt spztpx
+        ,revokeTime
+        ,case when pwo.revokeTime is not null then '1' else '0' end revokeFlag
+        from pull_work_order pwo
+        left join flow_lczxjdb fl
+        on fl.lcpch = pwo.lcspid
+        where fl.lcpch is not null
+        and pwo.numid = #{numid}
+        <if test=" sqrid != null and sqrid != '' ">
+            and fl.sqrid = #{sqrid}
+        </if>
+        <if test=" sqbssxt != null and sqbssxt != '' ">
+            and fl.sqbssxt like concat('%',#{sqbssxt},'%')
+        </if>
+        <if test=" sqbssbm != null and sqbssbm != '' ">
+            and fl.sqbssbm like concat('%',#{sqbssbm},'%')
+        </if>
+        <if test=" sqbywbm != null and sqbywbm != '' ">
+            and fl.sqbywbm like concat('%',#{sqbywbm},'%')
+        </if>
+        <if test=" startsqsj != null and startsqsj != '' ">
+            and pwo.sqdate &gt;=  #{startsqsj}
+        </if>
+        <if test=" endsqsj != null and endsqsj != '' ">
+            and pwo.sqdate &lt;=  #{endsqsj}
+        </if>
+        <if test=" spzt != null and spzt != '' ">
+            and fl.spzt =  #{spzt}
+        </if>
+        <if test=" bz != null and bz != '' ">
+            and fl.bz =  #{bz}
+        </if>
+        order by fl.spzt asc,pwo.sqdate desc
+    </select>
+
+    <!-- 查询工单流程审批详情信息-->
+    <select id="queryAllApplyDataListForDetails" parameterType="pd" resultType="pd">
+        select
+           DISTINCT jdt.num,ifnull(jdt.jdmc, '') as jdmc,
+           ifnull(jdt.username, '') as username,ifnull(cxjd.lcxq, '') as lcxq
+        from (
+        select '0' as num,	'用户申请' as jdmc, '用户' as username
+        union all select '1' as num,	'信通公司审批' as jdmc, '数据中心' as username
+        union all select '2' as num,	'互联网部审批' as jdmc, '互联网部' as username
+        union all select '3' as num,	'大数据中心审批' as jdmc, '大数据中心' as username
+        ) jdt
+        left join (
+        select
+        0 as rownum,'用户申请' as jdmc, CONCAT ( z.sqrmc,'，联系方式：',z.sqrlxfs,'，审批时间：',z.sqsj,'，审批意见：提交申请') as lcxq
+        from flow_lczxjdb z
+        where
+        z.lcpch =   #{lcpch}
+        union all
+        select rownum,jdmc,lcxq from
+        (select
+         distinct @rownum :=@rownum + 1 as rownum, t.jdmc,CONCAT ( t.shrmc,'，审批时间：',t.shsj,'，审批意见：',ifnull(t.shjg,'')) as lcxq
+        from flow_lcsprzb t ,( SELECT @rownum := 0  ) b
+        where
+        t.lcpch =  #{lcpch}
+        group by t.jdmc, t.shrmc,t.lcpch
+        order by t.jdbm, t.shrmc,t.lcpch
+        ) s
+        ) cxjd on jdt.jdmc = cxjd.jdmc
+    </select>
+
+    <!-- 查询中台授权用户信息 -->
+    <select id="querySjztUserList" parameterType="pd" resultType="pd">
+        select distinct t.user_name,t.display_name,t.mobile_phone,t.email,date_format(t.create_date,'%Y-%m-%d %H:%i:%s') create_date from pull_user t
+        where 1=1
+        <if test=" username != null and username != '' ">
+            and (t.user_name like concat('%',#{username},'%') or  t.display_name like concat('%',#{username},'%'))
+        </if>
+        <if test=" displayname != null and displayname != '' ">
+            and t.display_name like concat('%',#{displayname},'%')
+        </if>
+        <if test="grantUserNos != null and grantUserNos.length > 0">
+            and t.user_name in (
+            <foreach collection="grantUserNos"  item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+    </select>
+
+    <select id="updateshoppingcat" parameterType="pd" resultType="String">
+        update flow_shoppingcart t set t.zt='1'
+        where sqbywbm=#{sqbywbm}
+        and sqrid=#{sqrid}
+        and id=#{id}
+        <if test=" sqbxtyh != null and sqbxtyh != '' ">
+            and sqbxtyh=#{sqbxtyh}
+        </if>
+    </select>
+
+    <select id="updateshoppingcatForRevoke" parameterType="pd" resultType="String">
+        update flow_shoppingcart t set t.zt='-2'
+        where sqbsqbm=#{sqbsqbm}
+        and sqrid=#{sqrid}
+    </select>
+    <!--查询申请表的申请表名-->
+    <select id="querysqbm" parameterType="String" resultType="String">
+        select table_ename from dict_sjzt_tables where ydxtbm=#{ydxtbm} and ydyhm=#{ydyhm} and ydbm=#{ydbm} and sqrssbm=#{sqrssbm}
+    </select>
+
+    <delete id="delForShoppingcat" parameterType="pd">
+        delete  from flow_shoppingcart
+        where sqrid = #{sqrid} and id = #{id}
+        and zt =  '0'
+    </delete>
+
+    <!--根据本部授权表查询地市授权表信息 规则修改已经弃用-->
+    <select id="querySqTableName_old" parameterType="pd" resultType="pd">
+        select
+		distinct
+        IFNULL(dst.table_ename,dst1.table_ename) as table_ename,
+        IFNULL(dst.table_cn_name,dst1.table_cn_name) as table_cn_name,
+		t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+		left join dict_system_dept t2 on t2.system_name = t.simple_name
+        left join (select distinct id,zt_qz,xt_slm from zt_zjb) r
+        on t2.system_code = r.id
+		left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(REPLACE(upper(r.zt_qz),"ODS_","ADS_DSSJYYZC_"),t.db_user,'_',t.table_ename,#{dshz})
+        left join dict_sjzt_tables dst1
+        on dst1.table_cn_name = concat(REPLACE(upper(r.zt_qz),"ODS_","ADS_DSSJYYZC_"),upper(r.xt_slm),t.db_user,'_',t.table_ename,#{dshz})
+        where t.table_type = '有效表'
+        and t2.system_code = #{xtbm}
+        and t.db_user =  #{sqbxtyh}
+        and t.table_ename =  #{sqbywbm}
+        and t.negative_type = #{sffmqd}
+        <if test=" bsskj != null and bsskj != '' and bsskj == '贴源层' ">
+            and IFNULL(dst.table_type,dst1.table_type)= "贴源层生产"
+        </if>
+    </select>
+
+
+    <!--根据本部授权表查询地市授权表信息 新的地市授权表拼接的规则-->
+    <select id="querySqTableName" parameterType="pd" resultType="pd">
+        select
+        distinct
+        dst.table_ename as table_ename,
+        dst.table_cn_name as table_cn_name,
+        t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+        left join dict_system_dept t2 on t2.system_name = t.simple_name
+        left join (select distinct id,zt_qz,xt_slm,xt_code,xt_jc_bm,xt_bs_fs from zt_zjb) r
+        on t2.system_code = r.id
+        left join dict_sjzt_tables dst
+        on dst.table_cn_name = concat(upper(r.xt_code),'_',r.xt_bs_fs,#{dshz},'_',r.xt_jc_bm,'_',t.table_ename)
+        where t.table_type = '有效表'
+        and t2.system_code = #{xtbm}
+        and t.db_user =  #{sqbxtyh}
+        and t.table_ename =  #{sqbywbm}
+        and t.negative_type = #{sffmqd}
+        <if test=" bsskj != null and bsskj != '' and bsskj == '贴源层' ">
+            and (dst.table_type = "贴源层生产" or dst.table_type = "未知")
+        </if>
+    </select>
+
+    <!--数据中台 三层 根据本部授权表查询地市授权表信息 新的地市授权表拼接的规则-->
+    <select id="querySqTableNameForSjzt" parameterType="pd" resultType="pd">
+        select
+        distinct
+        dst.table_ename as table_ename,
+        dst.table_cn_name as table_cn_name,
+        t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+        left join dict_system_dept t2 on t2.system_name = t.simple_name
+        left join (select distinct id,zt_qz,xt_slm,xt_code,xt_jc_bm,xt_bs_fs from zt_zjb) r
+        on t2.system_code = r.id
+        left join dict_sjzt_tables dst
+        on dst.table_cn_name = concat(upper(r.xt_code),'_',r.xt_bs_fs,#{dshz},'_',r.xt_jc_bm,'_',t.table_ename)
+        where t.table_type = '有效表'
+        and t2.system_code = #{xtbm}
+        and t.db_user =  #{sqbxtyh}
+        and t.table_ename =  #{sqbywbm}
+        and t.negative_type = #{sffmqd}
+        <if test=" bsskj != null and bsskj != '' and bsskj == '贴源层' ">
+            and (dst.table_type = "贴源层生产" or dst.table_type = "未知")
+        </if>
+    </select>
+
+    <!--根据本部授权表查询地市授权表信息 新的地市授权表拼接的规则-->
+    <select id="querySqTableName1" parameterType="pd" resultType="pd">
+        select
+        distinct
+        (dst.table_ename) as table_ename,
+        (dst.table_cn_name) as table_cn_name,
+        t.db_user xtyh,t.table_cname zwbm,t.table_ename ywbm,t.system_code,
+        t.simple_name xtmc,t2.dept_name ssbm,t.table_desc bjs,t.negative_type sffmqd
+        from t_up_table_zs t
+        left join dict_system_dept t2 on t2.system_name = t.simple_name
+        left join (select distinct id,zt_qz,xt_slm,xt_code,xt_jc_bm,xt_bs_fs from zt_zjb) r
+        on t2.system_code = r.id
+        left join dict_sjzt_tables dst
+        on  dst.table_cn_name = concat(upper(r.xt_code),'_',r.xt_bs_fs,'_',#{dshz},'_',r.xt_jc_bm,'_',t.table_ename)
+/*                left join dict_sjzt_tables dst1
+                on dst1.table_cn_name = concat(REPLACE(upper(r.zt_qz),"ODS_","ADS_DSSJYYZC_"),upper(r.xt_slm),t.db_user,'_',t.table_ename,#{dshz})*/
+        where t.table_type = '有效表'
+        and t2.system_code = #{xtbm}
+        and t.db_user =  #{sqbxtyh}
+        and t.table_ename =  #{sqbywbm}
+        and t.negative_type = #{sffmqd}
+        <if test=" bsskj != null and bsskj != '' and bsskj == '贴源层' ">
+            and dst.table_type = "贴源层生产"
+        </if>
+<!--        <if test=" bsskj != null and bsskj != '' and bsskj == '分析层' ">-->
+<!--            and dst.table_type = "分析层"-->
+<!--        </if>-->
+<!--        <if test=" bsskj != null and bsskj != '' and bsskj == '共享层' ">-->
+<!--            and dst.table_type = "共享层生产"-->
+<!--        </if>-->
+    </select>
+
+</mapper>

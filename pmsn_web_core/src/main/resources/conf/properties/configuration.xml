@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD SQL MAP Config 3.1//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="callSettersOnNulls" value="true"/>
+        <!--插入为空时插入空值避免报空指针-->
+        <setting name="jdbcTypeForNull" value="NULL" />
+    </settings>
+    <!--    封装PageDate 和 Page 返回  注册PageData 和 Page 类型-->
+    <typeAliases>
+        <typeAlias type="com.hqep.dataSharingPlatform.common.utils.Page" alias="page"/>
+        <typeAlias type="com.hqep.dataSharingPlatform.common.utils.PageData" alias="pd"/>
+    </typeAliases>
+    <!-- 分页 -->
+    <typeHandlers>
+        <typeHandler handler="com.hqep.dataSharingPlatform.pmsn.mybatis.handlers.JSONTypeHandler" javaType="Object" jdbcType="OTHER"/>
+    </typeHandlers>
+    <plugins>
+        <plugin interceptor="com.hqep.dataSharingPlatform.pmsn.plugin.PagePlugin">
+            <property name="dialect" value="oracle"/>
+            <property name="pageSqlId" value=".*PgListPage.*"/>
+        </plugin>
+    </plugins>
+
+</configuration>

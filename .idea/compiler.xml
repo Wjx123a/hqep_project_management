@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="sjkflc_redis_servce" />
+        <module name="common" />
+        <module name="interface_service" />
+        <module name="sjfwgj_web" />
+        <module name="sjkflc_service" />
+        <module name="pmsn_web_core" />
+        <module name="sjwfgj_serve" />
+        <module name="pmsn_check_service" />
+        <module name="pmsn_service" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="8">
+      <module name="common" target="8" />
+      <module name="hqep_project_management" target="1.7" />
+      <module name="interface_service" target="8" />
+      <module name="pmsn_check_service" target="8" />
+      <module name="pmsn_service" target="8" />
+      <module name="pmsn_web_core" target="8" />
+      <module name="sjfwgj_web" target="8" />
+      <module name="sjkflc_redis_servce" target="8" />
+      <module name="sjkflc_service" target="8" />
+      <module name="sjwfgj_serve" target="8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
